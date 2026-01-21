@@ -34,7 +34,7 @@ export default function Home() {
 
   return (
     <div style={{ backgroundColor: '#F9F7F2', minHeight: '100vh', color: '#333', fontFamily: "'Noto Sans KR', sans-serif" }}>
-      {/* 네비게이션 - 모든 메뉴 이동 로직 적용 완료 */}
+      {/* 네비게이션 - 모든 메뉴 연결 완료 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 60px', backgroundColor: '#FFF', borderBottom: '1px solid #E5E0D5', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <img src="/logo.png" alt="로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} 
@@ -51,7 +51,7 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* 대문 배너 - 문구 유지 */}
+      {/* 대문 배너 - 문구 완벽 유지 */}
       <div style={{ width: '100%', height: '350px', backgroundColor: '#DDD', position: 'relative', overflow: 'hidden' }}>
         {banners.length > 0 ? (
           <img src={banners[0].imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Main" />
