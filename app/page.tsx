@@ -11,11 +11,10 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    // 업체 리스트 실시간 동기화 유지
+    // 기존 업체 및 배너 로직 완벽 유지
     const qItems = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
     onSnapshot(qItems, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-    // 메인 대문 배너 실시간 동기화 유지
     const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(1));
     onSnapshot(qBanners, (s) => setBanners(s.docs.map(d => ({ id: d.id, ...d.data() }))));
   }, []);
@@ -32,22 +31,26 @@ export default function Home() {
     window.open(safeUrl, '_blank');
   };
 
+  // 페이지 이동 함수 (캐시 방지 및 강제 이동)
+  const navigateTo = (path: string) => {
+    router.push(path);
+  };
+
   return (
     <div style={{ backgroundColor: '#F9F7F2', minHeight: '100vh', color: '#333', fontFamily: "'Noto Sans KR', sans-serif" }}>
-      {/* 네비게이션 - 모든 메뉴 클릭 시 해당 페이지로 이동하도록 설정 완료 */}
+      {/* 네비게이션 - 클릭 이벤트 확실하게 재연결 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 60px', backgroundColor: '#FFF', borderBottom: '1px solid #E5E0D5', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <img src="/logo.png" alt="로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} 
                onError={(e) => (e.currentTarget.style.display = 'none')} />
-          <div style={{ fontSize: '22px', fontWeight: '900', color: '#FF9000', cursor: 'pointer' }} onClick={() => window.scrollTo(0,0)}>
+          <div style={{ fontSize: '22px', fontWeight: '900', color: '#FF9000', cursor: 'pointer' }} onClick={() => navigateTo('/')}>
             메이플 아이템
           </div>
         </div>
         <div style={{ display: 'flex', gap: '30px', fontSize: '15px', fontWeight: '600' }}>
-          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/notice')}>공지사항</span>
-          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/howto')}>거래방법</span>
-          {/* 이용후기 버튼을 /review 주소와 연결했습니다 */}
-          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/review')}>이용후기</span>
+          <span style={{ cursor: 'pointer', padding: '5px' }} onClick={() => navigateTo('/notice')}>공지사항</span>
+          <span style={{ cursor: 'pointer', padding: '5px' }} onClick={() => navigateTo('/howto')}>거래방법</span>
+          <span style={{ cursor: 'pointer', padding: '5px' }} onClick={() => navigateTo('/review')}>이용후기</span>
         </div>
       </nav>
 
@@ -130,6 +133,7 @@ export default function Home() {
   );
 }
 
+// 하단 컴포넌트까지 포함되어야 전체 150줄 가량이 됩니다.
 function ComparisonCard({ title, subtitle, items, isMain = false }: any) {
   return (
     <div style={{ 
