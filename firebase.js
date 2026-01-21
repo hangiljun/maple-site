@@ -1,21 +1,20 @@
-// firebase.js
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBsmW33QhBPu7vcEFqvsM7KK0jeHLAuCNI",
-  authDomain: "maple-item-site.firebaseapp.com",
-  projectId: "maple-item-site",
-  storageBucket: "maple-item-site.firebasestorage.app",
-  messagingSenderId: "361844746472",
-  appId: "1:361844746472:web:01014c4782118b4aa4815d",
-  measurementId: "G-Z6DX58HXGM"
+  apiKey: "AIzaSyABvyebJmW2GlaiLNvbWxuOSXbntkk21mA",
+  authDomain: "maple-trading-admin.firebaseapp.com",
+  projectId: "maple-trading-admin",
+  storageBucket: "maple-trading-admin.firebasestorage.app",
+  messagingSenderId: "702801044350",
+  appId: "1:702801044350:web:8d2fd48196319ddee6892f",
+  measurementId: "G-8T7P54ZCN0"
 };
 
-// Firebase 초기화
 const app = initializeApp(firebaseConfig);
 
-// 우리가 사이트에서 쓸 기능들 내보내기
-export const db = getFirestore(app);      // 글 저장용
-export const storage = getStorage(app);  // 사진 저장용
+export const db = getFirestore(app);
+export const storage = getStorage(app);
+export const auth = getAuth(app); // 로그인 기능을 위해 필수!
