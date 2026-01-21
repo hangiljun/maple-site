@@ -22,13 +22,11 @@ export default function Home() {
     return () => { unsubItems(); unsubBanners(); };
   }, []);
 
-  // 프리미엄과 일반 업체 분리
   const premiumItems = items.filter(item => item.isPremium).slice(0, 3);
   const normalItems = items.filter(item => !item.isPremium).slice(0, 6);
 
   return (
     <div style={{ backgroundColor: '#0a0a0a', minHeight: '100vh', color: 'white', fontFamily: "'Noto Sans KR', sans-serif" }}>
-      {/* 네비게이션 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 60px', backgroundColor: '#111', borderBottom: '1px solid #222', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ fontSize: '22px', fontWeight: '900', color: '#ff9000' }}>메이플 아이템</div>
         <div style={{ display: 'flex', gap: '30px', fontSize: '15px' }}>
@@ -37,7 +35,7 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* 배너 영역 */}
+      {/* 대문 배너 */}
       <div style={{ width: '100%', height: '400px', backgroundColor: '#000', position: 'relative', overflow: 'hidden' }}>
         {banners.length > 0 ? (
           <img src={banners[0].imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.4' }} alt="Main Banner" />
@@ -50,18 +48,25 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 프리미엄 업체 (상단 광고) */}
+      {/* 프리미엄 인증 파트너 (이미지 꽉 차게 수정) */}
       <div style={{ padding: '60px 60px 0 60px' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '25px', color: '#ff9000' }}>★ 프리미엄 인증 파트너</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
           {premiumItems.map((item) => (
-            <a href={item.kakaoUrl} target="_blank" key={item.id} style={{ textDecoration: 'none', color: 'white' }}>
-              <div style={{ backgroundColor: '#161616', border: '1px solid #ff9000', borderRadius: '12px', padding: '20px', display: 'flex', alignItems: 'center' }}>
-                <img src={item.imageUrl} style={{ width: '50px', height: '50px', borderRadius: '8px', marginRight: '15px', objectFit: 'cover' }} alt="Logo" />
-                <div>
-                  <div style={{ fontWeight: 'bold', color: '#ff9000' }}>{item.name}</div>
-                  <div style={{ fontSize: '13px', color: '#aaa' }}>{item.desc}</div>
-                </div>
+            <a href={item.kakaoUrl} target="_blank" key={item.id} style={{ textDecoration: 'none', display: 'block' }}>
+              <div style={{ 
+                width: '100%', 
+                height: '120px', // 가로로 긴 형태
+                border: '2px solid #ff9000', 
+                borderRadius: '12px', 
+                overflow: 'hidden',
+                backgroundColor: '#161616'
+              }}>
+                <img 
+                  src={item.imageUrl} 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  alt={item.name} 
+                />
               </div>
             </a>
           ))}
@@ -69,7 +74,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 일반 업체 리스트 */}
+      {/* 일반 매입 업체 */}
       <div style={{ padding: '80px 60px' }}>
         <h2 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '35px' }}>실시간 등록 매입 업체</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '30px' }}>
