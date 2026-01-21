@@ -9,11 +9,13 @@ export default function Home() {
   const [banners, setBanners] = useState<any[]>([]);
 
   useEffect(() => {
+    // 실시간으로 업체 목록 가져오기
     const qItems = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
     const unsubItems = onSnapshot(qItems, (snapshot) => {
       setItems(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
+    // 배너 이미지 가져오기
     const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(1));
     const unsubBanners = onSnapshot(qBanners, (snapshot) => {
       setBanners(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
@@ -22,11 +24,13 @@ export default function Home() {
     return () => { unsubItems(); unsubBanners(); };
   }, []);
 
+  // 프리미엄 업체와 일반 업체 필터링
   const premiumItems = items.filter(item => item.isPremium).slice(0, 3);
-  const normalItems = items.filter(item => !item.isPremium).slice(0, 6);
+  const normalItems = items.filter(item => !item.isPremium);
 
   return (
     <div style={{ backgroundColor: '#0a0a0a', minHeight: '100vh', color: 'white', fontFamily: "'Noto Sans KR', sans-serif" }}>
+      {/* 네비게이션 바 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 60px', backgroundColor: '#111', borderBottom: '1px solid #222', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ fontSize: '22px', fontWeight: '900', color: '#ff9000' }}>메이플 아이템</div>
         <div style={{ display: 'flex', gap: '30px', fontSize: '15px' }}>
@@ -35,8 +39,8 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* 대문 배너 */}
-      <div style={{ width: '100%', height: '400px', backgroundColor: '#000', position: 'relative', overflow: 'hidden' }}>
+      {/* 상단 대문 배너 */}
+      <div style={{ width: '100%', height: '350px', backgroundColor: '#000', position: 'relative', overflow: 'hidden' }}>
         {banners.length > 0 ? (
           <img src={banners[0].imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.4' }} alt="Main Banner" />
         ) : (
@@ -48,15 +52,23 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 프리미엄 인증 파트너 (이미지 꽉 차게 수정) */}
+      {/* 프리미엄 인증 파트너 (이미지 클릭 시 이동 기능 포함) */}
       <div style={{ padding: '60px 60px 0 60px' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '25px', color: '#ff9000' }}>★ 프리미엄 인증 파트너</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
           {premiumItems.map((item) => (
-            <a href={item.kakaoUrl} target="_blank" key={item.id} style={{ textDecoration: 'none', display: 'block' }}>
+            <a 
+              href={item.kakaoUrl.startsWith('http') ? item.kakaoUrl : `https://${item.kakaoUrl}`} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              key={item.id} 
+              style={{ textDecoration: 'none', display: 'block', transition: 'transform 0.2s' }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
               <div style={{ 
                 width: '100%', 
-                height: '120px', // 가로로 긴 형태
+                height: '140px', 
                 border: '2px solid #ff9000', 
                 borderRadius: '12px', 
                 overflow: 'hidden',
@@ -74,7 +86,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 일반 매입 업체 */}
+      {/* 일반 등록 매입 업체 리스트 */}
       <div style={{ padding: '80px 60px' }}>
         <h2 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '35px' }}>실시간 등록 매입 업체</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '30px' }}>
@@ -86,7 +98,7 @@ export default function Home() {
                 <p style={{ color: '#888', fontSize: '14px', marginBottom: '20px' }}>{item.desc}</p>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #282828', paddingTop: '15px' }}>
                   <span style={{ color: '#ff9000', fontWeight: 'bold' }}>{item.price}</span>
-                  <a href={item.kakaoUrl} target="_blank" style={{ backgroundColor: '#fee500', color: '#3c1e1e', padding: '10px 18px', borderRadius: '10px', textDecoration: 'none', fontWeight: 'bold', fontSize: '13px' }}>카톡 문의</a>
+                  <a href={item.kakaoUrl.startsWith('http') ? item.kakaoUrl : `https://${item.kakaoUrl}`} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#fee500', color: '#3c1e1e', padding: '10px 18px', borderRadius: '10px', textDecoration: 'none', fontWeight: 'bold', fontSize: '13px' }}>카톡 문의</a>
                 </div>
               </div>
             </div>
