@@ -2,93 +2,127 @@
 
 import { useEffect, useState } from 'react';
 import { auth, db, storage } from '../../../firebase';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useRouter } from 'next/navigation';
 
 export default function AdminDashboard() {
   const [user, setUser] = useState<any>(null);
-  const [itemName, setItemName] = useState('');
-  const [price, setPrice] = useState('');
-  const [image, setImage] = useState<File | null>(null);
+  const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  // 입력 폼 상태
+  const [form, setForm] = useState({ name: '', price: '', kakao: '', desc: '' });
+  const [image, setImage] = useState<File | null>(null);
+  const [bannerImage, setBannerImage] = useState<File | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) setUser(currentUser);
       else router.push('/admin');
     });
-    return () => unsubscribe();
+
+    const q = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
+    const unsubList = onSnapshot(q, (snapshot) => {
+      setItems(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+
+    return () => { unsubscribe(); unsubList(); };
   }, [router]);
 
-  const handleUpload = async (e: React.FormEvent) => {
+  // 업체 등록
+  const handleUploadItem = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!itemName || !price || !image) return alert('모든 정보를 입력해주세요!');
-
+    if (!image || !form.name) return alert('정보를 입력해주세요.');
     setLoading(true);
     try {
-      // 1. 사진을 Firebase Storage에 업로드
-      const imageRef = ref(storage, `items/${Date.now()}_${image.name}`);
-      await uploadBytes(imageRef, image);
-      const imageUrl = await getDownloadURL(imageRef);
-
-      // 2. 아이템 정보를 Firestore 데이터베이스에 저장
+      const imgRef = ref(storage, `items/${Date.now()}`);
+      await uploadBytes(imgRef, image);
+      const url = await getDownloadURL(imgRef);
       await addDoc(collection(db, 'items'), {
-        name: itemName,
-        price: price,
-        imageUrl: imageUrl,
-        createdAt: serverTimestamp(),
+        name: form.name, price: form.price, kakaoUrl: form.kakao, description: form.desc, imageUrl: url, createdAt: serverTimestamp()
       });
-
-      alert('아이템 등록 완료!');
-      setItemName(''); setPrice(''); setImage(null); // 입력창 초기화
-    } catch (error) {
-      console.error(error);
-      alert('등록 중 오류가 발생했습니다.');
-    }
+      alert('업체 등록 완료!');
+      setForm({ name: '', price: '', kakao: '', desc: '' });
+    } catch (err) { alert('오류 발생'); }
     setLoading(false);
   };
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    router.push('/admin');
+  // 대문 배너 변경
+  const handleUploadBanner = async () => {
+    if (!bannerImage) return alert('이미지를 선택하세요.');
+    setLoading(true);
+    try {
+      const bRef = ref(storage, `banners/${Date.now()}`);
+      await uploadBytes(bRef, bannerImage);
+      const url = await getDownloadURL(bRef);
+      await addDoc(collection(db, 'banners'), { imageUrl: url, createdAt: serverTimestamp() });
+      alert('대문 사진이 변경되었습니다!');
+    } catch (err) { alert('오류 발생'); }
+    setLoading(false);
   };
 
-  if (!user) return <div style={{color: 'white', textAlign: 'center', marginTop: '50px'}}>권한 확인 중...</div>;
+  // 삭제 기능
+  const handleDelete = async (id: string) => {
+    if (confirm('정말 삭제하시겠습니까?')) {
+      await deleteDoc(doc(db, 'items', id));
+    }
+  };
+
+  if (!user) return null;
 
   return (
-    <div style={{ padding: '40px', backgroundColor: '#121212', minHeight: '100vh', color: 'white' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-        <h1>관리자 대시보드</h1>
-        <button onClick={handleLogout} style={{ padding: '8px 16px', backgroundColor: '#444', border: 'none', color: 'white', borderRadius: '4px', cursor: 'pointer' }}>로그아웃</button>
-      </div>
+    <div style={{ padding: '40px', backgroundColor: '#121212', color: 'white', minHeight: '100vh' }}>
+      <h1>관리 센터</h1>
       
-      <form onSubmit={handleUpload} style={{ maxWidth: '500px', margin: '0 auto', backgroundColor: '#1e1e1e', padding: '30px', borderRadius: '10px' }}>
-        <h2 style={{ marginBottom: '20px' }}>새 아이템 등록</h2>
-        
-        <label>아이템 이름</label>
-        <input type="text" value={itemName} onChange={(e) => setItemName(e.target.value)} placeholder="예: 앱솔랩스 나이트글러브" style={inputStyle} />
-        
-        <label>가격</label>
-        <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="예: 10,000,000" style={inputStyle} />
-        
-        <label>아이템 스샷</label>
-        <input type="file" onChange={(e) => setImage(e.target.files ? e.target.files[0] : null)} style={inputStyle} />
-        
-        <button type="submit" disabled={loading} style={{ ...buttonStyle, backgroundColor: loading ? '#666' : '#ff9000' }}>
-          {loading ? '등록 중...' : '아이템 올리기'}
-        </button>
-      </form>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', marginTop: '30px' }}>
+        {/* 업체 등록 폼 */}
+        <section style={{ backgroundColor: '#1e1e1e', padding: '20px', borderRadius: '10px' }}>
+          <h3>새 매입 업체 등록</h3>
+          <input placeholder="업체명" value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={inputStyle} />
+          <input placeholder="한줄 설명(예: 업계 최고가)" value={form.desc} onChange={e => setForm({...form, desc: e.target.value})} style={inputStyle} />
+          <input placeholder="매입 가격/조건" value={form.price} onChange={e => setForm({...form, price: e.target.value})} style={inputStyle} />
+          <input placeholder="카카오톡 링크 (https://...)" value={form.kakao} onChange={e => setForm({...form, kakao: e.target.value})} style={inputStyle} />
+          <input type="file" onChange={e => setImage(e.target.files![0])} style={inputStyle} />
+          <button onClick={handleUploadItem} disabled={loading} style={btnStyle}>업체 등록하기</button>
+        </section>
+
+        {/* 배너 관리 */}
+        <section style={{ backgroundColor: '#1e1e1e', padding: '20px', borderRadius: '10px' }}>
+          <h3>대문 사진(배너) 교체</h3>
+          <p style={{ fontSize: '12px', color: '#888' }}>가장 최근에 올린 사진이 메인에 뜹니다.</p>
+          <input type="file" onChange={e => setBannerImage(e.target.files![0])} style={inputStyle} />
+          <button onClick={handleUploadBanner} disabled={loading} style={{ ...btnStyle, backgroundColor: '#444' }}>배너 변경하기</button>
+        </section>
+      </div>
+
+      {/* 등록된 업체 리스트 (삭제 버튼 포함) */}
+      <h3 style={{ marginTop: '50px' }}>현재 등록된 홍보 업체 목록</h3>
+      <table style={{ width: '100%', marginTop: '20px', borderCollapse: 'collapse' }}>
+        <thead>
+          <tr style={{ borderBottom: '1px solid #444' }}>
+            <th style={{ padding: '10px' }}>업체명</th>
+            <th>조건</th>
+            <th>관리</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map(item => (
+            <tr key={item.id} style={{ borderBottom: '1px solid #222' }}>
+              <td style={{ padding: '15px' }}>{item.name}</td>
+              <td>{item.price}</td>
+              <td>
+                <button onClick={() => handleDelete(item.id)} style={{ color: '#ff4444', background: 'none', border: '1px solid #ff4444', cursor: 'pointer', padding: '5px 10px' }}>삭제</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
 
-const inputStyle = {
-  display: 'block', width: '100%', padding: '12px', margin: '10px 0 20px 0', borderRadius: '5px', border: '1px solid #333', backgroundColor: '#2a2a2a', color: 'white'
-};
-
-const buttonStyle = {
-  width: '100%', padding: '15px', color: 'white', border: 'none', borderRadius: '5px', fontWeight: 'bold' as const, cursor: 'pointer', fontSize: '16px'
-};
+const inputStyle = { display: 'block', width: '100%', padding: '10px', margin: '10px 0', backgroundColor: '#333', color: 'white', border: 'none', borderRadius: '5px' };
+const btnStyle = { width: '100%', padding: '12px', backgroundColor: '#ff9000', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' as const };
