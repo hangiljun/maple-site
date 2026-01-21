@@ -9,29 +9,31 @@ export default function Home() {
   const [banners, setBanners] = useState<any[]>([]);
 
   useEffect(() => {
-    // 업체 목록 실시간 동기화
     const qItems = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
     const unsubItems = onSnapshot(qItems, (snapshot) => {
       setItems(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    }, (error) => console.error("Firestore Items Error:", error));
+    }, (error) => console.error("Items Error:", error));
 
-    // 대문 배너 실시간 동기화
     const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(1));
     const unsubBanners = onSnapshot(qBanners, (snapshot) => {
       setBanners(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    }, (error) => console.error("Firestore Banners Error:", error));
+    }, (error) => console.error("Banners Error:", error));
 
     return () => { unsubItems(); unsubBanners(); };
   }, []);
 
-  // 데이터 안전하게 분류 (데이터가 없을 경우 대비)
-  const premiumItems = items ? items.filter(item => item.isPremium === true).slice(0, 3) : [];
-  const normalItems = items ? items.filter(item => !item.isPremium).slice(0, 6) : [];
+  // 프리미엄/일반 분류 (isPremium 체크 확인)
+  const premiumItems = items.filter(item => item.isPremium === true).slice(0, 3);
+  const normalItems = items.filter(item => !item.isPremium).slice(0, 6);
 
-  // 링크 안전 처리 함수
-  const getSafeLink = (url: string) => {
-    if (!url) return "#";
-    return url.startsWith('http') ? url : `https://${url}`;
+  // 카카오톡 링크 연결 함수 (가장 중요)
+  const goToKakao = (url: string) => {
+    if (!url || url === "#") {
+      alert("등록된 문의 링크가 없습니다.");
+      return;
+    }
+    const safeUrl = url.startsWith('http') ? url : `https://${url}`;
+    window.open(safeUrl, '_blank'); // 새 창으로 카카오톡 열기
   };
 
   return (
@@ -46,8 +48,8 @@ export default function Home() {
 
       {/* 대문 배너 */}
       <div style={{ width: '100%', height: '350px', backgroundColor: '#000', position: 'relative', overflow: 'hidden' }}>
-        {banners.length > 0 && banners[0].imageUrl ? (
-          <img src={banners[0].imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.4' }} alt="Main Banner" />
+        {banners.length > 0 ? (
+          <img src={banners[0].imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.4' }} alt="Main" />
         ) : (
           <div style={{ width: '100%', height: '100%', background: '#111' }}></div>
         )}
@@ -57,35 +59,26 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 프리미엄 인증 파트너 (이미지 꽉 차게 & 클릭 이동) */}
+      {/* 프리미엄 파트너 - 클릭 이벤트 직접 연결 */}
       <div style={{ padding: '60px 60px 0 60px' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '25px', color: '#ff9000' }}>★ 프리미엄 인증 파트너</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
           {premiumItems.map((item) => (
-            <a 
-              href={getSafeLink(item.kakaoUrl)} 
-              target="_blank" 
-              rel="noopener noreferrer"
+            <div 
               key={item.id} 
-              style={{ textDecoration: 'none', display: 'block' }}
-            >
-              <div style={{ 
+              onClick={() => goToKakao(item.kakaoUrl)} // 클릭 시 함수 실행
+              style={{ 
                 width: '100%', 
                 height: '140px', 
                 border: '2px solid #ff9000', 
                 borderRadius: '12px', 
                 overflow: 'hidden',
+                cursor: 'pointer', // 마우스 올리면 손가락 모양으로 변경
                 backgroundColor: '#161616'
-              }}>
-                {item.imageUrl && (
-                  <img 
-                    src={item.imageUrl} 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                    alt={item.name || "premium"} 
-                  />
-                )}
-              </div>
-            </a>
+              }}
+            >
+              <img src={item.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="premium" />
+            </div>
           ))}
           {premiumItems.length === 0 && <p style={{color:'#444'}}>등록된 프리미엄 업체가 없습니다.</p>}
         </div>
@@ -97,13 +90,18 @@ export default function Home() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '30px' }}>
           {normalItems.map((item) => (
             <div key={item.id} style={{ backgroundColor: '#1a1a1a', borderRadius: '20px', overflow: 'hidden', border: '1px solid #222' }}>
-              {item.imageUrl && <img src={item.imageUrl} style={{ width: '100%', height: '180px', objectFit: 'cover' }} alt="Company" />}
+              <img src={item.imageUrl} style={{ width: '100%', height: '180px', objectFit: 'cover' }} alt="Company" />
               <div style={{ padding: '25px' }}>
-                <h3 style={{ fontSize: '19px', fontWeight: 'bold', marginBottom: '10px' }}>{item.name || "업체명"}</h3>
-                <p style={{ color: '#888', fontSize: '14px', marginBottom: '20px' }}>{item.desc || item.description || ""}</p>
+                <h3 style={{ fontSize: '19px', fontWeight: 'bold', marginBottom: '10px' }}>{item.name}</h3>
+                <p style={{ color: '#888', fontSize: '14px', marginBottom: '20px' }}>{item.desc}</p>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #282828', paddingTop: '15px' }}>
-                  <span style={{ color: '#ff9000', fontWeight: 'bold' }}>{item.price || ""}</span>
-                  <a href={getSafeLink(item.kakaoUrl)} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#fee500', color: '#3c1e1e', padding: '10px 18px', borderRadius: '10px', textDecoration: 'none', fontWeight: 'bold', fontSize: '13px' }}>카톡 문의</a>
+                  <span style={{ color: '#ff9000', fontWeight: 'bold' }}>{item.price}</span>
+                  <button 
+                    onClick={() => goToKakao(item.kakaoUrl)} // 버튼 클릭 시 카톡 이동
+                    style={{ backgroundColor: '#fee500', color: '#3c1e1e', padding: '10px 18px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}
+                  >
+                    카톡 문의
+                  </button>
                 </div>
               </div>
             </div>
