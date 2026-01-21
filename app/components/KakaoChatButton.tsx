@@ -1,8 +1,7 @@
 'use client';
 
 export default function KakaoChatButton() {
-  // 1. 이곳에 설정된 주소가 실제 버튼 클릭 시 연결되는 주소입니다.
-  // 2. 아래 주소를 사용자님의 실제 주소로 변경했습니다.
+  // 예시 주소였던 sPInyN7g를 삭제하고, 사용자님의 진짜 주소로 변경했습니다.
   const KAKAO_URL = "https://open.kakao.com/o/sKg86b7f"; 
 
   return (
