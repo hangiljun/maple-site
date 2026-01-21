@@ -59,13 +59,14 @@ export default function ReviewPage() {
 
   return (
     <div style={{ backgroundColor: '#F9F7F2', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif" }}>
-      {/* 상단 네비게이션 */}
+      {/* 상단 네비게이션 - '홈' 추가 및 경로 연결 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 60px', backgroundColor: '#FFF', borderBottom: '1px solid #E5E0D5', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
           <img src="/logo.png" style={{ width: '30px', height: '30px', objectFit: 'contain' }} onError={(e)=>(e.currentTarget.style.display='none')} />
           <div style={{ fontSize: '22px', fontWeight: '900', color: '#FF9000' }}>메이플 아이템</div>
         </div>
-        <div style={{ display: 'flex', gap: '30px', fontSize: '15px', fontWeight: '600' }}>
+        <div style={{ display: 'flex', gap: '25px', fontSize: '15px', fontWeight: '600' }}>
+          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/')}>홈</span>
           <span style={{ cursor: 'pointer' }} onClick={() => router.push('/notice')}>공지사항</span>
           <span style={{ cursor: 'pointer' }} onClick={() => router.push('/howto')}>거래방법</span>
           <span style={{ cursor: 'pointer', color: '#FF9000' }} onClick={() => window.scrollTo(0,0)}>이용후기</span>
@@ -82,13 +83,13 @@ export default function ReviewPage() {
       </div>
 
       <div style={{ padding: '60px 20px', maxWidth: '1000px', margin: '0 auto' }}>
-        {/* 후기 작성 폼 - 임시 계정 방식 */}
+        {/* 후기 작성 폼 */}
         <div style={{ backgroundColor: '#FFF', padding: '30px', borderRadius: '25px', marginBottom: '50px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
           <h3 style={{ marginBottom: '20px', fontWeight: 'bold', fontSize: '20px' }}>의견 남기기</h3>
           <form onSubmit={handleUpload}>
             <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
               <input placeholder="닉네임" value={form.nickname} onChange={e => setForm({...form, nickname: e.target.value})} style={inputStyle} />
-              <input type="password" placeholder="비밀번호 (삭제 시 필요)" value={form.password} onChange={e => setForm({...form, password: e.target.value})} style={inputStyle} />
+              <input type="password" placeholder="비밀번호 (삭제용)" value={form.password} onChange={e => setForm({...form, password: e.target.value})} style={inputStyle} />
             </div>
             <textarea placeholder="거래 경험을 공유해 주세요!" value={form.content} onChange={e => setForm({...form, content: e.target.value})} style={{ ...inputStyle, height: '120px', marginBottom: '15px', resize: 'none' }} />
             <div style={{ marginBottom: '20px' }}>

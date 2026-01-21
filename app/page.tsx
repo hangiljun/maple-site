@@ -34,7 +34,7 @@ export default function Home() {
 
   return (
     <div style={{ backgroundColor: '#F9F7F2', minHeight: '100vh', color: '#333', fontFamily: "'Noto Sans KR', sans-serif" }}>
-      {/* 네비게이션 - 모든 메뉴 이동 로직 적용 완료 */}
+      {/* 네비게이션 - '홈' 추가 및 모든 버튼 경로 강제 연결 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 60px', backgroundColor: '#FFF', borderBottom: '1px solid #E5E0D5', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <img src="/logo.png" alt="로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} 
@@ -43,15 +43,15 @@ export default function Home() {
             메이플 아이템
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '30px', fontSize: '15px', fontWeight: '600' }}>
+        <div style={{ display: 'flex', gap: '25px', fontSize: '15px', fontWeight: '600' }}>
+          <span style={{ cursor: 'pointer', color: '#FF9000' }} onClick={() => router.push('/')}>홈</span>
           <span style={{ cursor: 'pointer' }} onClick={() => router.push('/notice')}>공지사항</span>
           <span style={{ cursor: 'pointer' }} onClick={() => router.push('/howto')}>거래방법</span>
-          {/* 이용후기 클릭 시 /review 페이지로 이동 */}
           <span style={{ cursor: 'pointer' }} onClick={() => router.push('/review')}>이용후기</span>
         </div>
       </nav>
 
-      {/* 대문 배너 - 요청하신 문구 완벽 유지 */}
+      {/* 대문 배너 - 문구 완벽 유지 */}
       <div style={{ width: '100%', height: '350px', backgroundColor: '#DDD', position: 'relative', overflow: 'hidden' }}>
         {banners.length > 0 ? (
           <img src={banners[0].imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Main" />
@@ -66,7 +66,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 프리미엄 파트너 섹션 */}
+      {/* 프리미엄 파트너 - 디자인 유지 */}
       <div style={{ padding: '60px 60px 0 60px' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '25px', color: '#FF9000', textAlign: 'center' }}>★ 프리미엄 인증 파트너</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
@@ -78,7 +78,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 실시간 등록 매입 업체 섹션 */}
+      {/* 실시간 등록 매입 업체 - 디자인 유지 */}
       <div style={{ padding: '80px 60px' }}>
         <h2 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '35px', textAlign: 'center' }}>실시간 등록 매입 업체</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '30px' }}>
@@ -98,7 +98,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 업체 비교 섹션 - 요청하신 문구 단 한 글자도 틀리지 않게 복구 */}
+      {/* 업체 비교 섹션 - 문구 완벽 유지 */}
       <div style={{ padding: '80px 60px', backgroundColor: '#F3F0E9' }}>
         <h2 style={{ textAlign: 'center', fontSize: '32px', marginBottom: '50px' }}>
           <span style={{ color: '#FF9000' }}>메이플 아이템</span> 업체 비교, 무엇이 다를까요?
