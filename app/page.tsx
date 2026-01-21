@@ -22,86 +22,67 @@ export default function Home() {
     return () => { unsubItems(); unsubBanners(); };
   }, []);
 
-  // 프리미엄/일반 분류 (isPremium 체크 확인)
   const premiumItems = items.filter(item => item.isPremium === true).slice(0, 3);
   const normalItems = items.filter(item => !item.isPremium).slice(0, 6);
 
-  // 카카오톡 링크 연결 함수 (가장 중요)
   const goToKakao = (url: string) => {
     if (!url || url === "#") {
       alert("등록된 문의 링크가 없습니다.");
       return;
     }
     const safeUrl = url.startsWith('http') ? url : `https://${url}`;
-    window.open(safeUrl, '_blank'); // 새 창으로 카카오톡 열기
+    window.open(safeUrl, '_blank');
   };
 
   return (
-    <div style={{ backgroundColor: '#0a0a0a', minHeight: '100vh', color: 'white', fontFamily: "'Noto Sans KR', sans-serif" }}>
-      <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 60px', backgroundColor: '#111', borderBottom: '1px solid #222', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
-        <div style={{ fontSize: '22px', fontWeight: '900', color: '#ff9000' }}>메이플 아이템</div>
-        <div style={{ display: 'flex', gap: '30px', fontSize: '15px' }}>
+    <div style={{ backgroundColor: '#F9F7F2', minHeight: '100vh', color: '#333', fontFamily: "'Noto Sans KR', sans-serif" }}>
+      {/* 네비게이션 */}
+      <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 60px', backgroundColor: '#FFF', borderBottom: '1px solid #E5E0D5', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
+        <div style={{ fontSize: '22px', fontWeight: '900', color: '#FF9000' }}>메이플 아이템</div>
+        <div style={{ display: 'flex', gap: '30px', fontSize: '15px', fontWeight: '600' }}>
           <span>공지사항</span><span>거래방법</span><span>이용후기</span>
-          <a href="/admin" style={{ color: '#444', textDecoration: 'none' }}>관리자</a>
+          <a href="/admin" style={{ color: '#AAA', textDecoration: 'none' }}>관리</a>
         </div>
       </nav>
 
       {/* 대문 배너 */}
-      <div style={{ width: '100%', height: '350px', backgroundColor: '#000', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ width: '100%', height: '350px', backgroundColor: '#DDD', position: 'relative', overflow: 'hidden' }}>
         {banners.length > 0 ? (
-          <img src={banners[0].imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.4' }} alt="Main" />
+          <img src={banners[0].imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Main" />
         ) : (
-          <div style={{ width: '100%', height: '100%', background: '#111' }}></div>
+          <div style={{ width: '100%', height: '100%', background: '#EEE' }}></div>
         )}
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', width: '100%' }}>
-          <h1 style={{ fontSize: '42px', fontWeight: '900', marginBottom: '10px' }}>메이플 아이템 거래의 기준</h1>
-          <p style={{ color: '#ccc' }}>검증된 1등 매입 업체들을 확인하세요</p>
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', width: '100%', backgroundColor: 'rgba(255,255,255,0.7)', padding: '30px 0' }}>
+          <h1 style={{ fontSize: '42px', fontWeight: '900', color: '#222', marginBottom: '10px' }}>메이플 아이템 거래의 기준</h1>
+          <p style={{ color: '#555', fontWeight: '600' }}>검증된 1등 매입 업체들을 확인하세요</p>
         </div>
       </div>
 
-      {/* 프리미엄 파트너 - 클릭 이벤트 직접 연결 */}
+      {/* 프리미엄 파트너 */}
       <div style={{ padding: '60px 60px 0 60px' }}>
-        <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '25px', color: '#ff9000' }}>★ 프리미엄 인증 파트너</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '25px', color: '#FF9000', textAlign: 'center' }}>★ 프리미엄 인증 파트너</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
           {premiumItems.map((item) => (
-            <div 
-              key={item.id} 
-              onClick={() => goToKakao(item.kakaoUrl)} // 클릭 시 함수 실행
-              style={{ 
-                width: '100%', 
-                height: '140px', 
-                border: '2px solid #ff9000', 
-                borderRadius: '12px', 
-                overflow: 'hidden',
-                cursor: 'pointer', // 마우스 올리면 손가락 모양으로 변경
-                backgroundColor: '#161616'
-              }}
-            >
+            <div key={item.id} onClick={() => goToKakao(item.kakaoUrl)} style={{ width: '100%', height: '140px', border: '2px solid #FF9000', borderRadius: '15px', overflow: 'hidden', cursor: 'pointer', boxShadow: '0 4px 15px rgba(255,144,0,0.1)' }}>
               <img src={item.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="premium" />
             </div>
           ))}
-          {premiumItems.length === 0 && <p style={{color:'#444'}}>등록된 프리미엄 업체가 없습니다.</p>}
         </div>
       </div>
 
-      {/* 일반 등록 매입 업체 */}
+      {/* 일반 업체 리스트 */}
       <div style={{ padding: '80px 60px' }}>
-        <h2 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '35px' }}>실시간 등록 매입 업체</h2>
+        <h2 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '35px', textAlign: 'center' }}>실시간 등록 매입 업체</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '30px' }}>
           {normalItems.map((item) => (
-            <div key={item.id} style={{ backgroundColor: '#1a1a1a', borderRadius: '20px', overflow: 'hidden', border: '1px solid #222' }}>
+            <div key={item.id} style={{ backgroundColor: '#FFF', borderRadius: '20px', overflow: 'hidden', border: '1px solid #E5E0D5', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
               <img src={item.imageUrl} style={{ width: '100%', height: '180px', objectFit: 'cover' }} alt="Company" />
               <div style={{ padding: '25px' }}>
                 <h3 style={{ fontSize: '19px', fontWeight: 'bold', marginBottom: '10px' }}>{item.name}</h3>
-                <p style={{ color: '#888', fontSize: '14px', marginBottom: '20px' }}>{item.desc}</p>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #282828', paddingTop: '15px' }}>
-                  <span style={{ color: '#ff9000', fontWeight: 'bold' }}>{item.price}</span>
-                  <button 
-                    onClick={() => goToKakao(item.kakaoUrl)} // 버튼 클릭 시 카톡 이동
-                    style={{ backgroundColor: '#fee500', color: '#3c1e1e', padding: '10px 18px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}
-                  >
-                    카톡 문의
-                  </button>
+                <p style={{ color: '#777', fontSize: '14px', marginBottom: '20px' }}>{item.desc}</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #F0EDE5', paddingTop: '15px' }}>
+                  <span style={{ color: '#FF9000', fontWeight: 'bold', fontSize: '18px' }}>{item.price}</span>
+                  <button onClick={() => goToKakao(item.kakaoUrl)} style={{ backgroundColor: '#FEE500', color: '#3C1E1E', padding: '10px 18px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>카톡 문의</button>
                 </div>
               </div>
             </div>
@@ -109,9 +90,48 @@ export default function Home() {
         </div>
       </div>
 
-      <footer style={{ backgroundColor: '#000', padding: '40px', textAlign: 'center', color: '#444', fontSize: '12px' }}>
-        © 2026 MAPLE ITEM. All rights reserved.
+      {/* ⚠️ 신규 추가: 업체 비교 섹션 (보내주신 예시 이미지 반영) */}
+      <div style={{ padding: '80px 60px', backgroundColor: '#F3F0E9' }}>
+        <h2 style={{ textAlign: 'center', fontSize: '32px', marginBottom: '50px' }}>
+          <span style={{ color: '#FF9000' }}>메이플 아이템</span> 업체 비교, 무엇이 다를까요?
+        </h2>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
+          {/* 타사 A */}
+          <ComparisonCard title="B 장사꾼" subtitle="개인 운영 장사꾼" items={["무통장 거래 불안 (보증 없음)", "평균 55% 낮은 매입가", "비정기적 문의 가능", "사후관리 불가능"]} />
+          {/* 본사 (강조) */}
+          <ComparisonCard title="메이플 아이템" subtitle="공식 인증 업체" isMain={true} items={["무통장 거래 안전 (업체 보증)", "평균 85% 업계 최고 매입가", "24시간 전문 상담팀 운영", "매입 견적서 상시 제공"]} />
+          {/* 타사 B */}
+          <ComparisonCard title="R 장사꾼" subtitle="1인 운영 사칭 업체" items={["아이템 선전송 유도 불안", "평균 60% 낮은 매입가", "문의 답변 매우 느림", "신뢰도 및 보증 부족"]} />
+        </div>
+      </div>
+
+      <footer style={{ backgroundColor: '#FFF', padding: '40px', textAlign: 'center', color: '#999', fontSize: '12px', borderTop: '1px solid #E5E0D5' }}>
+        © 2026 메이플 아이템. All rights reserved.
       </footer>
+    </div>
+  );
+}
+
+// 비교 카드 컴포넌트
+function ComparisonCard({ title, subtitle, items, isMain = false }: any) {
+  return (
+    <div style={{ 
+      backgroundColor: '#FFF', padding: '30px', borderRadius: '20px', width: '300px',
+      border: isMain ? '3px solid #FF9000' : '1px solid #E5E0D5',
+      boxShadow: isMain ? '0 10px 30px rgba(255,144,0,0.2)' : 'none',
+      transform: isMain ? 'scale(1.05)' : 'none',
+      position: 'relative'
+    }}>
+      {isMain && <span style={{ position: 'absolute', top: '15px', right: '15px', backgroundColor: '#FF9000', color: '#FFF', padding: '2px 8px', borderRadius: '5px', fontSize: '12px' }}>추천</span>}
+      <h3 style={{ color: isMain ? '#FF9000' : '#333', fontSize: '24px', marginBottom: '5px' }}>{title}</h3>
+      <p style={{ color: '#AAA', fontSize: '14px', marginBottom: '25px' }}>{subtitle}</p>
+      <ul style={{ listStyle: 'none', padding: 0, fontSize: '14px', lineHeight: '2.5' }}>
+        {items.map((text: string, i: number) => (
+          <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ color: isMain ? '#FF9000' : '#CCC' }}>✔</span> {text}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
