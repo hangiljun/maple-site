@@ -1,5 +1,4 @@
 import './globals.css';
-// 경로를 상대 경로인 './components/KakaoChatButton'으로 확실히 지정하여 에러 해결
 import KakaoChatButton from './components/KakaoChatButton';
 import { Metadata } from 'next';
 
@@ -16,17 +15,13 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        {/* Noto Sans KR 폰트 및 스타일 완벽 유지 */}
         <link
           href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap"
           rel="stylesheet"
         />
       </head>
       <body style={{ margin: 0 }}>
-        {/* 기존 페이지 콘텐츠 출력 */}
         {children}
-        
-        {/* 우측 하단 고정 카카오톡 상담 버튼 */}
         <KakaoChatButton />
       </body>
     </html>

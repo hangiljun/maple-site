@@ -8,8 +8,8 @@ import { useRouter } from 'next/navigation';
 
 export default function ReviewPage() {
   const [reviews, setReviews] = useState<any[]>([]);
-  const [filteredReviews, setFilteredReviews] = useState<any[]>([]); // 검색 필터용
-  const [searchTerm, setSearchTerm] = useState(''); // 검색어 상태
+  const [filteredReviews, setFilteredReviews] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [selectedReview, setSelectedReview] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -19,17 +19,15 @@ export default function ReviewPage() {
   const [image, setImage] = useState<File | null>(null);
 
   useEffect(() => {
-    // 실시간 데이터 동기화로 리뷰 목록 불러오기
     const q = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (s) => {
       const data = s.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setReviews(data);
-      setFilteredReviews(data); // 초기 로드 시 전체 표시
+      setFilteredReviews(data);
     });
     return () => unsubscribe();
   }, []);
 
-  // 검색 기능 (이미지 129a66 스타일)
   const handleSearch = () => {
     const filtered = reviews.filter(r => 
       r.title.includes(searchTerm) || r.nickname.includes(searchTerm) || r.content.includes(searchTerm)
@@ -64,7 +62,6 @@ export default function ReviewPage() {
 
   return (
     <div style={{ backgroundColor: '#FFF', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif" }}>
-      {/* 상단 네비게이션 통일 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 60px', borderBottom: '1px solid #EEE', backgroundColor: '#FFF', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ cursor: 'pointer', fontWeight: '900', color: '#FF9000', fontSize: '22px' }} onClick={() => router.push('/')}>메이플 아이템</div>
         <div style={{ display: 'flex', gap: '25px', fontWeight: '600', fontSize: '15px' }}>
@@ -78,7 +75,6 @@ export default function ReviewPage() {
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 20px' }}>
         <h2 style={{ textAlign: 'center', marginBottom: '40px', fontSize: '24px', fontWeight: 'bold' }}>이용후기</h2>
         
-        {/* 게시판 목록 헤더 (이미지 120fe1 스타일) */}
         <div style={{ borderTop: '2px solid #333', borderBottom: '1px solid #DDD', padding: '15px 0', display: 'flex', fontWeight: 'bold', textAlign: 'center', backgroundColor: '#F9F9F9', fontSize: '14px' }}>
           <div style={{ width: '10%' }}>번호</div>
           <div style={{ width: '55%' }}>제목</div>
@@ -87,8 +83,7 @@ export default function ReviewPage() {
           <div style={{ width: '10%' }}>조회</div>
         </div>
 
-        {/* 리뷰 리스트 출력부 - 누락되었던 부분 복구 */}
-        {filteredReviews.length > 0 ? filteredReviews.map((r, i) => (
+        {filteredReviews.map((r, i) => (
           <div key={r.id} style={{ display: 'flex', padding: '15px 0', borderBottom: '1px solid #EEE', textAlign: 'center', fontSize: '14px', alignItems: 'center' }}>
             <div style={{ width: '10%', color: '#999' }}>{filteredReviews.length - i}</div>
             <div style={{ width: '55%', textAlign: 'left', paddingLeft: '20px', cursor: 'pointer', fontWeight: '500' }} onClick={() => openReview(r)}>
@@ -98,15 +93,12 @@ export default function ReviewPage() {
             <div style={{ width: '10%', color: '#999' }}>{r.createdAt?.toDate().toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}</div>
             <div style={{ width: '10%', color: '#999' }}>{r.views || 0}</div>
           </div>
-        )) : (
-          <p style={{ textAlign: 'center', padding: '50px', color: '#999' }}>작성된 후기가 없습니다.</p>
-        )}
+        ))}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
           <button onClick={() => setShowForm(true)} style={{ backgroundColor: '#000', color: '#FFF', padding: '10px 25px', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>글쓰기</button>
         </div>
 
-        {/* 하단 검색바 (이미지 129a66 스타일) */}
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '40px', gap: '10px' }}>
           <input 
             placeholder="제목 및 내용 검색" 
@@ -123,7 +115,6 @@ export default function ReviewPage() {
         </div>
       </div>
 
-      {/* 후기 작성 모달 (이미지 1217be 스타일) */}
       {showForm && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
           <div style={{ backgroundColor: '#FFF', padding: '30px', borderRadius: '10px', width: '90%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto' }}>
@@ -157,7 +148,6 @@ export default function ReviewPage() {
         </div>
       )}
 
-      {/* 후기 상세 보기 모달 */}
       {selectedReview && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
           <div style={{ backgroundColor: '#FFF', padding: '35px', borderRadius: '15px', width: '90%', maxWidth: '750px' }}>
