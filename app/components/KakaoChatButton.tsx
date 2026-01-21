@@ -1,7 +1,8 @@
 'use client';
 
 export default function KakaoChatButton() {
-  // 보내주신 실제 카카오톡 주소로 업데이트 완료
+  // 1. 이곳에 설정된 주소가 실제 버튼 클릭 시 연결되는 주소입니다.
+  // 2. 아래 주소를 사용자님의 실제 주소로 변경했습니다.
   const KAKAO_URL = "https://open.kakao.com/o/sKg86b7f"; 
 
   return (
@@ -20,7 +21,7 @@ export default function KakaoChatButton() {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        zIndex: 9999, // 어느 페이지에서든 최상단에 노출
+        zIndex: 9999,
         transition: 'transform 0.2s ease'
       }}
       onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
