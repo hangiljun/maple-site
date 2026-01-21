@@ -11,7 +11,7 @@ export default function ReviewPage() {
   const [filteredReviews, setFilteredReviews] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [selectedReview, setSelectedReview] = useState<any>(null);
+  const [selectedReview, setSelectedReview] = useState<any>(null); // 선택된 후기 상태
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -55,13 +55,16 @@ export default function ReviewPage() {
     setLoading(false);
   };
 
+  // 상세 보기 창을 여는 함수
   const openReview = async (review: any) => {
     setSelectedReview(review);
+    // 조회수 1 증가 로직
     await updateDoc(doc(db, 'reviews', review.id), { views: increment(1) });
   };
 
   return (
     <div style={{ backgroundColor: '#FFF', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif" }}>
+      {/* 로고.png 적용된 네비게이션 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 60px', borderBottom: '1px solid #EEE', backgroundColor: '#FFF', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
           <img src="/logo.png" alt="로고" style={{ width: '35px', height: '35px', objectFit: 'contain' }} />
@@ -113,6 +116,7 @@ export default function ReviewPage() {
         </div>
       </div>
 
+      {/* 후기 작성 모달 */}
       {showForm && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
           <div style={{ backgroundColor: '#FFF', padding: '30px', borderRadius: '10px', width: '90%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto' }}>
@@ -142,6 +146,30 @@ export default function ReviewPage() {
               <button onClick={handleUpload} disabled={loading} style={{ flex: 1, padding: '12px', backgroundColor: '#000', color: '#FFF', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>저장하기</button>
               <button onClick={() => setShowForm(false)} style={{ flex: 1, padding: '12px', backgroundColor: '#EEE', color: '#333', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>돌아가기</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ✅ [추가됨] 후기 상세 보기 모달 - 이 부분이 있어야 클릭했을 때 반응이 있습니다! */}
+      {selectedReview && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+          <div style={{ backgroundColor: '#FFF', padding: '35px', borderRadius: '15px', width: '90%', maxWidth: '750px', maxHeight: '85vh', overflowY: 'auto' }}>
+            <h3 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '10px' }}>{selectedReview.title}</h3>
+            <p style={{ fontSize: '13px', color: '#999', marginBottom: '20px', borderBottom: '1px solid #EEE', paddingBottom: '15px' }}>
+              작성자: {selectedReview.nickname.split('@')[0]} | 조회수: {selectedReview.views + 1}
+            </p>
+            <div style={{ minHeight: '200px', lineHeight: '1.8', whiteSpace: 'pre-wrap', color: '#333' }}>
+              {selectedReview.imageUrl && (
+                <img src={selectedReview.imageUrl} style={{ maxWidth: '100%', borderRadius: '10px', marginBottom: '20px', display: 'block' }} alt="후기 사진" />
+              )}
+              <p>{selectedReview.content}</p>
+            </div>
+            <button 
+              onClick={() => setSelectedReview(null)} 
+              style={{ width: '100%', marginTop: '30px', padding: '14px', backgroundColor: '#333', color: '#FFF', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
+            >
+              닫기
+            </button>
           </div>
         </div>
       )}
