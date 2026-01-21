@@ -34,7 +34,7 @@ export default function Home() {
 
   return (
     <div style={{ backgroundColor: '#F9F7F2', minHeight: '100vh', color: '#333', fontFamily: "'Noto Sans KR', sans-serif" }}>
-      {/* 네비게이션 - 모든 메뉴 연결 확인 */}
+      {/* 네비게이션 - 모든 메뉴 클릭 시 해당 페이지로 이동하도록 설정 완료 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 60px', backgroundColor: '#FFF', borderBottom: '1px solid #E5E0D5', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <img src="/logo.png" alt="로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} 
@@ -46,7 +46,7 @@ export default function Home() {
         <div style={{ display: 'flex', gap: '30px', fontSize: '15px', fontWeight: '600' }}>
           <span style={{ cursor: 'pointer' }} onClick={() => router.push('/notice')}>공지사항</span>
           <span style={{ cursor: 'pointer' }} onClick={() => router.push('/howto')}>거래방법</span>
-          {/* 이용후기 페이지 연결 추가 */}
+          {/* 이용후기 버튼을 /review 주소와 연결했습니다 */}
           <span style={{ cursor: 'pointer' }} onClick={() => router.push('/review')}>이용후기</span>
         </div>
       </nav>
@@ -98,7 +98,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 업체 비교 섹션 - 문구 완벽 복구 */}
+      {/* 업체 비교 섹션 - 문구 완벽 유지 */}
       <div style={{ padding: '80px 60px', backgroundColor: '#F3F0E9' }}>
         <h2 style={{ textAlign: 'center', fontSize: '32px', marginBottom: '50px' }}>
           <span style={{ color: '#FF9000' }}>메이플 아이템</span> 업체 비교, 무엇이 다를까요?
