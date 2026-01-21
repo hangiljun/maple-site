@@ -14,16 +14,19 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  // 1. 업체 관리 폼 상태
   const [form, setForm] = useState({ name: '', price: '', kakaoUrl: '', desc: '', isPremium: false });
+  // 2. 공지사항 폼 상태
   const [noticeForm, setNoticeForm] = useState({ title: '', category: '공지사항', content: '' });
-  const [howToContent, setHowToContent] = useState(''); // 거래방법 내용 상태
+  // 3. 거래방법 내용 상태
+  const [howToContent, setHowToContent] = useState('');
   
   const [image, setImage] = useState<File | null>(null);
   const [noticeImage, setNoticeImage] = useState<File | null>(null);
   const [mainBannerImage, setMainBannerImage] = useState<File | null>(null);
   const [noticeBannerImage, setNoticeBannerImage] = useState<File | null>(null);
-  const [howToBannerImage, setHowToBannerImage] = useState<File | null>(null); // 거래방법 대문
-  const [howToMainImage, setHowToMainImage] = useState<File | null>(null); // 거래방법 본문 이미지
+  const [howToBannerImage, setHowToBannerImage] = useState<File | null>(null);
+  const [howToMainImage, setHowToMainImage] = useState<File | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -40,7 +43,7 @@ export default function AdminDashboard() {
     return () => unsubscribe();
   }, [router]);
 
-  // 기존 업체 등록, 공지 등록, 대문 관리 함수들 (생략하지만 실제 코드에는 유지됨)
+  // 업체 등록 함수
   const handleUploadItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!image || !form.name || !form.kakaoUrl) return alert('업체 정보를 입력해주세요.');
@@ -52,11 +55,11 @@ export default function AdminDashboard() {
       await addDoc(collection(db, 'items'), { ...form, imageUrl: url, createdAt: serverTimestamp() });
       alert('업체 등록 완료!');
       setForm({ name: '', price: '', kakaoUrl: '', desc: '', isPremium: false });
-      setImage(null);
     } catch (err) { alert('오류 발생'); }
     setLoading(false);
   };
 
+  // 공지사항 등록 함수
   const handleUploadNotice = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!noticeImage || !noticeForm.title) return alert('제목과 사진을 등록해주세요.');
@@ -68,11 +71,11 @@ export default function AdminDashboard() {
       await addDoc(collection(db, 'notices'), { ...noticeForm, imageUrl: url, createdAt: serverTimestamp() });
       alert('공지사항 등록 완료!');
       setNoticeForm({ title: '', category: '공지사항', content: '' });
-      setNoticeImage(null);
     } catch (err) { alert('오류 발생'); }
     setLoading(false);
   };
 
+  // 메인 배너 업데이트
   const handleUploadMainBanner = async () => {
     if (!mainBannerImage) return alert('메인 배너 사진을 선택하세요.');
     setLoading(true);
@@ -86,6 +89,7 @@ export default function AdminDashboard() {
     setLoading(false);
   };
 
+  // 공지 배너 업데이트
   const handleUploadNoticeBanner = async () => {
     if (!noticeBannerImage) return alert('공지 배너 사진을 선택하세요.');
     setLoading(true);
@@ -99,31 +103,34 @@ export default function AdminDashboard() {
     setLoading(false);
   };
 
-  // --- 거래방법 전용 관리 기능 추가 ---
+  // 거래방법 배너만 업데이트하는 함수 추가
+  const handleUploadHowToBanner = async () => {
+    if (!howToBannerImage) return alert('거래방법 배너 사진을 선택하세요.');
+    setLoading(true);
+    try {
+      const bRef = ref(storage, `howToBanners/banner`);
+      await uploadBytes(bRef, howToBannerImage);
+      const bannerUrl = await getDownloadURL(bRef);
+      await setDoc(doc(db, 'settings', 'howto'), { bannerUrl, updatedAt: serverTimestamp() }, { merge: true });
+      alert('거래방법 대문 사진 업데이트 완료!');
+    } catch (err) { alert('오류 발생'); }
+    setLoading(false);
+  };
+
+  // 거래방법 본문(이미지+글) 업데이트
   const handleUpdateHowTo = async () => {
     setLoading(true);
     try {
-      let bannerUrl = "";
       let mainImgUrl = "";
-      
-      if (howToBannerImage) {
-        const bRef = ref(storage, `howToBanners/banner`);
-        await uploadBytes(bRef, howToBannerImage);
-        bannerUrl = await getDownloadURL(bRef);
-      }
-      
       if (howToMainImage) {
         const mRef = ref(storage, `howToContents/main`);
         await uploadBytes(mRef, howToMainImage);
         mainImgUrl = await getDownloadURL(mRef);
       }
-
       const data: any = { content: howToContent, updatedAt: serverTimestamp() };
-      if (bannerUrl) data.bannerUrl = bannerUrl;
       if (mainImgUrl) data.mainImgUrl = mainImgUrl;
-
       await setDoc(doc(db, 'settings', 'howto'), data, { merge: true });
-      alert('거래방법이 업데이트 되었습니다!');
+      alert('거래방법 본문 내용이 업데이트 되었습니다!');
     } catch (err) { alert('오류 발생'); }
     setLoading(false);
   };
@@ -139,7 +146,6 @@ export default function AdminDashboard() {
       <h1>메이플 아이템 관리 센터</h1>
       
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', marginTop: '30px' }}>
-        {/* 기존 업체 관리 섹션 */}
         <section style={{ backgroundColor: '#1e1e1e', padding: '25px', borderRadius: '15px' }}>
           <h3 style={{ color: '#ff9000' }}>기존 업체 관리</h3>
           <input placeholder="업체명" value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={inputStyle} />
@@ -157,7 +163,6 @@ export default function AdminDashboard() {
           <button onClick={handleUploadItem} disabled={loading} style={btnStyle}>업체 등록하기</button>
         </section>
 
-        {/* 공지사항 및 대문 관리 섹션 */}
         <div>
           <section style={{ backgroundColor: '#1e1e1e', padding: '25px', borderRadius: '15px', marginBottom: '20px' }}>
             <h3 style={{ color: '#00aaff' }}>공지사항 작성</h3>
@@ -187,18 +192,18 @@ export default function AdminDashboard() {
             <div>
               <p style={{ fontSize: '13px', color: '#aaa' }}>3. 거래방법 배너</p>
               <input type="file" onChange={e => setHowToBannerImage(e.target.files![0])} style={inputStyle} />
+              {/* 누락된 버튼 추가 */}
+              <button onClick={handleUploadHowToBanner} style={smBtnStyle}>거래방법 배너 업데이트</button>
             </div>
           </section>
         </div>
       </div>
 
-      {/* 거래방법 본문 관리 섹션 추가 */}
       <section style={{ backgroundColor: '#1e1e1e', padding: '25px', borderRadius: '15px', marginTop: '30px' }}>
-        <h3 style={{ color: '#00ff88' }}>거래방법 페이지 관리 (단일 글)</h3>
-        <p style={{ fontSize: '13px', color: '#aaa' }}>본문에 들어갈 대표 이미지와 설명 글을 작성하세요.</p>
+        <h3 style={{ color: '#00ff88' }}>거래방법 페이지 관리 (본문 내용)</h3>
         <input type="file" onChange={e => setHowToMainImage(e.target.files![0])} style={inputStyle} />
         <textarea placeholder="거래방법 상세 설명" value={howToContent} onChange={e => setHowToContent(e.target.value)} style={{ ...inputStyle, height: '150px' }} />
-        <button onClick={handleUpdateHowTo} disabled={loading} style={{ ...btnStyle, backgroundColor: '#00ff88', color: '#121212' }}>거래방법 전체 저장하기</button>
+        <button onClick={handleUpdateHowTo} disabled={loading} style={{ ...btnStyle, backgroundColor: '#00ff88', color: '#121212' }}>거래방법 본문 저장하기</button>
       </section>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', marginTop: '40px' }}>
@@ -211,6 +216,6 @@ export default function AdminDashboard() {
 
 const inputStyle = { display: 'block', width: '100%', padding: '10px', margin: '10px 0', backgroundColor: '#333', color: 'white', border: 'none', borderRadius: '5px' };
 const btnStyle = { width: '100%', padding: '12px', backgroundColor: '#ff9000', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' as any };
-const smBtnStyle = { width: '100%', padding: '8px', backgroundColor: '#444', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '12px' };
+const smBtnStyle = { width: '100%', padding: '8px', backgroundColor: '#444', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '12px', marginBottom: '5px' };
 const listStyle = { display: 'flex', justifyContent: 'space-between', padding: '10px', borderBottom: '1px solid #333' };
 const delBtn = { color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer' };
