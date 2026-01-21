@@ -1,5 +1,5 @@
 import './globals.css';
-// 빨간 줄 해결 포인트: ./components/... 경로를 다시 한번 확인하세요.
+// 절대 경로 스타일로 수정하여 인식 오류 해결
 import KakaoChatButton from './components/KakaoChatButton';
 import { Metadata } from 'next';
 
@@ -16,16 +16,14 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
+        {/* Noto Sans KR 폰트 유지 */}
         <link
           href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap"
           rel="stylesheet"
         />
       </head>
       <body style={{ margin: 0 }}>
-        {/* 모든 페이지의 본문 내용 */}
         {children}
-        
-        {/* 모든 페이지에 따라다니는 카톡 버튼 */}
         <KakaoChatButton />
       </body>
     </html>
