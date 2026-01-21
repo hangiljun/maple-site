@@ -11,11 +11,9 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    // 업체 리스트 실시간 동기화 유지
     const qItems = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
     onSnapshot(qItems, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-    // 메인 대문 배너 실시간 동기화 유지
     const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(1));
     onSnapshot(qBanners, (s) => setBanners(s.docs.map(d => ({ id: d.id, ...d.data() }))));
   }, []);
@@ -34,12 +32,17 @@ export default function Home() {
 
   return (
     <div style={{ backgroundColor: '#F9F7F2', minHeight: '100vh', color: '#333', fontFamily: "'Noto Sans KR', sans-serif" }}>
-      {/* 네비게이션 - 모든 메뉴 연결 완료 */}
+      {/* 상단 네비게이션 - 로고 수정 완료 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 60px', backgroundColor: '#FFF', borderBottom: '1px solid #E5E0D5', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <img src="/logo.png" alt="로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} 
-               onError={(e) => (e.currentTarget.style.display = 'none')} />
-          <div style={{ fontSize: '22px', fontWeight: '900', color: '#FF9000', cursor: 'pointer' }} onClick={() => router.push('/')}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
+          {/* 준비하신 favicon.png로 교체 및 크기 조절 */}
+          <img 
+            src="/favicon.png" 
+            alt="로고" 
+            style={{ width: '35px', height: '35px', objectFit: 'contain' }} 
+            onError={(e) => (e.currentTarget.style.display = 'none')} 
+          />
+          <div style={{ fontSize: '22px', fontWeight: '900', color: '#FF9000' }}>
             메이플 아이템
           </div>
         </div>
@@ -51,7 +54,7 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* 배너 - 디자인 유지 */}
+      {/* 대문 배너 - 문구 완벽 유지 */}
       <div style={{ width: '100%', height: '350px', backgroundColor: '#DDD', position: 'relative', overflow: 'hidden' }}>
         {banners.length > 0 ? (
           <img src={banners[0].imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Main" />
