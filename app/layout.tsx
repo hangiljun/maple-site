@@ -16,8 +16,8 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        {/* 파비콘 강제 갱신을 위해 ?v=1을 붙였습니다 */}
-        <link rel="icon" href="/favicon.ico?v=1" sizes="any" />
+        {/* 파일 이름을 fav.ico로 바꿔서 브라우저가 새 파일로 인식하게 강제합니다 */}
+        <link rel="icon" href="/fav.ico" sizes="any" />
       </head>
       <body className={inter.className} style={{ margin: 0, padding: 0 }}>
         {children}
