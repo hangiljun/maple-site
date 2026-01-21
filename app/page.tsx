@@ -36,24 +36,33 @@ export default function Home() {
 
   return (
     <div style={{ backgroundColor: '#F9F7F2', minHeight: '100vh', color: '#333', fontFamily: "'Noto Sans KR', sans-serif" }}>
-      {/* 네비게이션 */}
+      {/* 1. 네비게이션 - '관리' 메뉴 숨김 및 로고 추가 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 60px', backgroundColor: '#FFF', borderBottom: '1px solid #E5E0D5', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
-        <div style={{ fontSize: '22px', fontWeight: '900', color: '#FF9000' }}>메이플 아이템</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* public 폴더에 logo.png 파일을 넣으면 나타납니다 */}
+          <img src="/logo.png" alt="로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} 
+               onError={(e) => (e.currentTarget.style.display = 'none')} />
+          <div style={{ fontSize: '22px', fontWeight: '900', color: '#FF9000', cursor: 'pointer' }} onClick={() => window.location.reload()}>
+            메이플 아이템
+          </div>
+        </div>
         <div style={{ display: 'flex', gap: '30px', fontSize: '15px', fontWeight: '600' }}>
           <span>공지사항</span><span>거래방법</span><span>이용후기</span>
-          <a href="/admin" style={{ color: '#AAA', textDecoration: 'none' }}>관리</a>
+          {/* '관리' 버튼 삭제됨. /admin 으로 직접 접속하세요 */}
         </div>
       </nav>
 
-      {/* 대문 배너 */}
+      {/* 2. 대문 배너 - 멘트 수정 */}
       <div style={{ width: '100%', height: '350px', backgroundColor: '#DDD', position: 'relative', overflow: 'hidden' }}>
         {banners.length > 0 ? (
           <img src={banners[0].imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Main" />
         ) : (
           <div style={{ width: '100%', height: '100%', background: '#EEE' }}></div>
         )}
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', width: '100%', backgroundColor: 'rgba(255,255,255,0.7)', padding: '30px 0' }}>
-          <h1 style={{ fontSize: '42px', fontWeight: '900', color: '#222', marginBottom: '10px' }}>메이플 아이템 거래의 기준</h1>
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', width: '100%', backgroundColor: 'rgba(255,255,255,0.8)', padding: '30px 0' }}>
+          <h1 style={{ fontSize: '38px', fontWeight: '900', color: '#222', marginBottom: '10px' }}>
+            메이플 아이템 비교해서 최고가 판매 하세요
+          </h1>
           <p style={{ color: '#555', fontWeight: '600' }}>검증된 1등 매입 업체들을 확인하세요</p>
         </div>
       </div>
@@ -67,7 +76,6 @@ export default function Home() {
               <img src={item.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="premium" />
             </div>
           ))}
-          {premiumItems.length === 0 && <p style={{color:'#444', textAlign:'center', gridColumn:'1/4'}}>등록된 프리미엄 업체가 없습니다.</p>}
         </div>
       </div>
 
@@ -97,22 +105,9 @@ export default function Home() {
           <span style={{ color: '#FF9000' }}>메이플 아이템</span> 업체 비교, 무엇이 다를까요?
         </h2>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
-          <ComparisonCard 
-            title="장사꾼 A" 
-            subtitle="게임내 고성능 확성기로 홍보하는 사람" 
-            items={["오직 메소 거래만 가능", "평균 70% 낮은 매입가", "아이템 시세를 경매장 최소가 기준", "기준 없는 시세측정 이해 불가"]} 
-          />
-          <ComparisonCard 
-            title="메이플 아이템" 
-            subtitle="공식 인증 업체" 
-            isMain={true} 
-            items={["메소 / 무통장 거래 가능 (업체보증)", "업계 최고 매입가 85% 보장", "365일 24시간 상시 대기", "합리적인 경매장 시세 측정"]} 
-          />
-          <ComparisonCard 
-            title="장사꾼 B" 
-            subtitle="1인 웹사이트, 블로그 업체" 
-            items={["무조건 선 받으려고 하는 업체", "수수료, 가위값을 판매자에게 부담", "느린 대답 / 지연 이체 발생", "개인 운영으로 인한 신뢰도 부족"]} 
-          />
+          <ComparisonCard title="장사꾼 A" subtitle="게임내 고성능 확성기로 홍보하는 사람" items={["오직 메소 거래만 가능", "평균 70% 낮은 매입가", "아이템 시세를 경매장 최소가 기준", "기준 없는 시세측정 이해 불가"]} />
+          <ComparisonCard title="메이플 아이템" subtitle="공식 인증 업체" isMain={true} items={["메소 / 무통장 거래 가능 (업체보증)", "업계 최고 매입가 85% 보장", "365일 24시간 상시 대기", "합리적인 경매장 시세 측정"]} />
+          <ComparisonCard title="B 장사꾼" subtitle="1인 웹사이트, 블로그 업체" items={["무조건 선 받으려고 하는 업체", "수수료, 가위값을 판매자에게 부담", "느린 대답 / 지연 이체 발생", "개인 운영으로 인한 신뢰도 부족"]} />
         </div>
       </div>
 
@@ -130,8 +125,7 @@ function ComparisonCard({ title, subtitle, items, isMain = false }: any) {
       border: isMain ? '3px solid #FF9000' : '1px solid #E5E0D5',
       boxShadow: isMain ? '0 10px 30px rgba(255,144,0,0.2)' : 'none',
       transform: isMain ? 'scale(1.05)' : 'none',
-      position: 'relative',
-      transition: '0.3s'
+      position: 'relative', transition: '0.3s'
     }}>
       {isMain && <span style={{ position: 'absolute', top: '15px', right: '15px', backgroundColor: '#FF9000', color: '#FFF', padding: '2px 8px', borderRadius: '5px', fontSize: '12px', fontWeight: 'bold' }}>추천</span>}
       <h3 style={{ color: isMain ? '#FF9000' : '#333', fontSize: '24px', marginBottom: '8px', fontWeight: 'bold' }}>{title}</h3>

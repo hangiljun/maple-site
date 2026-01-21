@@ -16,8 +16,8 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        {/* favicon.ico 파일을 public 폴더에 넣으시면 바로 적용됩니다. */}
-        <link rel="icon" href="/favicon.ico" sizes="any" />
+        {/* 파비콘 강제 갱신을 위해 ?v=1을 붙였습니다 */}
+        <link rel="icon" href="/favicon.ico?v=1" sizes="any" />
       </head>
       <body className={inter.className} style={{ margin: 0, padding: 0 }}>
         {children}
