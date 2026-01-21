@@ -20,7 +20,6 @@ export default function NoticePage() {
 
   return (
     <div style={{ backgroundColor: '#F9F7F2', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif" }}>
-      {/* 상단 네비게이션 복구 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 60px', backgroundColor: '#FFF', borderBottom: '1px solid #E5E0D5', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
           <img src="/logo.png" style={{ width: '30px', height: '30px', objectFit: 'contain' }} onError={(e)=>(e.currentTarget.style.display='none')} />
@@ -28,14 +27,13 @@ export default function NoticePage() {
         </div>
         <div style={{ display: 'flex', gap: '30px', fontSize: '15px', fontWeight: '600' }}>
           <span style={{ cursor: 'pointer', color: '#FF9000' }} onClick={() => window.scrollTo(0,0)}>공지사항</span>
-          <span style={{ cursor: 'pointer' }}>거래방법</span>
+          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/howto')}>거래방법</span>
           <span style={{ cursor: 'pointer' }}>이용후기</span>
         </div>
       </nav>
 
-      {/* 공지사항 전용 배너 */}
       <div style={{ width: '100%', height: '300px', backgroundColor: '#DDD', position: 'relative', overflow: 'hidden' }}>
-        {banners[0] && <img src={banners[0].imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+        {banners[0] && <img src={banners[0].imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="banner" />}
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'white' }}>
           <h1 style={{ fontSize: '36px', fontWeight: 'bold' }}>메이플급처템, 템셋팅 공지사항</h1>
           <p style={{ fontSize: '18px', marginTop: '10px' }}>메이플스토리와 메이플랜드 정보를 확인하세요.</p>
@@ -46,7 +44,7 @@ export default function NoticePage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '30px' }}>
           {notices.map((n) => (
             <div key={n.id} onClick={() => router.push(`/notice/${n.id}`)} style={{ backgroundColor: '#FFF', borderRadius: '25px', overflow: 'hidden', cursor: 'pointer', boxShadow: '0 10px 20px rgba(0,0,0,0.05)' }}>
-              <img src={n.imageUrl} style={{ width: '100%', height: '180px', objectFit: 'cover' }} />
+              <img src={n.imageUrl} style={{ width: '100%', height: '180px', objectFit: 'cover' }} alt="notice" />
               <div style={{ padding: '20px' }}>
                 <span style={{ color: '#00aaff', fontSize: '13px', fontWeight: 'bold' }}>{n.category}</span>
                 <h3 style={{ fontSize: '16px', fontWeight: 'bold', margin: '10px 0' }}>{n.title}</h3>
