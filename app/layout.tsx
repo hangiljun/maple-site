@@ -22,10 +22,10 @@ export const metadata: Metadata = {
     type: 'website',
   },
   verification: {
-    // 구글 코드는 아직 없으므로 비워두었습니다.
-    google: '',
+    // 보내주신 구글 인증 코드를 적용했습니다.
+    google: 'eDPRCa4UVhEx5Fpyv0ExIXkhPfCgee206siYNLoE6vc',
     other: {
-      // 이미지에서 확인된 네이버 인증 코드를 정확히 입력했습니다.
+      // 이미 완료된 네이버 인증 코드입니다.
       'naver-site-verification': '566edcb6849fbcd5fee7fad38c053720020e5052', 
     },
   },
