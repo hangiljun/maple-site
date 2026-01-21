@@ -1,4 +1,5 @@
 import './globals.css';
+// 경로를 상대 경로인 './components/KakaoChatButton'으로 확실히 지정하여 에러 해결
 import KakaoChatButton from './components/KakaoChatButton';
 import { Metadata } from 'next';
 
@@ -22,10 +23,10 @@ export default function RootLayout({
         />
       </head>
       <body style={{ margin: 0 }}>
-        {/* 기존 페이지 콘텐츠 영역 */}
+        {/* 기존 페이지 콘텐츠 출력 */}
         {children}
         
-        {/* 우측 하단 고정 카카오톡 플로팅 버튼 */}
+        {/* 우측 하단 고정 카카오톡 상담 버튼 */}
         <KakaoChatButton />
       </body>
     </html>
