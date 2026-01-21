@@ -12,7 +12,7 @@ export default function ReviewPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // 유저 작성용 상태
+  // 유저 작성용 상태 유지
   const [form, setForm] = useState({ nickname: '', password: '', content: '' });
   const [image, setImage] = useState<File | null>(null);
 
@@ -32,7 +32,7 @@ export default function ReviewPage() {
     return () => unsubscribe();
   }, []);
 
-  // 후기 등록 함수 (유저용)
+  // 후기 등록 함수 (유저용 로직 유지)
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.nickname || !form.password || !form.content) return alert('모든 항목을 입력해주세요.');
@@ -59,7 +59,7 @@ export default function ReviewPage() {
 
   return (
     <div style={{ backgroundColor: '#F9F7F2', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif" }}>
-      {/* 상단 네비게이션 - '홈' 추가 및 경로 연결 */}
+      {/* 네비게이션 - 모든 페이지에서 동일하게 '홈' 메뉴 추가 및 연결 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 60px', backgroundColor: '#FFF', borderBottom: '1px solid #E5E0D5', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
           <img src="/logo.png" style={{ width: '30px', height: '30px', objectFit: 'contain' }} onError={(e)=>(e.currentTarget.style.display='none')} />
@@ -69,11 +69,12 @@ export default function ReviewPage() {
           <span style={{ cursor: 'pointer' }} onClick={() => router.push('/')}>홈</span>
           <span style={{ cursor: 'pointer' }} onClick={() => router.push('/notice')}>공지사항</span>
           <span style={{ cursor: 'pointer' }} onClick={() => router.push('/howto')}>거래방법</span>
+          {/* 현재 페이지이므로 scrollTo(0,0) 적용 */}
           <span style={{ cursor: 'pointer', color: '#FF9000' }} onClick={() => window.scrollTo(0,0)}>이용후기</span>
         </div>
       </nav>
 
-      {/* 이용후기 상단 배너 섹션 */}
+      {/* 이용후기 상단 배너 섹션 유지 */}
       <div style={{ width: '100%', height: '300px', backgroundColor: '#DDD', position: 'relative', overflow: 'hidden' }}>
         {bannerUrl && <img src={bannerUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="banner" />}
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'white' }}>
@@ -83,7 +84,7 @@ export default function ReviewPage() {
       </div>
 
       <div style={{ padding: '60px 20px', maxWidth: '1000px', margin: '0 auto' }}>
-        {/* 후기 작성 폼 */}
+        {/* 후기 작성 폼 - 디자인 유지 */}
         <div style={{ backgroundColor: '#FFF', padding: '30px', borderRadius: '25px', marginBottom: '50px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
           <h3 style={{ marginBottom: '20px', fontWeight: 'bold', fontSize: '20px' }}>의견 남기기</h3>
           <form onSubmit={handleUpload}>
@@ -100,7 +101,7 @@ export default function ReviewPage() {
           </form>
         </div>
 
-        {/* 후기 그리드 리스트 */}
+        {/* 후기 그리드 리스트 - 디자인 유지 */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '25px' }}>
           {reviews.map((r) => (
             <div key={r.id} style={{ backgroundColor: '#FFF', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 5px 15px rgba(0,0,0,0.05)', border: '1px solid #EEE' }}>
