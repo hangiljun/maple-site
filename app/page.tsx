@@ -11,11 +11,11 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    // 1. 업체 리스트 실시간 동기화 유지
+    // 업체 리스트 실시간 동기화 유지
     const qItems = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
     onSnapshot(qItems, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-    // 2. 메인 대문 배너 실시간 동기화 유지
+    // 메인 대문 배너 실시간 동기화 유지
     const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(1));
     onSnapshot(qBanners, (s) => setBanners(s.docs.map(d => ({ id: d.id, ...d.data() }))));
   }, []);
@@ -51,7 +51,7 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* 대문 배너 - 문구 완벽 유지 */}
+      {/* 배너 - 디자인 유지 */}
       <div style={{ width: '100%', height: '350px', backgroundColor: '#DDD', position: 'relative', overflow: 'hidden' }}>
         {banners.length > 0 ? (
           <img src={banners[0].imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Main" />
