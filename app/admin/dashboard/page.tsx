@@ -11,14 +11,12 @@ export default function AdminDashboard() {
   const [user, setUser] = useState<any>(null);
   const [items, setItems] = useState<any[]>([]);
   const [notices, setNotices] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]); // 이용후기 리스트 상태
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // 1. 업체 관리 폼 상태
   const [form, setForm] = useState({ name: '', price: '', kakaoUrl: '', desc: '', isPremium: false });
-  // 2. 공지사항 폼 상태
   const [noticeForm, setNoticeForm] = useState({ title: '', category: '공지사항', content: '' });
-  // 3. 거래방법 내용 상태
   const [howToContent, setHowToContent] = useState('');
   
   const [image, setImage] = useState<File | null>(null);
@@ -26,6 +24,7 @@ export default function AdminDashboard() {
   const [mainBannerImage, setMainBannerImage] = useState<File | null>(null);
   const [noticeBannerImage, setNoticeBannerImage] = useState<File | null>(null);
   const [howToBannerImage, setHowToBannerImage] = useState<File | null>(null);
+  const [reviewBannerImage, setReviewBannerImage] = useState<File | null>(null); // 이용후기 배너 상태
   const [howToMainImage, setHowToMainImage] = useState<File | null>(null);
 
   useEffect(() => {
@@ -40,10 +39,13 @@ export default function AdminDashboard() {
     const qNotices = query(collection(db, 'notices'), orderBy('createdAt', 'desc'));
     onSnapshot(qNotices, (snapshot) => setNotices(snapshot.docs.map(d => ({ id: d.id, ...d.data() }))));
 
+    // 이용후기 실시간 감시 추가
+    const qReviews = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'));
+    onSnapshot(qReviews, (snapshot) => setReviews(snapshot.docs.map(d => ({ id: d.id, ...d.data() }))));
+
     return () => unsubscribe();
   }, [router]);
 
-  // 업체 등록 함수
   const handleUploadItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!image || !form.name || !form.kakaoUrl) return alert('업체 정보를 입력해주세요.');
@@ -59,7 +61,6 @@ export default function AdminDashboard() {
     setLoading(false);
   };
 
-  // 공지사항 등록 함수
   const handleUploadNotice = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!noticeImage || !noticeForm.title) return alert('제목과 사진을 등록해주세요.');
@@ -75,7 +76,6 @@ export default function AdminDashboard() {
     setLoading(false);
   };
 
-  // 메인 배너 업데이트
   const handleUploadMainBanner = async () => {
     if (!mainBannerImage) return alert('메인 배너 사진을 선택하세요.');
     setLoading(true);
@@ -89,7 +89,6 @@ export default function AdminDashboard() {
     setLoading(false);
   };
 
-  // 공지 배너 업데이트
   const handleUploadNoticeBanner = async () => {
     if (!noticeBannerImage) return alert('공지 배너 사진을 선택하세요.');
     setLoading(true);
@@ -103,7 +102,6 @@ export default function AdminDashboard() {
     setLoading(false);
   };
 
-  // 거래방법 배너만 업데이트하는 함수 추가
   const handleUploadHowToBanner = async () => {
     if (!howToBannerImage) return alert('거래방법 배너 사진을 선택하세요.');
     setLoading(true);
@@ -117,7 +115,20 @@ export default function AdminDashboard() {
     setLoading(false);
   };
 
-  // 거래방법 본문(이미지+글) 업데이트
+  // 이용후기 배너 업데이트
+  const handleUploadReviewBanner = async () => {
+    if (!reviewBannerImage) return alert('이용후기 배너 사진을 선택하세요.');
+    setLoading(true);
+    try {
+      const bRef = ref(storage, `reviewBanners/banner`);
+      await uploadBytes(bRef, reviewBannerImage);
+      const url = await getDownloadURL(bRef);
+      await setDoc(doc(db, 'settings', 'reviewBanner'), { url, updatedAt: serverTimestamp() }, { merge: true });
+      alert('이용후기 대문 사진 업데이트 완료!');
+    } catch (err) { alert('오류 발생'); }
+    setLoading(false);
+  };
+
   const handleUpdateHowTo = async () => {
     setLoading(true);
     try {
@@ -189,11 +200,15 @@ export default function AdminDashboard() {
               <input type="file" onChange={e => setNoticeBannerImage(e.target.files![0])} style={inputStyle} />
               <button onClick={handleUploadNoticeBanner} style={smBtnStyle}>공지 배너 업데이트</button>
             </div>
-            <div>
+            <div style={{ marginBottom: '10px' }}>
               <p style={{ fontSize: '13px', color: '#aaa' }}>3. 거래방법 배너</p>
               <input type="file" onChange={e => setHowToBannerImage(e.target.files![0])} style={inputStyle} />
-              {/* 누락된 버튼 추가 */}
               <button onClick={handleUploadHowToBanner} style={smBtnStyle}>거래방법 배너 업데이트</button>
+            </div>
+            <div>
+              <p style={{ fontSize: '13px', color: '#aaa' }}>4. 이용후기 배너</p>
+              <input type="file" onChange={e => setReviewBannerImage(e.target.files![0])} style={inputStyle} />
+              <button onClick={handleUploadReviewBanner} style={smBtnStyle}>이용후기 배너 업데이트</button>
             </div>
           </section>
         </div>
@@ -204,6 +219,24 @@ export default function AdminDashboard() {
         <input type="file" onChange={e => setHowToMainImage(e.target.files![0])} style={inputStyle} />
         <textarea placeholder="거래방법 상세 설명" value={howToContent} onChange={e => setHowToContent(e.target.value)} style={{ ...inputStyle, height: '150px' }} />
         <button onClick={handleUpdateHowTo} disabled={loading} style={{ ...btnStyle, backgroundColor: '#00ff88', color: '#121212' }}>거래방법 본문 저장하기</button>
+      </section>
+
+      {/* 이용후기 관리 섹션 추가 */}
+      <section style={{ backgroundColor: '#1e1e1e', padding: '25px', borderRadius: '15px', marginTop: '30px' }}>
+        <h3 style={{ color: '#ff4444' }}>이용후기 관리 (이상한 글 삭제)</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '15px', marginTop: '15px' }}>
+          {reviews.map(r => (
+            <div key={r.id} style={{ padding: '15px', backgroundColor: '#333', borderRadius: '10px', border: '1px solid #444' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#aaa', marginBottom: '8px' }}>
+                <span>{r.nickname}</span>
+                <span>{r.createdAt?.toDate().toLocaleDateString()}</span>
+              </div>
+              <p style={{ fontSize: '14px', marginBottom: '12px', lineHeight: '1.4' }}>{r.content.substring(0, 50)}...</p>
+              <button onClick={() => handleDelete('reviews', r.id)} style={{ color: 'white', backgroundColor: '#ff4444', border: 'none', padding: '6px 12px', borderRadius: '5px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold', width: '100%' }}>부적절한 후기 삭제</button>
+            </div>
+          ))}
+          {reviews.length === 0 && <p style={{ color: '#666' }}>등록된 후기가 없습니다.</p>}
+        </div>
       </section>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', marginTop: '40px' }}>

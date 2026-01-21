@@ -32,6 +32,7 @@ export default function Home() {
 
   return (
     <div style={{ backgroundColor: '#F9F7F2', minHeight: '100vh', color: '#333', fontFamily: "'Noto Sans KR', sans-serif" }}>
+      {/* 네비게이션 - 이용후기 연결 추가 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 60px', backgroundColor: '#FFF', borderBottom: '1px solid #E5E0D5', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <img src="/logo.png" alt="로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} 
@@ -43,7 +44,8 @@ export default function Home() {
         <div style={{ display: 'flex', gap: '30px', fontSize: '15px', fontWeight: '600' }}>
           <span style={{ cursor: 'pointer' }} onClick={() => router.push('/notice')}>공지사항</span>
           <span style={{ cursor: 'pointer' }} onClick={() => router.push('/howto')}>거래방법</span>
-          <span style={{ cursor: 'pointer' }}>이용후기</span>
+          {/* 이용후기 클릭 시 이동 */}
+          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/review')}>이용후기</span>
         </div>
       </nav>
 
@@ -91,6 +93,7 @@ export default function Home() {
         </div>
       </div>
 
+      {/* 업체 비교 섹션 - 문구 완벽 유지 */}
       <div style={{ padding: '80px 60px', backgroundColor: '#F3F0E9' }}>
         <h2 style={{ textAlign: 'center', fontSize: '32px', marginBottom: '50px' }}>
           <span style={{ color: '#FF9000' }}>메이플 아이템</span> 업체 비교, 무엇이 다를까요?
