@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { db, storage } from '../../firebase';
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-// 에러 수정 포인트: navigation -> next/navigation
 import { useRouter } from 'next/navigation';
 
 export default function ReviewPage() {
@@ -65,7 +64,7 @@ export default function ReviewPage() {
     <div style={{ backgroundColor: '#FFF', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif" }}>
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 60px', borderBottom: '1px solid #EEE', backgroundColor: '#FFF', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
-          <img src="/favicon.png" alt="로고" style={{ width: '35px', height: '35px', objectFit: 'contain' }} />
+          <img src="/logo.png" alt="로고" style={{ width: '35px', height: '35px', objectFit: 'contain' }} />
           <div style={{ fontWeight: '900', color: '#FF9000', fontSize: '22px' }}>메이플 아이템</div>
         </div>
         <div style={{ display: 'flex', gap: '25px', fontWeight: '600', fontSize: '15px' }}>

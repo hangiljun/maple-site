@@ -32,19 +32,14 @@ export default function Home() {
 
   return (
     <div style={{ backgroundColor: '#F9F7F2', minHeight: '100vh', color: '#333', fontFamily: "'Noto Sans KR', sans-serif" }}>
-      {/* 상단 네비게이션 - 로고 수정 완료 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 60px', backgroundColor: '#FFF', borderBottom: '1px solid #E5E0D5', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
-          {/* 준비하신 favicon.png로 교체 및 크기 조절 */}
           <img 
-            src="/favicon.png" 
+            src="/logo.png" 
             alt="로고" 
             style={{ width: '35px', height: '35px', objectFit: 'contain' }} 
-            onError={(e) => (e.currentTarget.style.display = 'none')} 
           />
-          <div style={{ fontSize: '22px', fontWeight: '900', color: '#FF9000' }}>
-            메이플 아이템
-          </div>
+          <div style={{ fontSize: '22px', fontWeight: '900', color: '#FF9000' }}>메이플 아이템</div>
         </div>
         <div style={{ display: 'flex', gap: '25px', fontSize: '15px', fontWeight: '600' }}>
           <span style={{ cursor: 'pointer', color: '#FF9000' }} onClick={() => router.push('/')}>홈</span>
@@ -54,7 +49,7 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* 대문 배너 - 문구 완벽 유지 */}
+      {/* 대문 배너 */}
       <div style={{ width: '100%', height: '350px', backgroundColor: '#DDD', position: 'relative', overflow: 'hidden' }}>
         {banners.length > 0 ? (
           <img src={banners[0].imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Main" />
@@ -69,7 +64,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 프리미엄 파트너 - 디자인 유지 */}
+      {/* 프리미엄 파트너 */}
       <div style={{ padding: '60px 60px 0 60px' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '25px', color: '#FF9000', textAlign: 'center' }}>★ 프리미엄 인증 파트너</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
@@ -81,7 +76,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 실시간 등록 매입 업체 - 디자인 유지 */}
+      {/* 실시간 등록 매입 업체 */}
       <div style={{ padding: '80px 60px' }}>
         <h2 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '35px', textAlign: 'center' }}>실시간 등록 매입 업체</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '30px' }}>
@@ -101,7 +96,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 업체 비교 섹션 - 문구 완벽 유지 */}
       <div style={{ padding: '80px 60px', backgroundColor: '#F3F0E9' }}>
         <h2 style={{ textAlign: 'center', fontSize: '32px', marginBottom: '50px' }}>
           <span style={{ color: '#FF9000' }}>메이플 아이템</span> 업체 비교, 무엇이 다를까요?
