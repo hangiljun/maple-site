@@ -6,6 +6,7 @@ import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestor
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
+  // 상태 변수들 (기능 유지를 위해 모두 필요)
   const [items, setItems] = useState<any[]>([]);
   const [banners, setBanners] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
@@ -13,14 +14,20 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
+    // 1. 업체 목록 실시간 동기화
     const qItems = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
     onSnapshot(qItems, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+
+    // 2. 메인 배너 실시간 동기화
     const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(1));
     onSnapshot(qBanners, (s) => setBanners(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+
+    // 3. 후기 목록 실시간 동기화 (최근 10개)
     const qReviews = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(10));
     onSnapshot(qReviews, (s) => setReviews(s.docs.map(d => ({ id: d.id, ...d.data() }))));
   }, []);
 
+  // 후기 자동 슬라이드 로직
   useEffect(() => {
     if (reviews.length === 0) return;
     const interval = setInterval(() => {
@@ -40,6 +47,7 @@ export default function Home() {
 
   return (
     <div style={{ backgroundColor: '#0F172A', minHeight: '100vh', color: '#F8FAFC', fontFamily: "'Noto Sans KR', sans-serif" }}>
+      {/* 스타일 태그: 애니메이션 효과 등 */}
       <style jsx global>{`
         .hover-card { transition: all 0.3s ease; }
         .hover-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(255, 144, 0, 0.3); }
@@ -48,11 +56,11 @@ export default function Home() {
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
 
-      {/* 네비게이션 */}
+      {/* 1. 상단 네비게이션 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', backgroundColor: 'rgba(15, 23, 42, 0.95)', borderBottom: '1px solid #334155', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
           <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <img src="/logo.png" alt="로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+            <img src="/logo.png" alt="로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} onError={(e)=>(e.currentTarget.style.display='none')} />
           </div>
           <div style={{ fontSize: '20px', fontWeight: '900', color: '#FF9000', letterSpacing: '-0.5px' }} className="neon-text">메이플 아이템</div>
         </div>
@@ -64,7 +72,7 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* 배너 */}
+      {/* 2. 메인 배너 */}
       <div style={{ width: '100%', height: '320px', backgroundColor: '#1E293B', position: 'relative', overflow: 'hidden' }}>
         {banners.length > 0 ? (
           <div style={{ width: '100%', height: '100%', backgroundImage: `url(${banners[0].imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'brightness(0.7)' }}></div>
@@ -75,15 +83,27 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ★ 변경됨: 한글로 수정 ★ */}
+      {/* 3. 프리미엄 인증 파트너 (왼쪽 정렬 & 고정 크기) */}
       <div style={{ padding: '50px 5% 0 5%' }}>
         <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px', color: '#FF9000', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#FF9000', boxShadow: '0 0 10px #FF9000' }}></span>
           프리미엄 인증 파트너
         </h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
+        {/* flex-start를 사용하여 왼쪽 정렬, flex-wrap으로 줄바꿈 허용 */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'flex-start' }}>
           {premiumItems.map((item) => (
-            <div key={item.id} onClick={() => goToKakao(item.kakaoUrl)} className="hover-card" style={{ width: '320px', height: '130px', border: '1px solid #FF9000', borderRadius: '15px', overflow: 'hidden', cursor: 'pointer', position: 'relative', backgroundColor: '#1E293B', flexShrink: 0 }}>
+            <div key={item.id} onClick={() => goToKakao(item.kakaoUrl)} className="hover-card" 
+                 style={{ 
+                   width: '320px', // 크기 고정
+                   height: '130px', 
+                   border: '1px solid #FF9000', 
+                   borderRadius: '15px', 
+                   overflow: 'hidden', 
+                   cursor: 'pointer', 
+                   position: 'relative', 
+                   backgroundColor: '#1E293B',
+                   flexShrink: 0 
+                 }}>
               <div style={{ position: 'absolute', top: 0, right: 0, backgroundColor: '#FF9000', color: '#000', fontSize: '10px', fontWeight: 'bold', padding: '3px 10px', borderBottomLeftRadius: '10px', zIndex: 10 }}>공식인증</div>
               <img src={item.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.9' }} alt="premium" />
             </div>
@@ -91,7 +111,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 실시간 매입 업체 */}
+      {/* 4. 실시간 매입 업체 (큼직한 그리드 유지) */}
       <div style={{ padding: '60px 5%' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '30px', color: '#FFF' }}>실시간 등록 매입 업체</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
@@ -113,7 +133,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 비교 섹션 */}
+      {/* 5. 업체 비교 (상세 내용 유지) */}
       <div style={{ padding: '80px 5%', backgroundColor: '#0B1120', borderTop: '1px solid #1E293B' }}>
         <h2 style={{ textAlign: 'center', fontSize: '24px', marginBottom: '50px', color: '#FFF' }}>
           <span style={{ color: '#FF9000' }}>메이플 아이템</span> 업체 비교, 무엇이 다를까요?
@@ -125,7 +145,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 후기 슬라이드 */}
+      {/* 6. 실시간 후기 (별 삭제, 이름 표시, 슬라이드) */}
       <div style={{ padding: '60px 5%', borderTop: '1px solid #1E293B', backgroundColor: '#0F172A' }}>
          <h2 style={{ textAlign: 'center', fontSize: '22px', marginBottom: '30px', color: '#FFF' }}>📢 실시간 거래 후기</h2>
          <div style={{ maxWidth: '600px', margin: '0 auto', backgroundColor: '#1E293B', borderRadius: '20px', padding: '40px', border: '1px solid #334155', minHeight: '160px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
@@ -134,11 +154,11 @@ export default function Home() {
                 <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#FF9000', marginBottom: '15px' }}>{reviews[currentReviewIndex].title}</div>
                 <p style={{ color: '#CBD5E1', fontSize: '15px', lineHeight: '1.6', marginBottom: '20px' }}>"{reviews[currentReviewIndex].content?.substring(0, 100)}..."</p>
                 <div style={{ borderTop: '1px solid #334155', paddingTop: '15px', display: 'flex', gap: '10px', justifyContent: 'center', width: '100%' }}>
-                  <span style={{ fontSize: '13px', color: '#94A3B8' }}>작성자: {reviews[currentReviewIndex].author || '익명'}</span>
-                  <span style={{ fontSize: '13px', color: '#FF9000' }}>★★★★★</span>
+                  {/* 작성자 닉네임 표시, 별표 삭제됨 */}
+                  <span style={{ fontSize: '14px', color: '#94A3B8' }}>작성자: {reviews[currentReviewIndex].nickname || reviews[currentReviewIndex].author || '익명'}</span>
                 </div>
               </div>
-            ) : ( <div style={{ color: '#64748B' }}>등록된 후기가 없습니다.</div> )}
+            ) : ( <div style={{ color: '#64748B' }}>등록된 후기가 없습니다. 관리자 페이지에서 후기를 등록해보세요.</div> )}
          </div>
       </div>
 
@@ -149,14 +169,19 @@ export default function Home() {
   );
 }
 
+// 비교 카드 컴포넌트 (디자인 유지)
 function ComparisonCard({ title, subtitle, items, isMain = false }: any) {
   return (
-    <div style={{ backgroundColor: isMain ? '#1E293B' : '#0F172A', padding: '30px', borderRadius: '20px', width: '300px', border: isMain ? '2px solid #FF9000' : '1px solid #334155', boxShadow: isMain ? '0 0 30px rgba(255,144,0,0.1)' : 'none', transform: isMain ? 'scale(1.05)' : 'none', position: 'relative' }}>
+    <div style={{ backgroundColor: isMain ? '#1E293B' : '#0F172A', padding: '30px', borderRadius: '20px', width: '300px', border: isMain ? '2px solid #FF9000' : '1px solid #334155', boxShadow: isMain ? '0 0 30px rgba(255,144,0,0.1)' : 'none', transform: isMain ? 'scale(1.05)' : 'none', position: 'relative', transition: '0.3s' }}>
       {isMain && <span style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#FF9000', color: '#000', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold' }}>추천</span>}
       <h3 style={{ color: isMain ? '#FF9000' : '#E2E8F0', fontSize: '24px', marginBottom: '8px', fontWeight: 'bold' }}>{title}</h3>
       <p style={{ color: '#94A3B8', fontSize: '13px', marginBottom: '25px', height: '32px' }}>{subtitle}</p>
       <ul style={{ listStyle: 'none', padding: 0, fontSize: '14px', lineHeight: '2.4' }}>
-        {items.map((text: string, i: number) => <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#CBD5E1' }}><span style={{ color: isMain ? '#FF9000' : '#475569', fontSize: '12px', fontWeight: 'bold' }}>✔</span> <span style={{ flex: 1 }}>{text}</span></li>)}
+        {items.map((text: string, i: number) => (
+          <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#CBD5E1' }}>
+            <span style={{ color: isMain ? '#FF9000' : '#475569', fontSize: '12px', fontWeight: 'bold' }}>✔</span> <span style={{ flex: 1 }}>{text}</span>
+          </li>
+        ))}
       </ul>
     </div>
   );
