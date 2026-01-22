@@ -17,6 +17,14 @@ export default function NoticePage() {
     onSnapshot(qBanners, (s) => setBanners(s.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
   }, []);
 
+  // ★ 본문(content)에서 첫 번째 <img src="..."> 태그의 주소를 추출하는 함수
+  const extractFirstImg = (content: string) => {
+    if (!content) return null;
+    const imgReg = /<img[^>]+src=["']([^"']+)["']/;
+    const match = imgReg.exec(content);
+    return match ? match[1] : null;
+  };
+
   const filteredNotices = activeTab === '전체' ? notices : notices.filter(n => n.category === activeTab);
 
   return (
@@ -52,21 +60,30 @@ export default function NoticePage() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '30px' }}>
-          {filteredNotices.map((n) => (
-            <div key={n.id} onClick={() => router.push(`/notice/${n.id}`)} style={{ backgroundColor: '#1E293B', borderRadius: '20px', overflow: 'hidden', cursor: 'pointer', border: '1px solid #334155' }} className="hover-card">
-              <div style={{ position: 'relative', width: '100%', height: '180px', backgroundColor: '#333' }}>
-                {n.imageUrl ? <img src={n.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.9' }} /> : <div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center', color:'#555'}}>이미지 없음</div>}
-                <div style={{ position: 'absolute', top: '15px', left: '15px', backgroundColor: '#FF9000', color: '#000', fontSize: '11px', fontWeight: 'bold', padding: '4px 10px', borderRadius: '5px' }}>{n.category || '공지'}</div>
-              </div>
-              <div style={{ padding: '20px' }}>
-                <h3 style={{ fontSize: '17px', fontWeight: 'bold', margin: '0 0 10px 0', color: '#F1F5F9' }}>{n.title}</h3>
-                <div style={{ fontSize: '12px', color: '#64748B', display: 'flex', justifyContent: 'space-between' }}>
-                  <span>{n.createdAt?.toDate().toLocaleDateString()}</span>
-                  <span style={{ color: '#FF9000' }}>자세히 →</span>
+          {filteredNotices.map((n) => {
+            // ★ 대표 이미지가 없으면 본문에서 추출한 이미지를 썸네일로 사용
+            const thumbnail = n.imageUrl || extractFirstImg(n.content);
+
+            return (
+              <div key={n.id} onClick={() => router.push(`/notice/${n.id}`)} style={{ backgroundColor: '#1E293B', borderRadius: '20px', overflow: 'hidden', cursor: 'pointer', border: '1px solid #334155' }}>
+                <div style={{ position: 'relative', width: '100%', height: '180px', backgroundColor: '#333' }}>
+                  {thumbnail ? (
+                    <img src={thumbnail} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.9' }} />
+                  ) : (
+                    <div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center', color:'#555', fontSize:'13px'}}>이미지 없음</div>
+                  )}
+                  <div style={{ position: 'absolute', top: '15px', left: '15px', backgroundColor: '#FF9000', color: '#000', fontSize: '11px', fontWeight: 'bold', padding: '4px 10px', borderRadius: '5px' }}>{n.category || '공지'}</div>
+                </div>
+                <div style={{ padding: '20px' }}>
+                  <h3 style={{ fontSize: '17px', fontWeight: 'bold', margin: '0 0 10px 0', color: '#F1F5F9' }}>{n.title}</h3>
+                  <div style={{ fontSize: '12px', color: '#64748B', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>{n.createdAt?.toDate().toLocaleDateString()}</span>
+                    <span style={{ color: '#FF9000' }}>자세히 →</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
