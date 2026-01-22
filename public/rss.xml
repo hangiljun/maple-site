@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>메이플 아이템 | 전 서버 최고가 매입 및 시세 측정</title>
+    <link>https://www.maplestoryitem.com/</link>
+    <description>메이플 아이템 구매 및 시세 측정 전문. 합리적이고 안전한 거래 방법을 안내하며 전 서버 최고가로 매입합니다.</description>
+    <language>ko-kr</language>
+    <pubDate>Fri, 23 Jan 2026 00:00:00 +0900</pubDate>
+    <item>
+      <title>메이플 아이템 거래 방법 안내</title>
+      <link>https://www.maplestoryitem.com/howto</link>
+      <description>합리적이고 안전한 거래를 위한 단계별 가이드를 확인하세요.</description>
+      <pubDate>Fri, 23 Jan 2026 00:00:00 +0900</pubDate>
+    </item>
+    <item>
+      <title>실시간 이용후기 및 거래 인증</title>
+      <link>https://www.maplestoryitem.com/review</link>
+      <description>많은 유저들이 선택한 메이플 아이템 거래 후기입니다.</description>
+      <pubDate>Fri, 23 Jan 2026 00:00:00 +0900</pubDate>
+    </item>
+  </channel>
+</rss>
