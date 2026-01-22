@@ -1,50 +1,102 @@
 'use client';
+
+import { useEffect, useState } from 'react';
+import { db } from '../../firebase';
+import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 
 export default function NoticePage() {
+  const [notices, setNotices] = useState<any[]>([]);
+  const [banners, setBanners] = useState<any[]>([]);
   const router = useRouter();
 
-  // 여기에 공지사항 내용을 직접 적으시면 됩니다.
-  const notices = [
-    {
-      id: 1,
-      title: '🎉 메이플 아이템 사이트 정식 오픈 안내',
-      date: '2026.01.22',
-      content: '안녕하세요! 메이플 아이템이 정식 오픈했습니다.<br>전 서버 최고가 매입 및 안전한 거래를 보장합니다.<br>많은 이용 부탁드립니다.'
-    },
-    {
-      id: 2,
-      title: '📢 안전 거래를 위한 필수 확인 사항',
-      date: '2026.01.20',
-      content: '사칭 사기에 주의하세요!<br>저희는 공식 카카오톡 채널 외에는 상담을 진행하지 않습니다.<br>거래 전 반드시 사이트 내 인증 마크를 확인해주세요.'
-    },
-    {
-      id: 3,
-      title: '⏰ 24시간 연중무휴 상담센터 운영',
-      date: '2026.01.15',
-      content: '새벽에도 거래 가능합니다.<br>언제든지 편하게 문의주시면 5분 내로 답변 드리겠습니다.'
-    }
-  ];
+  useEffect(() => {
+    // 1. 공지사항 목록 가져오기 (기존 로직 유지)
+    const q = query(collection(db, 'notices'), orderBy('createdAt', 'desc'));
+    onSnapshot(q, (s) => setNotices(s.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
+
+    // 2. 공지사항 전용 배너 가져오기 (기존 로직 유지)
+    const qBanners = query(collection(db, 'noticeBanners'), orderBy('createdAt', 'desc'), limit(1));
+    onSnapshot(qBanners, (s) => setBanners(s.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
+  }, []);
 
   return (
-    <div style={{ backgroundColor: '#0F172A', minHeight: '100vh', color: '#F8FAFC', fontFamily: "'Noto Sans KR', sans-serif", padding: '20px' }}>
-      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <button onClick={() => router.push('/')} style={{ marginBottom: '30px', padding: '10px 20px', backgroundColor: '#334155', borderRadius: '8px', border: 'none', color: '#FFF', cursor: 'pointer', fontWeight: 'bold' }}>← 홈으로</button>
-        
-        <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#FF9000', marginBottom: '40px', borderBottom: '2px solid #334155', paddingBottom: '15px' }}>공지사항</h1>
-        
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {notices.map(notice => (
-            <div key={notice.id} style={{ backgroundColor: '#1E293B', padding: '30px', borderRadius: '15px', border: '1px solid #334155', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#F1F5F9', margin: 0 }}>{notice.title}</h2>
-                <span style={{ fontSize: '13px', color: '#94A3B8' }}>{notice.date}</span>
+    <div style={{ backgroundColor: '#0F172A', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif", color: '#F8FAFC' }}>
+      
+      {/* 1. 상단 네비게이션 (다크 모드 디자인 적용) */}
+      <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', backgroundColor: 'rgba(15, 23, 42, 0.95)', borderBottom: '1px solid #334155', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
+          <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <img src="/logo.png" style={{ width: '30px', height: '30px', objectFit: 'contain' }} onError={(e)=>(e.currentTarget.style.display='none')} />
+          </div>
+          <div style={{ fontSize: '20px', fontWeight: '900', color: '#FF9000' }}>메이플 아이템</div>
+        </div>
+        <div style={{ display: 'flex', gap: '25px', fontSize: '15px', fontWeight: '600', color: '#94A3B8' }}>
+          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/')}>홈</span>
+          <span style={{ cursor: 'pointer', color: '#FF9000' }} onClick={() => window.scrollTo(0,0)}>공지사항</span>
+          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/howto')}>거래방법</span>
+          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/review')}>이용후기</span>
+        </div>
+      </nav>
+
+      {/* 2. 공지사항 전용 배너 (다크 오버레이 적용) */}
+      <div style={{ width: '100%', height: '300px', backgroundColor: '#1E293B', position: 'relative', overflow: 'hidden' }}>
+        {banners[0] && (
+          <img src={banners[0].imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.6' }} />
+        )}
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15, 23, 42, 0.4)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'white' }}>
+          <h1 style={{ fontSize: '32px', fontWeight: 'bold', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>메이플급처템, 템셋팅 공지사항</h1>
+          <p style={{ fontSize: '16px', marginTop: '10px', color: '#CBD5E1' }}>메이플스토리와 메이플랜드 정보를 확인하세요.</p>
+        </div>
+      </div>
+
+      {/* 3. 공지사항 그리드 리스트 (다크 모드 카드 디자인) */}
+      <div style={{ padding: '60px 5%', maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '30px' }}>
+          {notices.map((n) => (
+            <div 
+              key={n.id} 
+              onClick={() => router.push(`/notice/${n.id}`)} 
+              style={{ 
+                backgroundColor: '#1E293B', 
+                borderRadius: '20px', 
+                overflow: 'hidden', 
+                cursor: 'pointer', 
+                boxShadow: '0 10px 20px rgba(0,0,0,0.2)', 
+                border: '1px solid #334155',
+                transition: '0.3s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+            >
+              <div style={{ position: 'relative', width: '100%', height: '180px' }}>
+                <img src={n.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.9' }} />
+                <div style={{ position: 'absolute', top: '15px', left: '15px', backgroundColor: '#FF9000', color: '#000', fontSize: '11px', fontWeight: 'bold', padding: '4px 10px', borderRadius: '5px' }}>
+                  {n.category || 'NOTICE'}
+                </div>
               </div>
-              <div dangerouslySetInnerHTML={{ __html: notice.content }} style={{ lineHeight: '1.8', color: '#CBD5E1', fontSize: '15px' }} />
+              <div style={{ padding: '20px' }}>
+                <h3 style={{ fontSize: '17px', fontWeight: 'bold', margin: '0 0 10px 0', color: '#F1F5F9', lineHeight: '1.4' }}>{n.title}</h3>
+                <div style={{ fontSize: '12px', color: '#64748B', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{n.createdAt?.toDate().toLocaleDateString()}</span>
+                  <span style={{ color: '#FF9000' }}>자세히 보기 →</span>
+                </div>
+              </div>
             </div>
           ))}
         </div>
+        
+        {/* 공지가 없을 경우 안내 */}
+        {notices.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '100px 0', color: '#64748B' }}>
+            등록된 공지사항이 없습니다.
+          </div>
+        )}
       </div>
+
+      <footer style={{ backgroundColor: '#020617', padding: '40px', textAlign: 'center', color: '#64748B', fontSize: '12px', borderTop: '1px solid #1E293B' }}>
+        © 2026 메이플 아이템. All rights reserved.
+      </footer>
     </div>
   );
 }
