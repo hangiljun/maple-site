@@ -16,7 +16,7 @@ export default function ReviewDetailPage() {
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         setReview(docSnap.data());
-        // 조회수 1 증가 로직
+        // 조회수 1 증가
         await updateDoc(docRef, { views: increment(1) });
       }
     };

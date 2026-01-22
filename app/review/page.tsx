@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { db, storage } from '../../firebase';
-import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useRouter } from 'next/navigation';
 
@@ -11,7 +11,6 @@ export default function ReviewPage() {
   const [filteredReviews, setFilteredReviews] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [selectedReview, setSelectedReview] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -55,15 +54,9 @@ export default function ReviewPage() {
     setLoading(false);
   };
 
-  const openReview = async (review: any) => {
-    setSelectedReview(review);
-    await updateDoc(doc(db, 'reviews', review.id), { views: increment(1) });
-  };
-
   return (
     <div style={{ backgroundColor: '#0F172A', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif", color: '#F8FAFC' }}>
       
-      {/* 네비게이션 (다크 모드) */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', borderBottom: '1px solid #334155', backgroundColor: 'rgba(15, 23, 42, 0.95)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
           <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -72,9 +65,9 @@ export default function ReviewPage() {
           <div style={{ fontWeight: '900', color: '#FF9000', fontSize: '20px' }}>메이플 아이템</div>
         </div>
         <div style={{ display: 'flex', gap: '20px', fontWeight: '600', fontSize: '15px', color: '#94A3B8' }}>
-          <span style={{ cursor: 'pointer', transition: '0.2s' }} onClick={() => router.push('/')}>홈</span>
-          <span style={{ cursor: 'pointer', transition: '0.2s' }} onClick={() => router.push('/notice')}>공지사항</span>
-          <span style={{ cursor: 'pointer', transition: '0.2s' }} onClick={() => router.push('/howto')}>거래방법</span>
+          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/')}>홈</span>
+          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/notice')}>공지사항</span>
+          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/howto')}>거래방법</span>
           <span style={{ color: '#FF9000', cursor: 'pointer' }}>이용후기</span>
         </div>
       </nav>
@@ -85,8 +78,7 @@ export default function ReviewPage() {
              <button onClick={() => setShowForm(true)} style={{ backgroundColor: '#FF9000', color: '#FFF', padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ 후기 쓰기</button>
         </div>
         
-        {/* 리스트 헤더 (다크) */}
-        <div style={{ borderTop: '2px solid #FF9000', borderBottom: '1px solid #334155', padding: '15px 0', display: 'flex', fontWeight: 'bold', textAlign: 'center', backgroundColor: '#1E293B', fontSize: '14px', color: '#FFF' }}>
+        <div style={{ borderTop: '2px solid #FF9000', borderBottom: '1px solid #334155', padding: '15px 0', display: 'flex', fontWeight: 'bold', textAlign: 'center', backgroundColor: '#1E293B', fontSize: '14px' }}>
           <div style={{ width: '10%' }}>번호</div>
           <div style={{ width: '55%' }}>제목</div>
           <div style={{ width: '15%' }}>작성자</div>
@@ -94,11 +86,11 @@ export default function ReviewPage() {
           <div style={{ width: '10%' }}>조회</div>
         </div>
 
-        {/* 리스트 아이템 (다크) */}
         {filteredReviews.map((r, i) => (
-          <div key={r.id} style={{ display: 'flex', padding: '15px 0', borderBottom: '1px solid #334155', textAlign: 'center', fontSize: '14px', alignItems: 'center', color: '#CBD5E1', backgroundColor: '#0F172A', transition: '0.2s' }}>
+          <div key={r.id} style={{ display: 'flex', padding: '15px 0', borderBottom: '1px solid #334155', textAlign: 'center', fontSize: '14px', alignItems: 'center', color: '#CBD5E1' }}>
             <div style={{ width: '10%', color: '#64748B' }}>{filteredReviews.length - i}</div>
-            <div style={{ width: '55%', textAlign: 'left', paddingLeft: '20px', cursor: 'pointer', fontWeight: '500', color: '#F8FAFC' }} onClick={() => openReview(r)}>
+            <div style={{ width: '55%', textAlign: 'left', paddingLeft: '20px', cursor: 'pointer', fontWeight: '500', color: '#F8FAFC' }} 
+                 onClick={() => router.push(`/review/${r.id}`)}>
               {r.title} {r.imageUrl && <span style={{ backgroundColor: '#FF9000', color: '#000', fontSize: '10px', padding: '2px 5px', borderRadius: '4px', marginLeft: '5px' }}>IMG</span>}
             </div>
             <div style={{ width: '15%' }}>{r.nickname.split('@')[0]}</div>
@@ -107,7 +99,6 @@ export default function ReviewPage() {
           </div>
         ))}
 
-        {/* 검색창 (다크) */}
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '40px', gap: '10px' }}>
           <input 
             placeholder="제목 및 내용 검색" 
@@ -119,7 +110,6 @@ export default function ReviewPage() {
         </div>
       </div>
 
-      {/* 후기 작성 모달 (다크) */}
       {showForm && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(3px)' }}>
           <div style={{ backgroundColor: '#1E293B', padding: '30px', borderRadius: '15px', width: '90%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', border: '1px solid #334155', color: '#FFF' }}>
@@ -131,7 +121,7 @@ export default function ReviewPage() {
             <div style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
               <div style={{ flex: 1 }}>
                 <p style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#94A3B8' }}>작성자 *</p>
-                <input placeholder="이메일 또는 닉네임" value={form.nickname} onChange={e => setForm({...form, nickname: e.target.value})} style={darkInputStyle} />
+                <input placeholder="닉네임" value={form.nickname} onChange={e => setForm({...form, nickname: e.target.value})} style={darkInputStyle} />
               </div>
               <div style={{ flex: 1 }}>
                 <p style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#94A3B8' }}>비밀번호 *</p>
@@ -149,30 +139,6 @@ export default function ReviewPage() {
               <button onClick={handleUpload} disabled={loading} style={{ flex: 1, padding: '15px', backgroundColor: '#FF9000', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>{loading ? '저장 중...' : '작성 완료'}</button>
               <button onClick={() => setShowForm(false)} style={{ flex: 1, padding: '15px', backgroundColor: '#334155', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>취소</button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* 후기 상세 보기 모달 (다크) */}
-      {selectedReview && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(3px)' }}>
-          <div style={{ backgroundColor: '#1E293B', padding: '35px', borderRadius: '15px', width: '90%', maxWidth: '750px', maxHeight: '85vh', overflowY: 'auto', border: '1px solid #334155', color: '#FFF' }}>
-            <h3 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '10px' }}>{selectedReview.title}</h3>
-            <p style={{ fontSize: '13px', color: '#94A3B8', marginBottom: '20px', borderBottom: '1px solid #334155', paddingBottom: '15px' }}>
-              작성자: {selectedReview.nickname.split('@')[0]} | 조회수: {selectedReview.views + 1}
-            </p>
-            <div style={{ minHeight: '200px', lineHeight: '1.8', whiteSpace: 'pre-wrap', color: '#E2E8F0' }}>
-              {selectedReview.imageUrl && (
-                <img src={selectedReview.imageUrl} style={{ maxWidth: '100%', borderRadius: '10px', marginBottom: '20px', display: 'block', border: '1px solid #334155' }} alt="후기 사진" />
-              )}
-              <p>{selectedReview.content}</p>
-            </div>
-            <button 
-              onClick={() => setSelectedReview(null)} 
-              style={{ width: '100%', marginTop: '30px', padding: '15px', backgroundColor: '#334155', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
-            >
-              닫기
-            </button>
           </div>
         </div>
       )}
