@@ -28,24 +28,28 @@ export default function Home() {
 
   return (
     <div style={{ backgroundColor: '#0F172A', minHeight: '100vh', color: '#F8FAFC', fontFamily: "'Noto Sans KR', sans-serif" }}>
-      {/* 스타일 태그: 호버 애니메이션 효과 정의 */}
       <style jsx global>{`
         .hover-card { transition: all 0.3s ease; }
         .hover-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(255, 144, 0, 0.3); }
         .neon-text { text-shadow: 0 0 10px rgba(255, 144, 0, 0.5); }
       `}</style>
 
-      {/* 네비게이션: 다크 테마 적용 */}
+      {/* 네비게이션 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', backgroundColor: 'rgba(15, 23, 42, 0.95)', borderBottom: '1px solid #334155', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
-          <img src="/logo.png" alt="로고" style={{ width: '35px', height: '35px', objectFit: 'contain' }} />
-          <div style={{ fontSize: '20px', fontWeight: '900', color: '#FF9000', letterSpacing: '-0.5px' }} className="neon-text">MAPLE ITEM</div>
+          {/* 로고 배경 문제 해결: 흰색 둥근 박스 안에 로고를 넣어 깔끔하게 처리 */}
+          <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <img src="/logo.png" alt="로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+          </div>
+          {/* 영어 대신 한글 '메이플 아이템'으로 원복 */}
+          <div style={{ fontSize: '20px', fontWeight: '900', color: '#FF9000', letterSpacing: '-0.5px' }} className="neon-text">메이플 아이템</div>
         </div>
+        {/* 메뉴명 원복 */}
         <div style={{ display: 'flex', gap: '20px', fontSize: '15px', fontWeight: '600', color: '#94A3B8' }}>
           <span style={{ cursor: 'pointer', color: '#FF9000' }} onClick={() => router.push('/')}>홈</span>
-          <span style={{ cursor: 'pointer', transition: '0.2s' }} onClick={() => router.push('/notice')}>공지</span>
-          <span style={{ cursor: 'pointer', transition: '0.2s' }} onClick={() => router.push('/howto')}>방법</span>
-          <span style={{ cursor: 'pointer', transition: '0.2s' }} onClick={() => router.push('/review')}>후기</span>
+          <span style={{ cursor: 'pointer', transition: '0.2s' }} onClick={() => router.push('/notice')}>공지사항</span>
+          <span style={{ cursor: 'pointer', transition: '0.2s' }} onClick={() => router.push('/howto')}>거래방법</span>
+          <span style={{ cursor: 'pointer', transition: '0.2s' }} onClick={() => router.push('/review')}>이용후기</span>
         </div>
       </nav>
 
@@ -65,7 +69,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 프리미엄 인증 파트너 (Bento Grid 스타일) */}
+      {/* 프리미엄 인증 파트너 */}
       <div style={{ padding: '50px 5% 0 5%' }}>
         <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px', color: '#FF9000', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#FF9000', boxShadow: '0 0 10px #FF9000' }}></span>
@@ -81,7 +85,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 실시간 매입 업체 (다크 카드 스타일) */}
+      {/* 실시간 매입 업체 */}
       <div style={{ padding: '60px 5%' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '30px', color: '#FFF' }}>실시간 등록 매입 업체</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
@@ -92,9 +96,10 @@ export default function Home() {
               </div>
               <div style={{ padding: '15px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '5px', color: '#F1F5F9' }}>{item.name}</h3>
+                <p style={{ color: '#94A3B8', fontSize: '13px', marginBottom: '15px' }}>{item.desc}</p>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', borderTop: '1px solid #334155', paddingTop: '12px' }}>
                   <span style={{ color: '#FF9000', fontWeight: 'bold', fontSize: '14px' }}>{item.price}</span>
-                  <button onClick={() => goToKakao(item.kakaoUrl)} style={{ backgroundColor: '#FEE500', color: '#000', padding: '6px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px' }}>문의</button>
+                  <button onClick={() => goToKakao(item.kakaoUrl)} style={{ backgroundColor: '#FEE500', color: '#000', padding: '6px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px' }}>카톡 문의</button>
                 </div>
               </div>
             </div>
@@ -102,45 +107,46 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 비교 섹션 (다크 버전) */}
+      {/* 비교 섹션 (내용 100% 원복) */}
       <div style={{ padding: '80px 5%', backgroundColor: '#0B1120', borderTop: '1px solid #1E293B' }}>
         <h2 style={{ textAlign: 'center', fontSize: '24px', marginBottom: '50px', color: '#FFF' }}>
-          왜 <span style={{ color: '#FF9000' }}>메이플 아이템</span>인가요?
+          <span style={{ color: '#FF9000' }}>메이플 아이템</span> 업체 비교, 무엇이 다를까요?
         </h2>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
-          <ComparisonCard title="장사꾼 A" subtitle="비인증 개인 거래" items={["낮은 매입가", "불투명한 시세", "사기 위험 존재"]} />
-          <ComparisonCard title="메이플 아이템" subtitle="공식 인증 플랫폼" isMain={true} items={["업계 최고 매입가", "투명한 실시간 시세", "100% 안전 보장"]} />
-          <ComparisonCard title="장사꾼 B" subtitle="소규모 업체" items={["수수료 부담 전가", "느린 정산 속도", "고객 응대 미흡"]} />
+          <ComparisonCard title="장사꾼 A" subtitle="게임내 고성능 확성기로 홍보하는 사람" items={["오직 메소 ", "평균 70% 낮은 매입가", "아이템 시세를 경매장 최소가", "시세측정 이해 불가"]} />
+          <ComparisonCard title="메이플 아이템" subtitle="공식 인증 업체" isMain={true} items={["메소 / 무통장 거래 가능 (업체보증)", "업계 최고 매입가 85% ", "365일 24시간 상시 대기", "합리적인 경매장 시세 측정"]} />
+          <ComparisonCard title="B 장사꾼" subtitle="1인 웹사이트,블로그 업체" items={["무조건 선 받으려고 하는 업체", "수수료,가위값을 판매자에게 부담", "느린 대답 / 지연 이체", "신뢰도 부족"]} />
         </div>
       </div>
 
       <footer style={{ backgroundColor: '#020617', padding: '40px', textAlign: 'center', color: '#64748B', fontSize: '12px', borderTop: '1px solid #1E293B' }}>
-        © 2026 MAPLE ITEM. All rights reserved.
+        © 2026 메이플 아이템. All rights reserved.
       </footer>
     </div>
   );
 }
 
-// 비교 카드 컴포넌트 (다크 모드용)
 function ComparisonCard({ title, subtitle, items, isMain = false }: any) {
   return (
     <div style={{ 
       backgroundColor: isMain ? '#1E293B' : '#0F172A', 
       padding: '30px', 
       borderRadius: '20px', 
-      width: '280px', 
+      width: '300px', 
       border: isMain ? '2px solid #FF9000' : '1px solid #334155', 
       boxShadow: isMain ? '0 0 30px rgba(255,144,0,0.1)' : 'none',
       transform: isMain ? 'scale(1.05)' : 'none', 
-      position: 'relative' 
+      position: 'relative',
+      transition: '0.3s'
     }}>
-      {isMain && <span style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#FF9000', color: '#000', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold' }}>RECOMMENDED</span>}
-      <h3 style={{ color: isMain ? '#FF9000' : '#E2E8F0', fontSize: '20px', marginBottom: '8px', fontWeight: 'bold' }}>{title}</h3>
-      <p style={{ color: '#64748B', fontSize: '13px', marginBottom: '25px' }}>{subtitle}</p>
-      <ul style={{ listStyle: 'none', padding: 0, fontSize: '14px', lineHeight: '2.2' }}>
+      {isMain && <span style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#FF9000', color: '#000', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold' }}>추천</span>}
+      <h3 style={{ color: isMain ? '#FF9000' : '#E2E8F0', fontSize: '24px', marginBottom: '8px', fontWeight: 'bold' }}>{title}</h3>
+      <p style={{ color: '#94A3B8', fontSize: '13px', marginBottom: '25px', height: '32px' }}>{subtitle}</p>
+      <ul style={{ listStyle: 'none', padding: 0, fontSize: '14px', lineHeight: '2.4' }}>
         {items.map((text: string, i: number) => (
           <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#CBD5E1' }}>
-            <span style={{ color: isMain ? '#FF9000' : '#475569', fontSize: '12px' }}>●</span> {text}
+            <span style={{ color: isMain ? '#FF9000' : '#475569', fontSize: '12px', fontWeight: 'bold' }}>✔</span> 
+            <span style={{ flex: 1 }}>{text}</span>
           </li>
         ))}
       </ul>
