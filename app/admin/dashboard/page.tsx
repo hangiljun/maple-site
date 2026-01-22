@@ -33,7 +33,7 @@ function MenuButton({ label, active, onClick }: any) {
   );
 }
 
-// 1. 업체 관리 (기존 유지)
+// 1. 업체 관리
 function CompanyManager() {
   const [items, setItems] = useState<any[]>([]);
   const [name, setName] = useState('');
@@ -93,7 +93,7 @@ function CompanyManager() {
   );
 }
 
-// 2. 배너 관리 (기존 유지)
+// 2. 배너 관리
 function BannerManager() {
   const handleBannerUpdate = async (e: any, type: string) => {
     const file = e.target.files[0];
@@ -121,10 +121,11 @@ function BannerManager() {
   );
 }
 
-// 3. ★[수정됨]★ 게시글 관리 (howto 저장소 연결 + 카테고리 기능 추가)
+// 3. ★[수정됨]★ 게시글 관리 (공지사항 & 거래방법 카테고리 모두 지원)
 function PostManager() {
   const [activeCollection, setActiveCollection] = useState('notices'); // notices 또는 howto
-  const [noticeCategory, setNoticeCategory] = useState('공지사항'); // 공지사항 세부 카테고리
+  const [noticeCategory, setNoticeCategory] = useState('공지사항'); 
+  const [howtoCategory, setHowtoCategory] = useState('거래 방법'); // ★ 추가됨: 거래방법용 카테고리
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
@@ -132,7 +133,6 @@ function PostManager() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const fetchPosts = async () => {
-    // ★ 수정: 사용자가 말한 'howto' 사용
     const q = query(collection(db, activeCollection), orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
     setPosts(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -162,10 +162,9 @@ function PostManager() {
     if (!title || !content) return alert("내용을 입력하세요.");
     if (confirm("등록하시겠습니까?")) {
       setLoading(true);
-      // ★ 중요: 공지사항이면 선택한 카테고리(이벤트 등)로 저장, 거래방법이면 '거래방법'으로 저장
-      const finalCategory = activeCollection === 'notices' ? noticeCategory : '거래방법';
+      // ★ 중요: 현재 탭에 따라 카테고리 결정
+      const finalCategory = activeCollection === 'notices' ? noticeCategory : howtoCategory;
       
-      // ★ 수정: 'howto' 컬렉션에 저장됨
       await addDoc(collection(db, activeCollection), {
         title, content, category: finalCategory, createdAt: serverTimestamp()
       });
@@ -182,29 +181,31 @@ function PostManager() {
       <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>게시글 관리</h2>
       <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
         <button onClick={() => setActiveCollection('notices')} style={tabStyle(activeCollection === 'notices')}>📢 공지사항 관리</button>
-        {/* ★ 수정: 'howto' 사용 */}
         <button onClick={() => setActiveCollection('howto')} style={tabStyle(activeCollection === 'howto')}>📘 거래방법 관리</button>
       </div>
 
       <div style={{ backgroundColor: '#FFF', padding: '30px', borderRadius: '15px', marginBottom: '40px' }}>
-        <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '15px' }}>새 글 작성</h3>
+        <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '15px' }}>
+          새 {activeCollection === 'notices' ? '공지사항' : '거래방법'} 작성
+        </h3>
         
-        {/* ★ 공지사항일 때만 카테고리 선택 박스 보임 */}
-        {activeCollection === 'notices' && (
-          <div style={{ marginBottom: '15px' }}>
-            <span style={{ fontWeight: 'bold', marginRight: '10px' }}>카테고리:</span>
-            <select 
-              value={noticeCategory} 
-              onChange={(e) => setNoticeCategory(e.target.value)}
-              style={{ padding: '10px', borderRadius: '5px', border: '1px solid #DDD' }}
-            >
+        {/* ★ 카테고리 선택 박스: 공지사항일 때 vs 거래방법일 때 다르게 나옴 */}
+        <div style={{ marginBottom: '15px' }}>
+          <span style={{ fontWeight: 'bold', marginRight: '10px' }}>카테고리:</span>
+          {activeCollection === 'notices' ? (
+            <select value={noticeCategory} onChange={(e) => setNoticeCategory(e.target.value)} style={selectStyle}>
               <option value="공지사항">공지사항</option>
               <option value="메이플 패치">메이플 패치</option>
               <option value="이벤트">이벤트</option>
               <option value="시세측정 방법">시세측정 방법</option>
             </select>
-          </div>
-        )}
+          ) : (
+            <select value={howtoCategory} onChange={(e) => setHowtoCategory(e.target.value)} style={selectStyle}>
+              <option value="거래 방법">거래 방법</option>
+              <option value="거래 주의 사항">거래 주의 사항</option>
+            </select>
+          )}
+        </div>
 
         <div style={{ marginBottom: '15px' }}><input placeholder="제목" value={title} onChange={e => setTitle(e.target.value)} style={{ ...inputStyle, width: '100%' }} /></div>
         <div style={{ marginBottom: '15px' }}>
@@ -230,7 +231,7 @@ function PostManager() {
   );
 }
 
-// 4. 후기 관리 (기존 유지)
+// 4. 후기 관리
 function ReviewManager() {
   const [reviews, setReviews] = useState<any[]>([]);
   const fetchReviews = async () => {
@@ -255,5 +256,6 @@ function ReviewManager() {
 }
 
 const inputStyle = { padding: '12px', border: '1px solid #DDD', borderRadius: '8px', outline: 'none' };
+const selectStyle = { padding: '10px', borderRadius: '5px', border: '1px solid #DDD', width: '200px' };
 const btnStyle = { width: '100%', padding: '15px', backgroundColor: '#FF9000', color: '#FFF', border: 'none', borderRadius: '10px', fontSize: '18px', fontWeight: 'bold', cursor: 'pointer' };
 const tabStyle = (isActive: boolean) => ({ padding: '10px 20px', borderRadius: '10px', border: 'none', fontWeight: 'bold', cursor: 'pointer', backgroundColor: isActive ? '#333' : '#E0E0E0', color: isActive ? '#FFF' : '#333' });
