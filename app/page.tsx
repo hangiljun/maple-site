@@ -6,14 +6,18 @@ import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestor
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  // 상태 변수들 (기능 유지를 위해 모두 필요)
   const [items, setItems] = useState<any[]>([]);
   const [banners, setBanners] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
+  const [today, setToday] = useState('');
   const router = useRouter();
 
   useEffect(() => {
+    // 오늘 날짜 설정
+    const now = new Date();
+    setToday(`${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`);
+
     // 1. 업체 목록 실시간 동기화
     const qItems = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
     onSnapshot(qItems, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
@@ -47,32 +51,56 @@ export default function Home() {
 
   return (
     <div style={{ backgroundColor: '#0F172A', minHeight: '100vh', color: '#F8FAFC', fontFamily: "'Noto Sans KR', sans-serif" }}>
-      {/* 스타일 태그: 애니메이션 효과 등 */}
+      
+      {/* 스타일 태그: 애니메이션 효과 복구 */}
       <style jsx global>{`
         .hover-card { transition: all 0.3s ease; }
         .hover-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(255, 144, 0, 0.3); }
         .neon-text { text-shadow: 0 0 10px rgba(255, 144, 0, 0.5); }
         .review-fade { animation: fadeIn 0.8s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .marquee { animation: marquee 30s linear infinite; }
       `}</style>
 
-      {/* 1. 상단 네비게이션 */}
+      {/* --- [복구] 1. 실시간 운영 상태 바 & 전광판 --- */}
+      <div style={{ backgroundColor: '#020617', borderBottom: '1px solid #1e293b' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', padding: '10px 0', fontSize: '13px', fontWeight: 'bold', color: '#94a3b8' }}>
+          <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981', boxShadow: '0 0 8px #10b981' }}></span>
+          <span>{today} 실시간 운영 중</span>
+          <span style={{ color: '#334155' }}>|</span>
+          <span style={{ color: '#FF9000' }}>평균 응답 시간 1분 내외</span>
+        </div>
+        <div style={{ backgroundColor: '#0f172a', overflow: 'hidden', whiteSpace: 'nowrap', padding: '6px 0', borderTop: '1px solid #1e293b' }}>
+          <div className="marquee" style={{ display: 'inline-block', fontSize: '12px', color: '#64748b' }}>
+            <span style={{ marginRight: '50px' }}>[실시간] 루나 서버 500억 메소 매입 완료</span>
+            <span style={{ marginRight: '50px' }}>[실시간] 스카니아 서버 급처템 패키지 상담 진행 중</span>
+            <span style={{ marginRight: '50px' }}>[안내] 2026년 1월 신규 인증 파트너 업체 입점 완료</span>
+            <span style={{ marginRight: '50px' }}>[실시간] 엘리시움 서버 메소 매입 상담 완료</span>
+            <span style={{ marginRight: '50px' }}>[주의] 사칭 채널 주의! 반드시 사이트 내 링크를 이용하세요</span>
+            <span style={{ marginRight: '50px' }}>[실시간] 루나 서버 500억 메소 매입 완료</span>
+            <span style={{ marginRight: '50px' }}>[실시간] 스카니아 서버 급처템 패키지 상담 진행 중</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. 네비게이션 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', backgroundColor: 'rgba(15, 23, 42, 0.95)', borderBottom: '1px solid #334155', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
           <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <img src="/logo.png" alt="로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} onError={(e)=>(e.currentTarget.style.display='none')} />
+            <img src="/logo.png" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
           </div>
           <div style={{ fontSize: '20px', fontWeight: '900', color: '#FF9000', letterSpacing: '-0.5px' }} className="neon-text">메이플 아이템</div>
         </div>
         <div style={{ display: 'flex', gap: '20px', fontSize: '15px', fontWeight: '600', color: '#94A3B8' }}>
-          <span style={{ cursor: 'pointer', color: '#FF9000' }} onClick={() => router.push('/')}>홈</span>
-          <span style={{ cursor: 'pointer', transition: '0.2s' }} onClick={() => router.push('/notice')}>공지사항</span>
-          <span style={{ cursor: 'pointer', transition: '0.2s' }} onClick={() => router.push('/howto')}>거래방법</span>
-          <span style={{ cursor: 'pointer', transition: '0.2s' }} onClick={() => router.push('/review')}>이용후기</span>
+          <span style={{ cursor: 'pointer', color: '#FF9000' }}>홈</span>
+          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/notice')}>공지사항</span>
+          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/howto')}>거래방법</span>
+          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/review')}>이용후기</span>
         </div>
       </nav>
 
-      {/* 2. 메인 배너 */}
+      {/* 3. 메인 배너 */}
       <div style={{ width: '100%', height: '320px', backgroundColor: '#1E293B', position: 'relative', overflow: 'hidden' }}>
         {banners.length > 0 ? (
           <div style={{ width: '100%', height: '100%', backgroundImage: `url(${banners[0].imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'brightness(0.7)' }}></div>
@@ -83,38 +111,35 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 3. 프리미엄 인증 파트너 (왼쪽 정렬 & 고정 크기) */}
+      {/* 4. 프리미엄 인증 파트너 (크기 크게 복구) */}
       <div style={{ padding: '50px 5% 0 5%' }}>
         <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px', color: '#FF9000', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#FF9000', boxShadow: '0 0 10px #FF9000' }}></span>
           프리미엄 인증 파트너
         </h2>
-        {/* flex-start를 사용하여 왼쪽 정렬, flex-wrap으로 줄바꿈 허용 */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'flex-start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
           {premiumItems.map((item) => (
             <div key={item.id} onClick={() => goToKakao(item.kakaoUrl)} className="hover-card" 
                  style={{ 
-                   width: '320px', // 크기 고정
-                   height: '130px', 
-                   border: '1px solid #FF9000', 
-                   borderRadius: '15px', 
+                   height: '160px', // 크기를 더 키웠습니다.
+                   border: '2px solid #FF9000', 
+                   borderRadius: '20px', 
                    overflow: 'hidden', 
                    cursor: 'pointer', 
                    position: 'relative', 
-                   backgroundColor: '#1E293B',
-                   flexShrink: 0 
+                   backgroundColor: '#1E293B' 
                  }}>
-              <div style={{ position: 'absolute', top: 0, right: 0, backgroundColor: '#FF9000', color: '#000', fontSize: '10px', fontWeight: 'bold', padding: '3px 10px', borderBottomLeftRadius: '10px', zIndex: 10 }}>공식인증</div>
+              <div style={{ position: 'absolute', top: 0, right: 0, backgroundColor: '#FF9000', color: '#000', fontSize: '11px', fontWeight: 'bold', padding: '4px 12px', borderBottomLeftRadius: '10px', zIndex: 10 }}>공식인증</div>
               <img src={item.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.9' }} alt="premium" />
             </div>
           ))}
         </div>
       </div>
 
-      {/* 4. 실시간 매입 업체 (큼직한 그리드 유지) */}
+      {/* 5. 실시간 매입 업체 */}
       <div style={{ padding: '60px 5%' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '30px', color: '#FFF' }}>실시간 등록 매입 업체</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px' }}>
           {normalItems.map((item) => (
             <div key={item.id} className="hover-card" style={{ backgroundColor: '#1E293B', borderRadius: '16px', overflow: 'hidden', border: '1px solid #334155' }}>
               <div style={{ width: '100%', height: '140px', overflow: 'hidden' }}>
@@ -122,7 +147,7 @@ export default function Home() {
               </div>
               <div style={{ padding: '15px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '5px', color: '#F1F5F9' }}>{item.name}</h3>
-                <p style={{ color: '#94A3B8', fontSize: '13px', marginBottom: '15px' }}>{item.desc}</p>
+                <p style={{ color: '#94A3B8', fontSize: '13px', marginBottom: '15px', height: '40px', overflow: 'hidden' }}>{item.desc}</p>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', borderTop: '1px solid #334155', paddingTop: '12px' }}>
                   <span style={{ color: '#FF9000', fontWeight: 'bold', fontSize: '14px' }}>{item.price}</span>
                   <button onClick={() => goToKakao(item.kakaoUrl)} style={{ backgroundColor: '#FEE500', color: '#000', padding: '6px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px' }}>카톡 문의</button>
@@ -133,7 +158,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 5. 업체 비교 (상세 내용 유지) */}
+      {/* 6. 업체 비교 */}
       <div style={{ padding: '80px 5%', backgroundColor: '#0B1120', borderTop: '1px solid #1E293B' }}>
         <h2 style={{ textAlign: 'center', fontSize: '24px', marginBottom: '50px', color: '#FFF' }}>
           <span style={{ color: '#FF9000' }}>메이플 아이템</span> 업체 비교, 무엇이 다를까요?
@@ -145,21 +170,20 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 6. 실시간 후기 (별 삭제, 이름 표시, 슬라이드) */}
+      {/* 7. 실시간 후기 */}
       <div style={{ padding: '60px 5%', borderTop: '1px solid #1E293B', backgroundColor: '#0F172A' }}>
-         <h2 style={{ textAlign: 'center', fontSize: '22px', marginBottom: '30px', color: '#FFF' }}>📢 실시간 거래 후기</h2>
-         <div style={{ maxWidth: '600px', margin: '0 auto', backgroundColor: '#1E293B', borderRadius: '20px', padding: '40px', border: '1px solid #334155', minHeight: '160px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <h2 style={{ textAlign: 'center', fontSize: '22px', marginBottom: '30px', color: '#FFF' }}>📢 실시간 거래 후기</h2>
+          <div style={{ maxWidth: '600px', margin: '0 auto', backgroundColor: '#1E293B', borderRadius: '20px', padding: '40px', border: '1px solid #334155', minHeight: '160px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
             {reviews.length > 0 ? (
               <div key={currentReviewIndex} className="review-fade" style={{ textAlign: 'center', width: '100%' }}>
                 <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#FF9000', marginBottom: '15px' }}>{reviews[currentReviewIndex].title}</div>
                 <p style={{ color: '#CBD5E1', fontSize: '15px', lineHeight: '1.6', marginBottom: '20px' }}>"{reviews[currentReviewIndex].content?.substring(0, 100)}..."</p>
                 <div style={{ borderTop: '1px solid #334155', paddingTop: '15px', display: 'flex', gap: '10px', justifyContent: 'center', width: '100%' }}>
-                  {/* 작성자 닉네임 표시, 별표 삭제됨 */}
                   <span style={{ fontSize: '14px', color: '#94A3B8' }}>작성자: {reviews[currentReviewIndex].nickname || reviews[currentReviewIndex].author || '익명'}</span>
                 </div>
               </div>
-            ) : ( <div style={{ color: '#64748B' }}>등록된 후기가 없습니다. 관리자 페이지에서 후기를 등록해보세요.</div> )}
-         </div>
+            ) : ( <div style={{ color: '#64748B' }}>등록된 후기가 없습니다.</div> )}
+          </div>
       </div>
 
       <footer style={{ backgroundColor: '#020617', padding: '40px', textAlign: 'center', color: '#64748B', fontSize: '12px', borderTop: '1px solid #1E293B' }}>
@@ -169,7 +193,6 @@ export default function Home() {
   );
 }
 
-// 비교 카드 컴포넌트 (디자인 유지)
 function ComparisonCard({ title, subtitle, items, isMain = false }: any) {
   return (
     <div style={{ backgroundColor: isMain ? '#1E293B' : '#0F172A', padding: '30px', borderRadius: '20px', width: '300px', border: isMain ? '2px solid #FF9000' : '1px solid #334155', boxShadow: isMain ? '0 0 30px rgba(255,144,0,0.1)' : 'none', transform: isMain ? 'scale(1.05)' : 'none', position: 'relative', transition: '0.3s' }}>
