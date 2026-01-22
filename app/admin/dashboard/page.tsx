@@ -10,6 +10,7 @@ export default function AdminDashboard() {
   
   return (
     <div style={{ display: 'flex', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif", backgroundColor: '#F5F5F5' }}>
+      {/* 사이드바 메뉴 */}
       <div style={{ width: '250px', backgroundColor: '#333', color: '#FFF', padding: '30px 20px', flexShrink: 0 }}>
         <h1 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '40px', color: '#FF9000' }}>관리자 센터</h1>
         <MenuButton label="업체 등록/관리" active={activeTab === 'company'} onClick={() => setActiveTab('company')} />
@@ -17,6 +18,8 @@ export default function AdminDashboard() {
         <MenuButton label="공지/방법 관리" active={activeTab === 'write'} onClick={() => setActiveTab('write')} />
         <MenuButton label="이용후기 관리" active={activeTab === 'review'} onClick={() => setActiveTab('review')} />
       </div>
+      
+      {/* 메인 컨텐츠 영역 */}
       <div style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
         {activeTab === 'company' && <CompanyManager />}
         {activeTab === 'banner' && <BannerManager />}
@@ -33,7 +36,7 @@ function MenuButton({ label, active, onClick }: any) {
   );
 }
 
-// 1. 업체 관리
+// 1. 업체 관리 컴포넌트
 function CompanyManager() {
   const [items, setItems] = useState<any[]>([]);
   const [name, setName] = useState('');
@@ -93,7 +96,7 @@ function CompanyManager() {
   );
 }
 
-// 2. 배너 관리
+// 2. 배너 관리 컴포넌트
 function BannerManager() {
   const handleBannerUpdate = async (e: any, type: string) => {
     const file = e.target.files[0];
@@ -121,11 +124,12 @@ function BannerManager() {
   );
 }
 
-// 3. ★[수정됨]★ 게시글 관리 (공지사항 & 거래방법 카테고리 모두 지원)
+// 3. ★[핵심 수정] 게시글 관리 컴포넌트 (거래방법 카테고리 탭 지원)
 function PostManager() {
-  const [activeCollection, setActiveCollection] = useState('notices'); // notices 또는 howto
+  const [activeCollection, setActiveCollection] = useState('notices'); // 'notices' 또는 'howto'
   const [noticeCategory, setNoticeCategory] = useState('공지사항'); 
-  const [howtoCategory, setHowtoCategory] = useState('거래 방법'); // ★ 추가됨: 거래방법용 카테고리
+  const [howtoCategory, setHowtoCategory] = useState('거래 방법'); // ★ 거래방법용 카테고리 상태 추가
+  
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
@@ -162,7 +166,7 @@ function PostManager() {
     if (!title || !content) return alert("내용을 입력하세요.");
     if (confirm("등록하시겠습니까?")) {
       setLoading(true);
-      // ★ 중요: 현재 탭에 따라 카테고리 결정
+      // ★ 중요: 현재 탭에 따라 저장될 카테고리 변수가 다름
       const finalCategory = activeCollection === 'notices' ? noticeCategory : howtoCategory;
       
       await addDoc(collection(db, activeCollection), {
@@ -179,6 +183,8 @@ function PostManager() {
   return (
     <div>
       <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>게시글 관리</h2>
+      
+      {/* 탭 버튼 */}
       <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
         <button onClick={() => setActiveCollection('notices')} style={tabStyle(activeCollection === 'notices')}>📢 공지사항 관리</button>
         <button onClick={() => setActiveCollection('howto')} style={tabStyle(activeCollection === 'howto')}>📘 거래방법 관리</button>
@@ -189,10 +195,12 @@ function PostManager() {
           새 {activeCollection === 'notices' ? '공지사항' : '거래방법'} 작성
         </h3>
         
-        {/* ★ 카테고리 선택 박스: 공지사항일 때 vs 거래방법일 때 다르게 나옴 */}
+        {/* ★ 카테고리 선택 박스 (탭에 따라 다르게 보임) ★ */}
         <div style={{ marginBottom: '15px' }}>
           <span style={{ fontWeight: 'bold', marginRight: '10px' }}>카테고리:</span>
+          
           {activeCollection === 'notices' ? (
+            // 공지사항일 때 보이는 옵션
             <select value={noticeCategory} onChange={(e) => setNoticeCategory(e.target.value)} style={selectStyle}>
               <option value="공지사항">공지사항</option>
               <option value="메이플 패치">메이플 패치</option>
@@ -200,6 +208,7 @@ function PostManager() {
               <option value="시세측정 방법">시세측정 방법</option>
             </select>
           ) : (
+            // 거래방법일 때 보이는 옵션 (이제 보일 겁니다!)
             <select value={howtoCategory} onChange={(e) => setHowtoCategory(e.target.value)} style={selectStyle}>
               <option value="거래 방법">거래 방법</option>
               <option value="거래 주의 사항">거래 주의 사항</option>
