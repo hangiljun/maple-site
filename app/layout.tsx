@@ -1,4 +1,4 @@
-import './globals.css';
+import './globals.css'; // ★ 이 줄이 꼭 있어야 합니다!
 import KakaoChatButton from './components/KakaoChatButton';
 import { Metadata } from 'next';
 
@@ -20,8 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap" rel="stylesheet" />
         <link rel="canonical" href="https://www.maplestoryitem.com" />
       </head>
-      {/* 전체 사이트 배경색을 다크 네이비로 고정 (공지, 후기 페이지 포함) */}
-      <body style={{ margin: 0, backgroundColor: '#0F172A', color: '#F8FAFC' }}>
+      <body>
         {children}
         <KakaoChatButton />
       </body>
