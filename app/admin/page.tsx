@@ -1,77 +1,362 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-// ★ 수정됨: 경로를 ../../../ 에서 ../../ 로 변경
-import { db, storage } from '../../firebase'; 
-import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { useState, useEffect, useRef } from 'react';
+import { db, storage } from '../../firebase';
+import { collection, addDoc, deleteDoc, doc, getDocs, getDoc, setDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState('posts');
-  const [list, setList] = useState<any[]>([]);
-  
-  // 데이터 불러오기 함수
-  const fetchData = async (tab: string) => {
-    // 탭에 따라 컬렉션 이름 자동 선택 (공지사항=notices, 거래방법=howtos, 후기=reviews)
-    const colName = tab === 'posts' ? 'notices' : (tab === 'howto' ? 'howtos' : 'reviews');
-    const q = query(collection(db, colName), orderBy('createdAt', 'desc'));
-    const snap = await getDocs(q);
-    setList(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-  };
-
-  useEffect(() => { fetchData(activeTab); }, [activeTab]);
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("정말 삭제하시겠습니까?")) return;
-    const colName = activeTab === 'posts' ? 'notices' : (activeTab === 'howto' ? 'howtos' : 'reviews');
-    await deleteDoc(doc(db, colName, id));
-    alert("삭제되었습니다.");
-    fetchData(activeTab); // 목록 새로고침
-  };
+  const [activeTab, setActiveTab] = useState('company'); 
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#111', color: '#FFF', fontFamily: "'Noto Sans KR', sans-serif" }}>
+    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif", backgroundColor: '#F5F5F5' }}>
       {/* 사이드바 메뉴 */}
-      <div style={{ width: '250px', backgroundColor: '#222', padding: '30px 20px', borderRight: '1px solid #333' }}>
-        <h2 style={{ color: '#FF9000', marginBottom: '40px', fontSize: '20px', fontWeight: 'bold' }}>관리자 센터</h2>
-        <MenuButton label="공지사항 관리" active={activeTab === 'posts'} onClick={() => setActiveTab('posts')} />
-        <MenuButton label="거래방법 관리" active={activeTab === 'howto'} onClick={() => setActiveTab('howto')} />
+      <div style={{ width: '250px', backgroundColor: '#333', color: '#FFF', padding: '30px 20px', flexShrink: 0 }}>
+        <h1 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '40px', color: '#FF9000' }}>관리자 센터</h1>
+        {/* ★ 추가된 메뉴: 메인 설정 */}
+        <MenuButton label="메인 페이지 설정" active={activeTab === 'main_config'} onClick={() => setActiveTab('main_config')} />
+        <MenuButton label="업체 등록/관리" active={activeTab === 'company'} onClick={() => setActiveTab('company')} />
+        <MenuButton label="배너 이미지 관리" active={activeTab === 'banner'} onClick={() => setActiveTab('banner')} />
+        <MenuButton label="공지/방법 관리" active={activeTab === 'write'} onClick={() => setActiveTab('write')} />
         <MenuButton label="이용후기 관리" active={activeTab === 'review'} onClick={() => setActiveTab('review')} />
       </div>
-
-      {/* 메인 컨텐츠 */}
-      <div style={{ flex: 1, padding: '40px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '30px' }}>
-          {activeTab === 'posts' && '공지사항 목록'}
-          {activeTab === 'howto' && '거래방법 목록'}
-          {activeTab === 'review' && '이용후기 목록'}
-        </h2>
-        
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          {list.length === 0 ? (
-            <div style={{ color: '#666' }}>등록된 글이 없습니다.</div>
-          ) : (
-            list.map(item => (
-              <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', backgroundColor: '#1E293B', borderRadius: '10px', border: '1px solid #333' }}>
-                <div>
-                  <div style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '5px' }}>{item.title}</div>
-                  <div style={{ fontSize: '12px', color: '#888' }}>ID: {item.id}</div>
-                </div>
-                <button onClick={() => handleDelete(item.id)} style={{ backgroundColor: '#FF4444', color: '#FFF', border: 'none', padding: '8px 15px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>삭제</button>
-              </div>
-            ))
-          )}
-        </div>
+      
+      {/* 메인 컨텐츠 영역 */}
+      <div style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
+        {activeTab === 'main_config' && <MainConfigManager />}
+        {activeTab === 'company' && <CompanyManager />}
+        {activeTab === 'banner' && <BannerManager />}
+        {activeTab === 'write' && <PostManager />} 
+        {activeTab === 'review' && <ReviewManager />}
       </div>
     </div>
   );
 }
 
-// 메뉴 버튼 컴포넌트
 function MenuButton({ label, active, onClick }: any) {
   return (
-    <div onClick={onClick} style={{ padding: '15px', marginBottom: '10px', backgroundColor: active ? '#FF9000' : 'transparent', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', color: active ? '#000' : '#FFF', transition: '0.2s' }}>
-      {label}
+    <div onClick={onClick} style={{ padding: '15px', marginBottom: '10px', backgroundColor: active ? '#FF9000' : 'transparent', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', transition: '0.3s' }}>{label}</div>
+  );
+}
+
+// ★ 신규: 메인 페이지 설정 (실시간 바 & Q&A)
+function MainConfigManager() {
+  const [statusText, setStatusText] = useState(''); // 줄바꿈으로 구분된 텍스트
+  const [qnaList, setQnaList] = useState<{question: string, answer: string}[]>([]);
+  const [newQ, setNewQ] = useState({ question: '', answer: '' });
+
+  useEffect(() => {
+    fetchConfig();
+  }, []);
+
+  const fetchConfig = async () => {
+    const docRef = doc(db, 'site_config', 'main');
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data.statusMessages) setStatusText(data.statusMessages.join('\n'));
+      if (data.qna) setQnaList(data.qna);
+    }
+  };
+
+  const saveStatus = async () => {
+    const messages = statusText.split('\n').filter(t => t.trim() !== '');
+    await setDoc(doc(db, 'site_config', 'main'), { statusMessages: messages }, { merge: true });
+    alert('실시간 상태 바 저장 완료!');
+  };
+
+  const addQna = async () => {
+    if (!newQ.question || !newQ.answer) return;
+    const updated = [...qnaList, newQ];
+    setQnaList(updated);
+    await setDoc(doc(db, 'site_config', 'main'), { qna: updated }, { merge: true });
+    setNewQ({ question: '', answer: '' });
+  };
+
+  const deleteQna = async (index: number) => {
+    const updated = qnaList.filter((_, i) => i !== index);
+    setQnaList(updated);
+    await setDoc(doc(db, 'site_config', 'main'), { qna: updated }, { merge: true });
+  };
+
+  return (
+    <div>
+      <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>메인 페이지 설정</h2>
+      
+      <div style={{ backgroundColor: '#FFF', padding: '20px', borderRadius: '15px', marginBottom: '30px' }}>
+        <h3>상단 실시간 운영 바 (한 줄에 하나씩 입력)</h3>
+        <textarea 
+          value={statusText} 
+          onChange={e => setStatusText(e.target.value)} 
+          style={{ width: '100%', height: '150px', padding: '10px', borderRadius: '5px', border: '1px solid #DDD', marginBottom: '10px' }} 
+          placeholder="예: [실시간] 루나 서버 500억 매입 완료"
+        />
+        <button onClick={saveStatus} style={btnStyle}>저장하기</button>
+      </div>
+
+      <div style={{ backgroundColor: '#FFF', padding: '20px', borderRadius: '15px' }}>
+        <h3>하단 Q&A 관리</h3>
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+          <input placeholder="질문 (Q)" value={newQ.question} onChange={e => setNewQ({...newQ, question: e.target.value})} style={{ ...inputStyle, flex: 1 }} />
+          <input placeholder="답변 (A)" value={newQ.answer} onChange={e => setNewQ({...newQ, answer: e.target.value})} style={{ ...inputStyle, flex: 2 }} />
+          <button onClick={addQna} style={{ ...btnStyle, width: '100px', padding: '10px' }}>추가</button>
+        </div>
+        {qnaList.map((q, i) => (
+          <div key={i} style={{ borderBottom: '1px solid #EEE', padding: '10px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontWeight: 'bold', color: '#FF9000' }}>Q. {q.question}</div>
+              <div>A. {q.answer}</div>
+            </div>
+            <button onClick={() => deleteQna(i)} style={{ backgroundColor: '#FF4444', color: '#FFF', border: 'none', padding: '5px 10px', borderRadius: '5px', cursor: 'pointer' }}>삭제</button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
+
+// 1. 업체 관리 컴포넌트 (기존 유지)
+function CompanyManager() {
+  const [items, setItems] = useState<any[]>([]);
+  const [name, setName] = useState('');
+  const [desc, setDesc] = useState('');
+  const [kakaoUrl, setKakaoUrl] = useState('');
+  const [isPremium, setIsPremium] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const fetchItems = async () => {
+    const q = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    setItems(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+  };
+  useEffect(() => { fetchItems(); }, []);
+
+  const handleAdd = async (e: any) => {
+    e.preventDefault();
+    const file = e.target.image.files[0];
+    if (!name || !desc || !file) return alert("정보를 모두 입력해주세요.");
+    setLoading(true);
+    try {
+      const imgRef = ref(storage, `companies/${Date.now()}`);
+      await uploadBytes(imgRef, file);
+      const imageUrl = await getDownloadURL(imgRef);
+      await addDoc(collection(db, 'items'), { name, price: desc, desc, kakaoUrl, imageUrl, isPremium, createdAt: serverTimestamp() });
+      alert("등록 완료"); fetchItems(); e.target.reset(); setName(''); setDesc(''); setKakaoUrl(''); setIsPremium(false);
+    } catch (err) { alert("등록 실패"); }
+    setLoading(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm("삭제하시겠습니까?")) { await deleteDoc(doc(db, 'items', id)); fetchItems(); }
+  };
+
+  return (
+    <div>
+      <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>업체 등록 및 관리</h2>
+      <form onSubmit={handleAdd} style={{ backgroundColor: '#FFF', padding: '20px', borderRadius: '15px', marginBottom: '30px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+          <input placeholder="업체명" value={name} onChange={e => setName(e.target.value)} style={inputStyle} />
+          <input placeholder="설명/가격" value={desc} onChange={e => setDesc(e.target.value)} style={inputStyle} />
+          <input placeholder="카톡 링크" value={kakaoUrl} onChange={e => setKakaoUrl(e.target.value)} style={inputStyle} />
+          <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><input type="checkbox" checked={isPremium} onChange={e => setIsPremium(e.target.checked)} /> 프리미엄 등록</label>
+        </div>
+        <input type="file" name="image" accept="image/*" />
+        <button type="submit" disabled={loading} style={{...btnStyle, marginTop:'15px'}}>{loading ? "등록 중..." : "등록하기"}</button>
+      </form>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
+        {items.map(item => (
+          <div key={item.id} style={{ backgroundColor: '#FFF', padding: '15px', borderRadius: '10px', border: '1px solid #DDD' }}>
+            <div style={{ fontWeight: 'bold' }}>{item.name}</div>
+            <button onClick={() => handleDelete(item.id)} style={{ marginTop: '10px', padding: '5px 10px', backgroundColor: '#FF4444', color: '#FFF', border: 'none', borderRadius: '5px' }}>삭제</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 2. 배너 관리 컴포넌트 (기존 유지)
+function BannerManager() {
+  const handleBannerUpdate = async (e: any, type: string) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const imgRef = ref(storage, `banners/${type}_${Date.now()}`);
+      await uploadBytes(imgRef, file);
+      const imageUrl = await getDownloadURL(imgRef);
+      await addDoc(collection(db, 'banners'), { type, imageUrl, createdAt: serverTimestamp() });
+      alert(`${type} 배너 변경 완료`);
+    } catch (err) { alert("업로드 실패"); }
+  };
+  return (
+    <div>
+      <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>배너 관리</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+        {['홈 (메인)', '공지사항', '거래방법', '이용후기'].map((menu, idx) => (
+          <div key={idx} style={{ backgroundColor: '#FFF', padding: '20px', borderRadius: '15px' }}>
+            <h3>{menu} 배너</h3>
+            <input type="file" onChange={(e) => handleBannerUpdate(e, menu)} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 3. 게시글 관리 컴포넌트 (수정됨: 고정핀 추가)
+function PostManager() {
+  const [activeCollection, setActiveCollection] = useState('notices');
+  const [noticeCategory, setNoticeCategory] = useState('공지사항'); 
+  const [howtoCategory, setHowtoCategory] = useState('거래 방법');
+  
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [isPinned, setIsPinned] = useState(false); // ★ 추가: 상단 고정 여부
+  const [loading, setLoading] = useState(false);
+  const [posts, setPosts] = useState<any[]>([]);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const fetchPosts = async () => {
+    const q = query(collection(db, activeCollection), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    setPosts(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+  };
+  useEffect(() => { fetchPosts(); }, [activeCollection]);
+
+  const handleImageInsert = async (e: any) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setLoading(true);
+    try {
+      const imgRef = ref(storage, `${activeCollection}/${Date.now()}`);
+      await uploadBytes(imgRef, file);
+      const url = await getDownloadURL(imgRef);
+      const imgTag = `\n<img src="${url}" style="width: 100%; max-width: 800px; margin: 10px 0; border-radius: 10px;" />\n`;
+      const textarea = textareaRef.current;
+      if (textarea) {
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        setContent(content.substring(0, start) + imgTag + content.substring(end));
+      } else { setContent(prev => prev + imgTag); }
+    } catch (err) { alert("사진 실패"); }
+    setLoading(false);
+  };
+
+  const handleSubmit = async () => {
+    if (!title || !content) return alert("내용을 입력하세요.");
+    if (confirm("등록하시겠습니까?")) {
+      setLoading(true);
+      const finalCategory = activeCollection === 'notices' ? noticeCategory : howtoCategory;
+      
+      await addDoc(collection(db, activeCollection), {
+        title, 
+        content, 
+        category: finalCategory, 
+        isPinned: activeCollection === 'notices' ? isPinned : false, // 공지사항일 때만 핀 저장
+        createdAt: serverTimestamp()
+      });
+      alert("등록 완료!"); setTitle(''); setContent(''); setIsPinned(false); fetchPosts(); setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if(confirm("삭제하시겠습니까?")) { await deleteDoc(doc(db, activeCollection, id)); fetchPosts(); }
+  };
+
+  return (
+    <div>
+      <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>게시글 관리</h2>
+      
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+        <button onClick={() => setActiveCollection('notices')} style={tabStyle(activeCollection === 'notices')}>📢 공지사항 관리</button>
+        <button onClick={() => setActiveCollection('howto')} style={tabStyle(activeCollection === 'howto')}>📘 거래방법 관리</button>
+      </div>
+
+      <div style={{ backgroundColor: '#FFF', padding: '30px', borderRadius: '15px', marginBottom: '40px' }}>
+        <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '15px' }}>
+          새 {activeCollection === 'notices' ? '공지사항' : '거래방법'} 작성
+        </h3>
+        
+        <div style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div>
+            <span style={{ fontWeight: 'bold', marginRight: '10px' }}>카테고리:</span>
+            {activeCollection === 'notices' ? (
+              <select value={noticeCategory} onChange={(e) => setNoticeCategory(e.target.value)} style={selectStyle}>
+                <option value="공지사항">공지사항</option>
+                <option value="메이플 패치">메이플 패치</option>
+                <option value="이벤트">이벤트</option>
+                {/* ★ 수정: '시세측정 기준'으로 변경 */}
+                <option value="시세측정 기준">시세측정 기준</option>
+              </select>
+            ) : (
+              <select value={howtoCategory} onChange={(e) => setHowtoCategory(e.target.value)} style={selectStyle}>
+                <option value="거래 방법">거래 방법</option>
+                <option value="거래 주의 사항">거래 주의 사항</option>
+              </select>
+            )}
+          </div>
+          
+          {/* ★ 추가: 상단 고정 체크박스 (공지사항일 때만 노출) */}
+          {activeCollection === 'notices' && (
+             <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontWeight: 'bold', color: '#FF9000' }}>
+               <input type="checkbox" checked={isPinned} onChange={e => setIsPinned(e.target.checked)} />
+               📌 상단 고정 (Pin)
+             </label>
+          )}
+        </div>
+
+        <div style={{ marginBottom: '15px' }}><input placeholder="제목" value={title} onChange={e => setTitle(e.target.value)} style={{ ...inputStyle, width: '100%' }} /></div>
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ backgroundColor: '#FF9000', color: '#FFF', padding: '10px 20px', borderRadius: '5px', cursor: 'pointer' }}>
+            📷 사진 추가 <input type="file" hidden onChange={handleImageInsert} />
+          </label>
+          {loading && <span> 업로드 중...</span>}
+        </div>
+        <textarea ref={textareaRef} value={content} onChange={e => setContent(e.target.value)} placeholder="내용 작성" style={{ width: '100%', height: '400px', padding: '20px', border: '1px solid #DDD' }} />
+        <button onClick={handleSubmit} style={{ ...btnStyle, marginTop: '20px' }}>등록하기</button>
+      </div>
+
+      <h3>등록된 글 목록</h3>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {posts.map(post => (
+          <div key={post.id} style={{ display: 'flex', justifyContent: 'space-between', backgroundColor: '#FFF', padding: '15px', borderRadius: '10px', border: '1px solid #DDD' }}>
+            <div>
+              {post.isPinned && <span style={{ marginRight: '5px' }}>📌</span>}
+              <span style={{color:'#FF9000', fontWeight:'bold'}}>[{post.category}]</span> {post.title}
+            </div>
+            <button onClick={() => handleDelete(post.id)} style={{ backgroundColor: '#FF4444', color: '#FFF', border: 'none', padding: '5px 10px', borderRadius: '5px' }}>삭제</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 4. 후기 관리 (기존 유지)
+function ReviewManager() {
+  const [reviews, setReviews] = useState<any[]>([]);
+  const fetchReviews = async () => {
+    const q = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    setReviews(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+  };
+  useEffect(() => { fetchReviews(); }, []);
+  const handleDelete = async (id: string) => {
+    if (confirm("삭제?")) { await deleteDoc(doc(db, 'reviews', id)); fetchReviews(); }
+  };
+  return (
+    <div>
+      <h3>이용후기 관리</h3>
+      {reviews.map((r) => (
+        <div key={r.id} style={{ padding: '15px', borderBottom: '1px solid #EEE', backgroundColor: '#FFF', marginBottom:'5px' }}>
+          <b>{r.title}</b> ({r.author}) <button onClick={() => handleDelete(r.id)} style={{ float:'right', backgroundColor: '#FF4444', color: '#FFF', border:'none', padding:'3px 10px' }}>삭제</button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const inputStyle = { padding: '12px', border: '1px solid #DDD', borderRadius: '8px', outline: 'none' };
+const selectStyle = { padding: '10px', borderRadius: '5px', border: '1px solid #DDD', width: '200px' };
+const btnStyle = { width: '100%', padding: '15px', backgroundColor: '#FF9000', color: '#FFF', border: 'none', borderRadius: '10px', fontSize: '18px', fontWeight: 'bold', cursor: 'pointer' };
+const tabStyle = (isActive: boolean) => ({ padding: '10px 20px', borderRadius: '10px', border: 'none', fontWeight: 'bold', cursor: 'pointer', backgroundColor: isActive ? '#333' : '#E0E0E0', color: isActive ? '#FFF' : '#333' });

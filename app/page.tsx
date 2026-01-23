@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { db } from '../firebase';
-import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, limit, doc } from 'firebase/firestore'; // doc 추가됨
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
@@ -11,6 +11,12 @@ export default function Home() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [today, setToday] = useState('');
+  
+  // ★ 추가: 관리자 연동 데이터 상태
+  const [statusMessages, setStatusMessages] = useState<string[]>([]);
+  const [qnaList, setQnaList] = useState<{question: string, answer: string}[]>([]);
+  const [openQna, setOpenQna] = useState<number | null>(null);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -20,15 +26,28 @@ export default function Home() {
 
     // 1. 업체 목록 실시간 동기화
     const qItems = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
-    onSnapshot(qItems, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+    const unsubItems = onSnapshot(qItems, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
     // 2. 메인 배너 실시간 동기화
     const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(1));
-    onSnapshot(qBanners, (s) => setBanners(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+    const unsubBanners = onSnapshot(qBanners, (s) => setBanners(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
     // 3. 후기 목록 실시간 동기화 (최근 10개)
     const qReviews = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(10));
-    onSnapshot(qReviews, (s) => setReviews(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+    const unsubReviews = onSnapshot(qReviews, (s) => setReviews(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+
+    // ★ 4. (추가) 관리자 설정(실시간 상태바, Q&A) 동기화
+    const unsubConfig = onSnapshot(doc(db, 'site_config', 'main'), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.statusMessages) setStatusMessages(data.statusMessages);
+        if (data.qna) setQnaList(data.qna);
+      }
+    });
+
+    return () => {
+      unsubItems(); unsubBanners(); unsubReviews(); unsubConfig();
+    };
   }, []);
 
   // 후기 자동 슬라이드 로직
@@ -52,7 +71,6 @@ export default function Home() {
   return (
     <div style={{ backgroundColor: '#0F172A', minHeight: '100vh', color: '#F8FAFC', fontFamily: "'Noto Sans KR', sans-serif" }}>
       
-      {/* 스타일 태그: 애니메이션 효과 복구 */}
       <style jsx global>{`
         .hover-card { transition: all 0.3s ease; }
         .hover-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(255, 144, 0, 0.3); }
@@ -63,7 +81,7 @@ export default function Home() {
         .marquee { animation: marquee 30s linear infinite; }
       `}</style>
 
-      {/* --- [복구] 1. 실시간 운영 상태 바 & 전광판 --- */}
+      {/* --- [수정] 1. 실시간 운영 상태 바 (관리자 연동) --- */}
       <div style={{ backgroundColor: '#020617', borderBottom: '1px solid #1e293b' }}>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', padding: '10px 0', fontSize: '13px', fontWeight: 'bold', color: '#94a3b8' }}>
           <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981', boxShadow: '0 0 8px #10b981' }}></span>
@@ -73,13 +91,19 @@ export default function Home() {
         </div>
         <div style={{ backgroundColor: '#0f172a', overflow: 'hidden', whiteSpace: 'nowrap', padding: '6px 0', borderTop: '1px solid #1e293b' }}>
           <div className="marquee" style={{ display: 'inline-block', fontSize: '12px', color: '#64748b' }}>
-            <span style={{ marginRight: '50px' }}>[실시간] 루나 서버 500억 메소 매입 완료</span>
-            <span style={{ marginRight: '50px' }}>[실시간] 스카니아 서버 급처템 패키지 상담 진행 중</span>
-            <span style={{ marginRight: '50px' }}>[안내] 2026년 1월 신규 인증 파트너 업체 입점 완료</span>
-            <span style={{ marginRight: '50px' }}>[실시간] 엘리시움 서버 메소 매입 상담 완료</span>
-            <span style={{ marginRight: '50px' }}>[주의] 사칭 채널 주의! 반드시 사이트 내 링크를 이용하세요</span>
-            <span style={{ marginRight: '50px' }}>[실시간] 루나 서버 500억 메소 매입 완료</span>
-            <span style={{ marginRight: '50px' }}>[실시간] 스카니아 서버 급처템 패키지 상담 진행 중</span>
+            {statusMessages.length > 0 ? statusMessages.map((msg, i) => (
+               <span key={i} style={{ marginRight: '50px' }}>{msg}</span>
+            )) : (
+               // 기본값 (데이터 없을 때)
+               <>
+                 <span style={{ marginRight: '50px' }}>[실시간] 루나 서버 500억 메소 매입 완료</span>
+                 <span style={{ marginRight: '50px' }}>[안내] 관리자 페이지에서 상태 메시지를 설정해주세요.</span>
+               </>
+            )}
+            {/* 마퀴 끊김 방지를 위한 복제 (데이터가 있을 때만) */}
+            {statusMessages.length > 0 && statusMessages.map((msg, i) => (
+               <span key={`dup-${i}`} style={{ marginRight: '50px' }}>{msg}</span>
+            ))}
           </div>
         </div>
       </div>
@@ -111,7 +135,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 4. 프리미엄 인증 파트너 (크기 크게 복구) */}
+      {/* 4. 프리미엄 인증 파트너 */}
       <div style={{ padding: '50px 5% 0 5%' }}>
         <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px', color: '#FF9000', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#FF9000', boxShadow: '0 0 10px #FF9000' }}></span>
@@ -121,7 +145,7 @@ export default function Home() {
           {premiumItems.map((item) => (
             <div key={item.id} onClick={() => goToKakao(item.kakaoUrl)} className="hover-card" 
                  style={{ 
-                   height: '160px', // 크기를 더 키웠습니다.
+                   height: '160px', 
                    border: '2px solid #FF9000', 
                    borderRadius: '20px', 
                    overflow: 'hidden', 
@@ -161,7 +185,7 @@ export default function Home() {
       {/* 6. 업체 비교 */}
       <div style={{ padding: '80px 5%', backgroundColor: '#0B1120', borderTop: '1px solid #1E293B' }}>
         <h2 style={{ textAlign: 'center', fontSize: '24px', marginBottom: '50px', color: '#FFF' }}>
-          <span style={{ color: '#FF9000' }}>메이플 아이템</span> 업체 비교, 무엇이 다를까요?
+          <span style={{ color: '#FF9000' }}>메이플 아이템</span> 업체 비교, 저희는 다릅니다.
         </h2>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
           <ComparisonCard title="장사꾼 A" subtitle="게임내 고성능 확성기로 홍보하는 사람" items={["오직 메소 ", "평균 70% 낮은 매입가", "아이템 시세를 경매장 최소가", "시세측정 이해 불가"]} />
@@ -184,6 +208,28 @@ export default function Home() {
               </div>
             ) : ( <div style={{ color: '#64748B' }}>등록된 후기가 없습니다.</div> )}
           </div>
+      </div>
+
+      {/* ★ [추가] 8. 자주 묻는 질문 (Q&A) - 관리자 연동 */}
+      <div style={{ maxWidth: '800px', margin: '50px auto', padding: '0 20px 80px' }}>
+        <h2 style={{ textAlign: 'center', color: '#FF9000', marginBottom: '30px', fontSize: '22px' }}>자주 묻는 질문 (Q&A)</h2>
+        {qnaList.map((q, i) => (
+          <div key={i} style={{ marginBottom: '15px', border: '1px solid #334155', borderRadius: '10px', overflow: 'hidden' }}>
+            <div 
+              onClick={() => setOpenQna(openQna === i ? null : i)}
+              style={{ padding: '20px', backgroundColor: '#1E293B', cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+            >
+              <span style={{ color: '#F1F5F9' }}>Q. {q.question}</span>
+              <span style={{ color: '#FF9000', fontSize: '12px' }}>{openQna === i ? '▲' : '▼'}</span>
+            </div>
+            {openQna === i && (
+              <div style={{ padding: '20px', backgroundColor: '#0F172A', color: '#CBD5E1', lineHeight: '1.6', borderTop: '1px solid #334155', fontSize: '15px' }}>
+                A. {q.answer}
+              </div>
+            )}
+          </div>
+        ))}
+        {qnaList.length === 0 && <div style={{ textAlign: 'center', color: '#64748B' }}>등록된 질문이 없습니다.</div>}
       </div>
 
       <footer style={{ backgroundColor: '#020617', padding: '40px', textAlign: 'center', color: '#64748B', fontSize: '12px', borderTop: '1px solid #1E293B' }}>

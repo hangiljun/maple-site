@@ -12,12 +12,24 @@ export default function NoticePage() {
 
   useEffect(() => {
     const q = query(collection(db, 'notices'), orderBy('createdAt', 'desc'));
-    onSnapshot(q, (s) => setNotices(s.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
+    onSnapshot(q, (s) => {
+      const data = s.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      // ★ 추가: 고정핀(isPinned) 정렬 로직
+      // isPinned가 true인 항목을 배열의 앞으로 보냅니다.
+      data.sort((a: any, b: any) => {
+        if (a.isPinned === b.isPinned) return 0; // 둘 다 같으면 순서 유지 (최신순)
+        return a.isPinned ? -1 : 1; // a가 핀이면 앞으로(-1)
+      });
+      
+      setNotices(data);
+    });
+
     const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(1));
     onSnapshot(qBanners, (s) => setBanners(s.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
   }, []);
 
-  // ★ 본문(content)에서 첫 번째 <img src="..."> 태그의 주소를 추출하는 함수
+  // 본문에서 이미지 추출 함수
   const extractFirstImg = (content: string) => {
     if (!content) return null;
     const imgReg = /<img[^>]+src=["']([^"']+)["']/;
@@ -54,24 +66,35 @@ export default function NoticePage() {
 
       <div style={{ padding: '60px 5%', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ display: 'flex', gap: '10px', marginBottom: '40px', flexWrap: 'wrap' }}>
-          {['전체', '공지사항', '메이플 패치', '이벤트', '시세측정 방법'].map((tab) => (
+          {/* ★ 수정: '시세측정 방법' -> '시세측정 기준' */}
+          {['전체', '공지사항', '메이플 패치', '이벤트', '시세측정 기준'].map((tab) => (
             <button key={tab} onClick={() => setActiveTab(tab)} style={{ padding: '10px 20px', borderRadius: '30px', border: activeTab === tab ? '1px solid #FF9000' : '1px solid #334155', backgroundColor: activeTab === tab ? '#FF9000' : '#1E293B', color: activeTab === tab ? '#000' : '#CBD5E1', fontWeight: 'bold', cursor: 'pointer', transition: '0.3s' }}>{tab}</button>
           ))}
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '30px' }}>
           {filteredNotices.map((n) => {
-            // ★ 대표 이미지가 없으면 본문에서 추출한 이미지를 썸네일로 사용
             const thumbnail = n.imageUrl || extractFirstImg(n.content);
 
             return (
-              <div key={n.id} onClick={() => router.push(`/notice/${n.id}`)} style={{ backgroundColor: '#1E293B', borderRadius: '20px', overflow: 'hidden', cursor: 'pointer', border: '1px solid #334155' }}>
+              <div key={n.id} onClick={() => router.push(`/notice/${n.id}`)} 
+                   style={{ 
+                     backgroundColor: '#1E293B', 
+                     borderRadius: '20px', 
+                     overflow: 'hidden', 
+                     cursor: 'pointer', 
+                     border: n.isPinned ? '2px solid #FF9000' : '1px solid #334155', // ★ 고정핀 스타일 강조
+                     boxShadow: n.isPinned ? '0 0 15px rgba(255, 144, 0, 0.2)' : 'none'
+                   }}>
                 <div style={{ position: 'relative', width: '100%', height: '180px', backgroundColor: '#333' }}>
                   {thumbnail ? (
                     <img src={thumbnail} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.9' }} />
                   ) : (
                     <div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center', color:'#555', fontSize:'13px'}}>이미지 없음</div>
                   )}
+                  {/* ★ 고정핀 아이콘 표시 */}
+                  {n.isPinned && <div style={{ position: 'absolute', top: '15px', right: '15px', fontSize: '20px' }}>📌</div>}
+                  
                   <div style={{ position: 'absolute', top: '15px', left: '15px', backgroundColor: '#FF9000', color: '#000', fontSize: '11px', fontWeight: 'bold', padding: '4px 10px', borderRadius: '5px' }}>{n.category || '공지'}</div>
                 </div>
                 <div style={{ padding: '20px' }}>
