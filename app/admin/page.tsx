@@ -6,14 +6,47 @@ import { collection, addDoc, deleteDoc, doc, getDocs, getDoc, setDoc, query, ord
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export default function AdminDashboard() {
+  // ★ 보안 설정: 요청하신 비밀번호로 설정되었습니다.
+  const ADMIN_PASSWORD = "rlfwns55%%"; 
+
+  const [password, setPassword] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeTab, setActiveTab] = useState('company'); 
 
+  // 로그인 체크 함수
+  const checkLogin = () => {
+    if (password === ADMIN_PASSWORD) { 
+      setIsLoggedIn(true);
+    } else {
+      alert('비밀번호가 틀렸습니다.');
+    }
+  };
+
+  // ★ 로그인 안 된 상태면 '로그인 화면'만 보여줌
+  if (!isLoggedIn) {
+    return (
+      <div style={{ height: '100vh', backgroundColor: '#0F172A', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#FFF', fontFamily: "'Noto Sans KR', sans-serif" }}>
+        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '30px', color: '#FF9000' }}>🔒 관리자 접속</h2>
+        <input 
+          type="password" 
+          placeholder="관리자 비밀번호 입력" 
+          value={password} 
+          onChange={(e) => setPassword(e.target.value)} 
+          onKeyDown={(e) => e.key === 'Enter' && checkLogin()}
+          style={{ padding: '15px', borderRadius: '10px', border: '1px solid #334155', backgroundColor: '#1E293B', color: '#FFF', marginBottom: '20px', width: '300px', outline: 'none', fontSize: '16px', textAlign: 'center' }}
+        />
+        <button onClick={checkLogin} style={{ padding: '15px 50px', backgroundColor: '#FF9000', color: '#000', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', fontSize: '16px' }}>접속하기</button>
+      </div>
+    );
+  }
+
+  // ★ 로그인 성공 시에만 관리자 기능 보여줌
   return (
     <div style={{ display: 'flex', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif", backgroundColor: '#F5F5F5' }}>
       {/* 사이드바 메뉴 */}
       <div style={{ width: '250px', backgroundColor: '#333', color: '#FFF', padding: '30px 20px', flexShrink: 0 }}>
         <h1 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '40px', color: '#FF9000' }}>관리자 센터</h1>
-        {/* ★ 추가된 메뉴: 메인 설정 */}
+        {/* ★ 메뉴 목록 */}
         <MenuButton label="메인 페이지 설정" active={activeTab === 'main_config'} onClick={() => setActiveTab('main_config')} />
         <MenuButton label="업체 등록/관리" active={activeTab === 'company'} onClick={() => setActiveTab('company')} />
         <MenuButton label="배너 이미지 관리" active={activeTab === 'banner'} onClick={() => setActiveTab('banner')} />
@@ -39,7 +72,7 @@ function MenuButton({ label, active, onClick }: any) {
   );
 }
 
-// ★ 신규: 메인 페이지 설정 (실시간 바 & Q&A)
+// 1. 메인 페이지 설정 (실시간 바 & Q&A)
 function MainConfigManager() {
   const [statusText, setStatusText] = useState(''); // 줄바꿈으로 구분된 텍스트
   const [qnaList, setQnaList] = useState<{question: string, answer: string}[]>([]);
