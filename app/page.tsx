@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { db } from '../firebase';
 import { collection, query, orderBy, onSnapshot, limit, doc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function Home() {
   const [items, setItems] = useState<any[]>([]);
@@ -16,28 +17,21 @@ export default function Home() {
   const [statusMessages, setStatusMessages] = useState<string[]>([]);
   const [qnaList, setQnaList] = useState<{question: string, answer: string}[]>([]);
   
-  // ★ 수정: openQna 상태(클릭 여부 저장)는 더 이상 필요 없어서 삭제했습니다.
-
   const router = useRouter();
 
   useEffect(() => {
-    // 오늘 날짜 설정
     const now = new Date();
     setToday(`${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`);
 
-    // 1. 업체 목록 실시간 동기화
     const qItems = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
     const unsubItems = onSnapshot(qItems, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-    // 2. 메인 배너 실시간 동기화
     const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(1));
     const unsubBanners = onSnapshot(qBanners, (s) => setBanners(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-    // 3. 후기 목록 실시간 동기화 (최근 10개)
     const qReviews = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(10));
     const unsubReviews = onSnapshot(qReviews, (s) => setReviews(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-    // 4. 관리자 설정(실시간 상태바, Q&A) 동기화
     const unsubConfig = onSnapshot(doc(db, 'site_config', 'main'), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -51,7 +45,6 @@ export default function Home() {
     };
   }, []);
 
-  // 후기 자동 슬라이드 로직
   useEffect(() => {
     if (reviews.length === 0) return;
     const interval = setInterval(() => {
@@ -109,17 +102,20 @@ export default function Home() {
 
       {/* 2. 네비게이션 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', backgroundColor: 'rgba(15, 23, 42, 0.95)', borderBottom: '1px solid #334155', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
-          <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <img src="/logo.png" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+        <Link href="/" style={{ textDecoration: 'none' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+            <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {/* SEO 수정: alt 태그 구체화 */}
+              <img src="/logo.png" alt="메이플 아이템 최고가 매입 로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+            </div>
+            <div style={{ fontSize: '20px', fontWeight: '900', color: '#FF9000', letterSpacing: '-0.5px' }} className="neon-text">메이플 아이템</div>
           </div>
-          <div style={{ fontSize: '20px', fontWeight: '900', color: '#FF9000', letterSpacing: '-0.5px' }} className="neon-text">메이플 아이템</div>
-        </div>
+        </Link>
         <div style={{ display: 'flex', gap: '20px', fontSize: '15px', fontWeight: '600', color: '#94A3B8' }}>
-          <span style={{ cursor: 'pointer', color: '#FF9000' }}>홈</span>
-          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/notice')}>공지사항</span>
-          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/howto')}>거래방법</span>
-          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/review')}>이용후기</span>
+          <Link href="/" style={{ textDecoration: 'none' }}><span style={{ cursor: 'pointer', color: '#FF9000' }}>홈</span></Link>
+          <Link href="/notice" style={{ textDecoration: 'none', color: '#94A3B8' }}><span style={{ cursor: 'pointer' }}>공지사항</span></Link>
+          <Link href="/howto" style={{ textDecoration: 'none', color: '#94A3B8' }}><span style={{ cursor: 'pointer' }}>거래방법</span></Link>
+          <Link href="/review" style={{ textDecoration: 'none', color: '#94A3B8' }}><span style={{ cursor: 'pointer' }}>이용후기</span></Link>
         </div>
       </nav>
 
@@ -153,7 +149,8 @@ export default function Home() {
                    backgroundColor: '#1E293B' 
                  }}>
               <div style={{ position: 'absolute', top: 0, right: 0, backgroundColor: '#FF9000', color: '#000', fontSize: '11px', fontWeight: 'bold', padding: '4px 12px', borderBottomLeftRadius: '10px', zIndex: 10 }}>공식인증</div>
-              <img src={item.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.9' }} alt="premium" />
+              {/* SEO 수정: alt 태그 구체화 */}
+              <img src={item.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.9' }} alt="메이플스토리 공식 인증 안전 거래 업체" />
             </div>
           ))}
         </div>
@@ -166,7 +163,8 @@ export default function Home() {
           {normalItems.map((item) => (
             <div key={item.id} className="hover-card" style={{ backgroundColor: '#1E293B', borderRadius: '16px', overflow: 'hidden', border: '1px solid #334155' }}>
               <div style={{ width: '100%', height: '140px', overflow: 'hidden' }}>
-                <img src={item.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Company" />
+                {/* SEO 수정: alt 태그 구체화 */}
+                <img src={item.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="메이플 실시간 매입 업체" />
               </div>
               <div style={{ padding: '15px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '5px', color: '#F1F5F9' }}>{item.name}</h3>
@@ -209,18 +207,15 @@ export default function Home() {
           </div>
       </div>
 
-      {/* ★ [수정] 8. 자주 묻는 질문 (Q&A) - 항상 보이도록 변경 */}
+      {/* 8. 자주 묻는 질문 (Q&A) */}
       <div style={{ maxWidth: '800px', margin: '50px auto', padding: '0 20px 80px' }}>
         <h2 style={{ textAlign: 'center', color: '#FF9000', marginBottom: '30px', fontSize: '22px' }}>자주 묻는 질문 (Q&A)</h2>
         {qnaList.map((q, i) => (
           <div key={i} style={{ marginBottom: '15px', border: '1px solid #334155', borderRadius: '10px', overflow: 'hidden' }}>
-            {/* 질문 부분 (클릭 이벤트 삭제) */}
             <div style={{ padding: '20px', backgroundColor: '#1E293B', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{ color: '#FF9000' }}>Q.</span>
               <span style={{ color: '#F1F5F9' }}>{q.question}</span>
             </div>
-            
-            {/* 답변 부분 (항상 보이도록 조건문 삭제) */}
             <div style={{ padding: '20px', backgroundColor: '#0F172A', color: '#CBD5E1', lineHeight: '1.6', borderTop: '1px solid #334155', fontSize: '15px' }}>
               <span style={{ color: '#FF9000', fontWeight: 'bold', marginRight: '5px' }}>A.</span>
               {q.answer}
