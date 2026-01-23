@@ -187,7 +187,8 @@ export default function ReviewDetailPage() {
           </div>
 
           <form onSubmit={handleAddComment} style={{ backgroundColor: '#1E293B', padding: '20px', borderRadius: '10px' }}>
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+            {/* ★ 수정됨: flexDirection: 'column'을 추가하여 세로로 배치 */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
               <input placeholder="닉네임" value={newComment.nickname} onChange={e => setNewComment({...newComment, nickname: e.target.value})} style={inputStyle} />
               <input type="password" placeholder="비밀번호" value={newComment.password} onChange={e => setNewComment({...newComment, password: e.target.value})} style={inputStyle} />
             </div>
@@ -207,6 +208,7 @@ export default function ReviewDetailPage() {
   );
 }
 
-const inputStyle = { backgroundColor: '#0F172A', border: '1px solid #334155', color: '#FFF', padding: '10px', borderRadius: '5px', outline: 'none', fontSize: '14px', boxSizing: 'border-box' as const };
+// ★ 수정됨: width: '100%' 추가
+const inputStyle = { backgroundColor: '#0F172A', border: '1px solid #334155', color: '#FFF', padding: '10px', borderRadius: '5px', outline: 'none', fontSize: '14px', boxSizing: 'border-box' as const, width: '100%' };
 const btnStyle = { padding: '15px', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', border: 'none' };
 const smallBtnStyle = { backgroundColor: 'transparent', border: '1px solid #475569', color: '#94A3B8', padding: '5px 10px', borderRadius: '5px', fontSize: '12px', cursor: 'pointer' };
