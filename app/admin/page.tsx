@@ -22,7 +22,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // ★ 로그인 안 된 상태면 '로그인 화면'만 보여줌
   if (!isLoggedIn) {
     return (
       <div style={{ height: '100vh', backgroundColor: '#0F172A', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#FFF', fontFamily: "'Noto Sans KR', sans-serif" }}>
@@ -40,13 +39,11 @@ export default function AdminDashboard() {
     );
   }
 
-  // ★ 로그인 성공 시에만 관리자 기능 보여줌
   return (
     <div style={{ display: 'flex', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif", backgroundColor: '#F5F5F5' }}>
       {/* 사이드바 메뉴 */}
       <div style={{ width: '250px', backgroundColor: '#333', color: '#FFF', padding: '30px 20px', flexShrink: 0 }}>
         <h1 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '40px', color: '#FF9000' }}>관리자 센터</h1>
-        {/* ★ 메뉴 목록 */}
         <MenuButton label="메인 페이지 설정" active={activeTab === 'main_config'} onClick={() => setActiveTab('main_config')} />
         <MenuButton label="업체 등록/관리" active={activeTab === 'company'} onClick={() => setActiveTab('company')} />
         <MenuButton label="배너 이미지 관리" active={activeTab === 'banner'} onClick={() => setActiveTab('banner')} />
@@ -78,9 +75,7 @@ function MainConfigManager() {
   const [qnaList, setQnaList] = useState<{question: string, answer: string}[]>([]);
   const [newQ, setNewQ] = useState({ question: '', answer: '' });
 
-  useEffect(() => {
-    fetchConfig();
-  }, []);
+  useEffect(() => { fetchConfig(); }, []);
 
   const fetchConfig = async () => {
     const docRef = doc(db, 'site_config', 'main');
@@ -115,18 +110,11 @@ function MainConfigManager() {
   return (
     <div>
       <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>메인 페이지 설정</h2>
-      
       <div style={{ backgroundColor: '#FFF', padding: '20px', borderRadius: '15px', marginBottom: '30px' }}>
         <h3>상단 실시간 운영 바 (한 줄에 하나씩 입력)</h3>
-        <textarea 
-          value={statusText} 
-          onChange={e => setStatusText(e.target.value)} 
-          style={{ width: '100%', height: '150px', padding: '10px', borderRadius: '5px', border: '1px solid #DDD', marginBottom: '10px' }} 
-          placeholder="예: [실시간] 루나 서버 500억 매입 완료"
-        />
+        <textarea value={statusText} onChange={e => setStatusText(e.target.value)} style={{ width: '100%', height: '150px', padding: '10px', borderRadius: '5px', border: '1px solid #DDD', marginBottom: '10px' }} placeholder="예: [실시간] 루나 서버 500억 매입 완료" />
         <button onClick={saveStatus} style={btnStyle}>저장하기</button>
       </div>
-
       <div style={{ backgroundColor: '#FFF', padding: '20px', borderRadius: '15px' }}>
         <h3>하단 Q&A 관리</h3>
         <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
@@ -148,7 +136,7 @@ function MainConfigManager() {
   );
 }
 
-// 1. 업체 관리 컴포넌트 (기존 유지)
+// 1. 업체 관리 (★ 수정됨: 사진 권장 사이즈 안내 추가)
 function CompanyManager() {
   const [items, setItems] = useState<any[]>([]);
   const [name, setName] = useState('');
@@ -193,7 +181,19 @@ function CompanyManager() {
           <input placeholder="카톡 링크" value={kakaoUrl} onChange={e => setKakaoUrl(e.target.value)} style={inputStyle} />
           <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><input type="checkbox" checked={isPremium} onChange={e => setIsPremium(e.target.checked)} /> 프리미엄 등록</label>
         </div>
-        <input type="file" name="image" accept="image/*" />
+        
+        {/* ★ 수정됨: 권장 사이즈 안내 추가 */}
+        <div style={{ marginBottom: '15px' }}>
+          <input type="file" name="image" accept="image/*" />
+          <div style={{ marginTop: '10px', fontSize: '13px', fontWeight: 'bold' }}>
+            {isPremium ? (
+              <span style={{ color: '#FF9000' }}>📢 프리미엄 권장 사이즈: 760 x 360 px (약 2:1 비율)</span>
+            ) : (
+              <span style={{ color: '#555' }}>📢 일반 업체 권장 사이즈: 500 x 280 px (세로형)</span>
+            )}
+          </div>
+        </div>
+
         <button type="submit" disabled={loading} style={{...btnStyle, marginTop:'15px'}}>{loading ? "등록 중..." : "등록하기"}</button>
       </form>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
@@ -208,7 +208,7 @@ function CompanyManager() {
   );
 }
 
-// 2. 배너 관리 컴포넌트 (기존 유지)
+// 2. 배너 관리 (기존 유지)
 function BannerManager() {
   const handleBannerUpdate = async (e: any, type: string) => {
     const file = e.target.files[0];
@@ -236,7 +236,7 @@ function BannerManager() {
   );
 }
 
-// 3. 게시글 관리 컴포넌트 (수정됨: 고정핀 추가)
+// 3. 게시글 관리 (기존 유지)
 function PostManager() {
   const [activeCollection, setActiveCollection] = useState('notices');
   const [noticeCategory, setNoticeCategory] = useState('공지사항'); 
@@ -244,7 +244,7 @@ function PostManager() {
   
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [isPinned, setIsPinned] = useState(false); // ★ 추가: 상단 고정 여부
+  const [isPinned, setIsPinned] = useState(false);
   const [loading, setLoading] = useState(false);
   const [posts, setPosts] = useState<any[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -280,12 +280,9 @@ function PostManager() {
     if (confirm("등록하시겠습니까?")) {
       setLoading(true);
       const finalCategory = activeCollection === 'notices' ? noticeCategory : howtoCategory;
-      
       await addDoc(collection(db, activeCollection), {
-        title, 
-        content, 
-        category: finalCategory, 
-        isPinned: activeCollection === 'notices' ? isPinned : false, // 공지사항일 때만 핀 저장
+        title, content, category: finalCategory, 
+        isPinned: activeCollection === 'notices' ? isPinned : false,
         createdAt: serverTimestamp()
       });
       alert("등록 완료!"); setTitle(''); setContent(''); setIsPinned(false); fetchPosts(); setLoading(false);
@@ -299,17 +296,13 @@ function PostManager() {
   return (
     <div>
       <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>게시글 관리</h2>
-      
       <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
         <button onClick={() => setActiveCollection('notices')} style={tabStyle(activeCollection === 'notices')}>📢 공지사항 관리</button>
         <button onClick={() => setActiveCollection('howto')} style={tabStyle(activeCollection === 'howto')}>📘 거래방법 관리</button>
       </div>
 
       <div style={{ backgroundColor: '#FFF', padding: '30px', borderRadius: '15px', marginBottom: '40px' }}>
-        <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '15px' }}>
-          새 {activeCollection === 'notices' ? '공지사항' : '거래방법'} 작성
-        </h3>
-        
+        <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '15px' }}>새 글 작성</h3>
         <div style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '20px' }}>
           <div>
             <span style={{ fontWeight: 'bold', marginRight: '10px' }}>카테고리:</span>
@@ -318,7 +311,6 @@ function PostManager() {
                 <option value="공지사항">공지사항</option>
                 <option value="메이플 패치">메이플 패치</option>
                 <option value="이벤트">이벤트</option>
-                {/* ★ 수정: '시세측정 기준'으로 변경 */}
                 <option value="시세측정 기준">시세측정 기준</option>
               </select>
             ) : (
@@ -328,16 +320,12 @@ function PostManager() {
               </select>
             )}
           </div>
-          
-          {/* ★ 추가: 상단 고정 체크박스 (공지사항일 때만 노출) */}
           {activeCollection === 'notices' && (
              <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontWeight: 'bold', color: '#FF9000' }}>
-               <input type="checkbox" checked={isPinned} onChange={e => setIsPinned(e.target.checked)} />
-               📌 상단 고정 (Pin)
+               <input type="checkbox" checked={isPinned} onChange={e => setIsPinned(e.target.checked)} /> 📌 상단 고정
              </label>
           )}
         </div>
-
         <div style={{ marginBottom: '15px' }}><input placeholder="제목" value={title} onChange={e => setTitle(e.target.value)} style={{ ...inputStyle, width: '100%' }} /></div>
         <div style={{ marginBottom: '15px' }}>
           <label style={{ backgroundColor: '#FF9000', color: '#FFF', padding: '10px 20px', borderRadius: '5px', cursor: 'pointer' }}>
@@ -353,10 +341,7 @@ function PostManager() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {posts.map(post => (
           <div key={post.id} style={{ display: 'flex', justifyContent: 'space-between', backgroundColor: '#FFF', padding: '15px', borderRadius: '10px', border: '1px solid #DDD' }}>
-            <div>
-              {post.isPinned && <span style={{ marginRight: '5px' }}>📌</span>}
-              <span style={{color:'#FF9000', fontWeight:'bold'}}>[{post.category}]</span> {post.title}
-            </div>
+            <div>{post.isPinned && '📌'} <span style={{color:'#FF9000', fontWeight:'bold'}}>[{post.category}]</span> {post.title}</div>
             <button onClick={() => handleDelete(post.id)} style={{ backgroundColor: '#FF4444', color: '#FFF', border: 'none', padding: '5px 10px', borderRadius: '5px' }}>삭제</button>
           </div>
         ))}
@@ -365,7 +350,7 @@ function PostManager() {
   );
 }
 
-// 4. 후기 관리 (기존 유지)
+// 5. 후기 관리 (기존 유지)
 function ReviewManager() {
   const [reviews, setReviews] = useState<any[]>([]);
   const fetchReviews = async () => {

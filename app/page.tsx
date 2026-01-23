@@ -13,7 +13,6 @@ export default function Home() {
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [today, setToday] = useState('');
   
-  // 관리자 연동 데이터 상태
   const [statusMessages, setStatusMessages] = useState<string[]>([]);
   const [qnaList, setQnaList] = useState<{question: string, answer: string}[]>([]);
   
@@ -105,7 +104,6 @@ export default function Home() {
         <Link href="/" style={{ textDecoration: 'none' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
             <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {/* SEO 수정: alt 태그 구체화 */}
               <img src="/logo.png" alt="메이플 아이템 최고가 매입 로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
             </div>
             <div style={{ fontSize: '20px', fontWeight: '900', color: '#FF9000', letterSpacing: '-0.5px' }} className="neon-text">메이플 아이템</div>
@@ -130,45 +128,58 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 4. 프리미엄 인증 파트너 */}
+      {/* 4. 프리미엄 인증 파트너 (★수정됨: 고정 크기 적용) */}
       <div style={{ padding: '50px 5% 0 5%' }}>
         <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px', color: '#FF9000', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#FF9000', boxShadow: '0 0 10px #FF9000' }}></span>
           프리미엄 인증 파트너
         </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
+        
+        {/* ★ 수정: display flex, wrap, gap 사용 및 카드 width/height 고정 */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
           {premiumItems.map((item) => (
             <div key={item.id} onClick={() => goToKakao(item.kakaoUrl)} className="hover-card" 
                  style={{ 
-                   height: '160px', 
+                   width: '380px',    // ★ 고정 가로 너비
+                   height: '180px',   // ★ 고정 세로 높이
                    border: '2px solid #FF9000', 
                    borderRadius: '20px', 
                    overflow: 'hidden', 
                    cursor: 'pointer', 
                    position: 'relative', 
-                   backgroundColor: '#1E293B' 
+                   backgroundColor: '#1E293B',
+                   flexShrink: 0      // ★ 줄어듦 방지
                  }}>
               <div style={{ position: 'absolute', top: 0, right: 0, backgroundColor: '#FF9000', color: '#000', fontSize: '11px', fontWeight: 'bold', padding: '4px 12px', borderBottomLeftRadius: '10px', zIndex: 10 }}>공식인증</div>
-              {/* SEO 수정: alt 태그 구체화 */}
-              <img src={item.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.9' }} alt="메이플스토리 공식 인증 안전 거래 업체" />
+              <img src={item.imageUrl} alt="메이플스토리 공식 인증 안전 거래 업체" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.9' }} />
             </div>
           ))}
         </div>
       </div>
 
-      {/* 5. 실시간 매입 업체 */}
+      {/* 5. 실시간 매입 업체 (★수정됨: 고정 크기 적용) */}
       <div style={{ padding: '60px 5%' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '30px', color: '#FFF' }}>실시간 등록 매입 업체</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px' }}>
+        
+        {/* ★ 수정: display flex, wrap, gap 사용 및 카드 width/height 고정 */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
           {normalItems.map((item) => (
-            <div key={item.id} className="hover-card" style={{ backgroundColor: '#1E293B', borderRadius: '16px', overflow: 'hidden', border: '1px solid #334155' }}>
+            <div key={item.id} className="hover-card" 
+                 style={{ 
+                   width: '250px',      // ★ 고정 가로 너비
+                   height: '320px',     // ★ 고정 세로 높이 (내용 포함)
+                   backgroundColor: '#1E293B', 
+                   borderRadius: '16px', 
+                   overflow: 'hidden', 
+                   border: '1px solid #334155',
+                   flexShrink: 0        // ★ 줄어듦 방지
+                 }}>
               <div style={{ width: '100%', height: '140px', overflow: 'hidden' }}>
-                {/* SEO 수정: alt 태그 구체화 */}
-                <img src={item.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="메이플 실시간 매입 업체" />
+                <img src={item.imageUrl} alt="메이플 실시간 매입 업체" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <div style={{ padding: '15px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '5px', color: '#F1F5F9' }}>{item.name}</h3>
-                <p style={{ color: '#94A3B8', fontSize: '13px', marginBottom: '15px', height: '40px', overflow: 'hidden' }}>{item.desc}</p>
+                <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '5px', color: '#F1F5F9', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</h3>
+                <p style={{ color: '#94A3B8', fontSize: '13px', marginBottom: '10px', height: '40px', overflow: 'hidden' }}>{item.desc}</p>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', borderTop: '1px solid #334155', paddingTop: '12px' }}>
                   <span style={{ color: '#FF9000', fontWeight: 'bold', fontSize: '14px' }}>{item.price}</span>
                   <button onClick={() => goToKakao(item.kakaoUrl)} style={{ backgroundColor: '#FEE500', color: '#000', padding: '6px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px' }}>카톡 문의</button>
