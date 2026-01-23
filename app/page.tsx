@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { db } from '../firebase';
-import { collection, query, orderBy, onSnapshot, limit, doc } from 'firebase/firestore'; // doc 추가됨
+import { collection, query, orderBy, onSnapshot, limit, doc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
@@ -12,10 +12,11 @@ export default function Home() {
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [today, setToday] = useState('');
   
-  // ★ 추가: 관리자 연동 데이터 상태
+  // 관리자 연동 데이터 상태
   const [statusMessages, setStatusMessages] = useState<string[]>([]);
   const [qnaList, setQnaList] = useState<{question: string, answer: string}[]>([]);
-  const [openQna, setOpenQna] = useState<number | null>(null);
+  
+  // ★ 수정: openQna 상태(클릭 여부 저장)는 더 이상 필요 없어서 삭제했습니다.
 
   const router = useRouter();
 
@@ -36,7 +37,7 @@ export default function Home() {
     const qReviews = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(10));
     const unsubReviews = onSnapshot(qReviews, (s) => setReviews(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-    // ★ 4. (추가) 관리자 설정(실시간 상태바, Q&A) 동기화
+    // 4. 관리자 설정(실시간 상태바, Q&A) 동기화
     const unsubConfig = onSnapshot(doc(db, 'site_config', 'main'), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -81,7 +82,7 @@ export default function Home() {
         .marquee { animation: marquee 30s linear infinite; }
       `}</style>
 
-      {/* --- [수정] 1. 실시간 운영 상태 바 (관리자 연동) --- */}
+      {/* 1. 실시간 운영 상태 바 */}
       <div style={{ backgroundColor: '#020617', borderBottom: '1px solid #1e293b' }}>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', padding: '10px 0', fontSize: '13px', fontWeight: 'bold', color: '#94a3b8' }}>
           <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981', boxShadow: '0 0 8px #10b981' }}></span>
@@ -94,13 +95,11 @@ export default function Home() {
             {statusMessages.length > 0 ? statusMessages.map((msg, i) => (
                <span key={i} style={{ marginRight: '50px' }}>{msg}</span>
             )) : (
-               // 기본값 (데이터 없을 때)
                <>
                  <span style={{ marginRight: '50px' }}>[실시간] 루나 서버 500억 메소 매입 완료</span>
                  <span style={{ marginRight: '50px' }}>[안내] 관리자 페이지에서 상태 메시지를 설정해주세요.</span>
                </>
             )}
-            {/* 마퀴 끊김 방지를 위한 복제 (데이터가 있을 때만) */}
             {statusMessages.length > 0 && statusMessages.map((msg, i) => (
                <span key={`dup-${i}`} style={{ marginRight: '50px' }}>{msg}</span>
             ))}
@@ -210,23 +209,22 @@ export default function Home() {
           </div>
       </div>
 
-      {/* ★ [추가] 8. 자주 묻는 질문 (Q&A) - 관리자 연동 */}
+      {/* ★ [수정] 8. 자주 묻는 질문 (Q&A) - 항상 보이도록 변경 */}
       <div style={{ maxWidth: '800px', margin: '50px auto', padding: '0 20px 80px' }}>
         <h2 style={{ textAlign: 'center', color: '#FF9000', marginBottom: '30px', fontSize: '22px' }}>자주 묻는 질문 (Q&A)</h2>
         {qnaList.map((q, i) => (
           <div key={i} style={{ marginBottom: '15px', border: '1px solid #334155', borderRadius: '10px', overflow: 'hidden' }}>
-            <div 
-              onClick={() => setOpenQna(openQna === i ? null : i)}
-              style={{ padding: '20px', backgroundColor: '#1E293B', cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-            >
-              <span style={{ color: '#F1F5F9' }}>Q. {q.question}</span>
-              <span style={{ color: '#FF9000', fontSize: '12px' }}>{openQna === i ? '▲' : '▼'}</span>
+            {/* 질문 부분 (클릭 이벤트 삭제) */}
+            <div style={{ padding: '20px', backgroundColor: '#1E293B', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ color: '#FF9000' }}>Q.</span>
+              <span style={{ color: '#F1F5F9' }}>{q.question}</span>
             </div>
-            {openQna === i && (
-              <div style={{ padding: '20px', backgroundColor: '#0F172A', color: '#CBD5E1', lineHeight: '1.6', borderTop: '1px solid #334155', fontSize: '15px' }}>
-                A. {q.answer}
-              </div>
-            )}
+            
+            {/* 답변 부분 (항상 보이도록 조건문 삭제) */}
+            <div style={{ padding: '20px', backgroundColor: '#0F172A', color: '#CBD5E1', lineHeight: '1.6', borderTop: '1px solid #334155', fontSize: '15px' }}>
+              <span style={{ color: '#FF9000', fontWeight: 'bold', marginRight: '5px' }}>A.</span>
+              {q.answer}
+            </div>
           </div>
         ))}
         {qnaList.length === 0 && <div style={{ textAlign: 'center', color: '#64748B' }}>등록된 질문이 없습니다.</div>}
