@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { db } from '../../../firebase';
-import { doc, getDoc, updateDoc, increment, deleteDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, increment, deleteDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { useParams, useRouter } from 'next/navigation';
 
 export default function ReviewDetailPage() {
@@ -11,7 +11,7 @@ export default function ReviewDetailPage() {
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState({ nickname: '', password: '', content: '' });
   
-  // ★ 추가: 수정 모드 상태
+  // 수정 모드 상태
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ title: '', content: '' });
 
@@ -26,15 +26,25 @@ export default function ReviewDetailPage() {
       if (docSnap.exists()) {
         const data = docSnap.data();
         setReview({ id: docSnap.id, ...data });
-        setEditForm({ title: data.title, content: data.content }); // 수정용 폼 초기화
+        setEditForm({ title: data.title, content: data.content });
         await updateDoc(docRef, { views: increment(1) });
       }
     };
     fetchReview();
 
-    const q = query(collection(db, 'comments'), where('postId', '==', id), orderBy('createdAt', 'asc'));
+    // ★ 수정됨: orderBy 제거 (DB 오류 방지) -> 댓글이 바로 보이게 됨
+    const q = query(collection(db, 'comments'), where('postId', '==', id));
     const unsubscribe = onSnapshot(q, (s) => {
-      setComments(s.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      const fetchedData = s.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      // ★ 수정됨: 가져온 뒤에 날짜순(오래된 순) 정렬
+      fetchedData.sort((a: any, b: any) => {
+        const dateA = a.createdAt?.seconds || 0;
+        const dateB = b.createdAt?.seconds || 0;
+        return dateA - dateB;
+      });
+
+      setComments(fetchedData);
     });
 
     return () => unsubscribe();
@@ -51,7 +61,6 @@ export default function ReviewDetailPage() {
     alert('이 후기를 추천했습니다!');
   };
 
-  // ★ 추가: 게시글 삭제 기능
   const handleDeletePost = async () => {
     const pw = prompt('게시글 삭제를 위해 비밀번호를 입력하세요.');
     if (pw === review.password) {
@@ -65,7 +74,6 @@ export default function ReviewDetailPage() {
     }
   };
 
-  // ★ 추가: 게시글 수정 모드 진입
   const handleEditPost = async () => {
     const pw = prompt('게시글 수정을 위해 비밀번호를 입력하세요.');
     if (pw === review.password) {
@@ -75,7 +83,6 @@ export default function ReviewDetailPage() {
     }
   };
 
-  // ★ 추가: 게시글 업데이트 실행
   const handleUpdatePost = async () => {
      await updateDoc(doc(db, 'reviews', id as string), {
        title: editForm.title,
@@ -113,7 +120,6 @@ export default function ReviewDetailPage() {
   if (!review) return <div style={{ textAlign: 'center', padding: '100px', backgroundColor: '#0F172A', minHeight: '100vh', color: '#FFF' }}>로딩 중...</div>;
 
   return (
-    // ★ 수정: overflowX: 'hidden' 추가로 모바일 흰 여백 제거
     <div style={{ backgroundColor: '#0F172A', minHeight: '100vh', color: '#F8FAFC', fontFamily: "'Noto Sans KR', sans-serif", overflowX: 'hidden' }}>
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', borderBottom: '1px solid #334155', backgroundColor: 'rgba(15, 23, 42, 0.95)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
@@ -127,7 +133,6 @@ export default function ReviewDetailPage() {
 
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 20px', width: '100%', boxSizing: 'border-box' }}>
         
-        {/* 수정 모드일 때 */}
         {isEditing ? (
            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
              <h2 style={{ color: '#FF9000' }}>게시글 수정</h2>
@@ -139,11 +144,9 @@ export default function ReviewDetailPage() {
              </div>
            </div>
         ) : (
-          // 일반 모드일 때
           <>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
               <h1 style={{ fontSize: '30px', fontWeight: 'bold', marginBottom: '15px', color: '#FF9000', wordBreak: 'keep-all' }}>{review.title}</h1>
-              {/* ★ 추가: 수정/삭제 버튼 그룹 */}
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button onClick={handleEditPost} style={smallBtnStyle}>수정</button>
                 <button onClick={handleDeletePost} style={smallBtnStyle}>삭제</button>
@@ -187,7 +190,6 @@ export default function ReviewDetailPage() {
           </div>
 
           <form onSubmit={handleAddComment} style={{ backgroundColor: '#1E293B', padding: '20px', borderRadius: '10px' }}>
-            {/* ★ 수정됨: flexDirection: 'column'을 추가하여 세로로 배치 */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
               <input placeholder="닉네임" value={newComment.nickname} onChange={e => setNewComment({...newComment, nickname: e.target.value})} style={inputStyle} />
               <input type="password" placeholder="비밀번호" value={newComment.password} onChange={e => setNewComment({...newComment, password: e.target.value})} style={inputStyle} />
@@ -208,7 +210,6 @@ export default function ReviewDetailPage() {
   );
 }
 
-// ★ 수정됨: width: '100%' 추가
 const inputStyle = { backgroundColor: '#0F172A', border: '1px solid #334155', color: '#FFF', padding: '10px', borderRadius: '5px', outline: 'none', fontSize: '14px', boxSizing: 'border-box' as const, width: '100%' };
 const btnStyle = { padding: '15px', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', border: 'none' };
 const smallBtnStyle = { backgroundColor: 'transparent', border: '1px solid #475569', color: '#94A3B8', padding: '5px 10px', borderRadius: '5px', fontSize: '12px', cursor: 'pointer' };
