@@ -1,17 +1,18 @@
-// ★ 수정 1: 캐시 강제 무효화 (이 줄이 있어야 내용이 바로 바뀝니다)
+// 캐시 문제 해결을 위해 강제 동적 렌더링 설정
 export const dynamic = 'force-dynamic'; 
 
 'use client';
 
 import { useEffect, useState } from 'react';
 import { db } from '../firebase';
-import { collection, query, orderBy, onSnapshot, limit, doc } from 'firebase/firestore';
+// ★ 수정: 'where' 함수 추가 (핵심!)
+import { collection, query, orderBy, onSnapshot, limit, doc, where } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function Home() {
   const [items, setItems] = useState<any[]>([]);
-  const [mainBanner, setMainBanner] = useState<any>(null); // 메인 배너 상태
+  const [mainBanner, setMainBanner] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [today, setToday] = useState('');
@@ -25,21 +26,33 @@ export default function Home() {
     const now = new Date();
     setToday(`${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`);
 
+    // 1. 업체 목록 가져오기
     const qItems = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
     const unsubItems = onSnapshot(qItems, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-    // ★ 수정 2: 배너를 넉넉히 가져와서 '홈 (메인)'만 정확히 찾아냄
-    const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(50));
+    // ★ 수정 핵심: 데이터베이스 차원에서 '홈 (메인)'만 정확히 필터링해서 1개만 가져옴
+    // 이렇게 하면 다른 배너가 100개 올라와도 절대 섞이지 않음
+    const qBanners = query(
+      collection(db, 'banners'),
+      where('type', '==', '홈 (메인)'), // "type이 정확히 '홈 (메인)'인 것만 내놔!"
+      orderBy('createdAt', 'desc'),     // "그 중에서 제일 최신 걸로"
+      limit(1)                          // "딱 1개만"
+    );
+
     const unsubBanners = onSnapshot(qBanners, (s) => {
-      const allBanners = s.docs.map(d => d.data());
-      // '홈 (메인)' 태그가 정확히 일치하는 배너 중 가장 최신 것 찾기
-      const homeBanner = allBanners.find((b: any) => b.type === '홈 (메인)');
-      setMainBanner(homeBanner || null);
+      if (!s.empty) {
+        // 결과가 있으면 첫 번째 문서(가장 최신)를 배너로 설정
+        setMainBanner(s.docs[0].data());
+      } else {
+        setMainBanner(null);
+      }
     });
 
+    // 3. 후기 가져오기
     const qReviews = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(10));
     const unsubReviews = onSnapshot(qReviews, (s) => setReviews(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
+    // 4. 사이트 설정 가져오기
     const unsubConfig = onSnapshot(doc(db, 'site_config', 'main'), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -126,12 +139,12 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* 3. 메인 배너 (비율 고정 & 메인 배너만 표시) */}
+      {/* 3. 메인 배너 (비율 고정 & 쿼리로 가져온 배너 표시) */}
       <div style={{ width: '100%', backgroundColor: '#1E293B', display: 'flex', justifyContent: 'center' }}>
         <div style={{ 
           width: '100%', 
           maxWidth: '1200px', 
-          aspectRatio: '3.75 / 1', // 1200:320 비율
+          aspectRatio: '3.75 / 1', // 1200:320 비율 고정
           position: 'relative', 
           overflow: 'hidden'
         }}>
@@ -152,14 +165,14 @@ export default function Home() {
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#FF9000', boxShadow: '0 0 10px #FF9000' }}></span>
           프리미엄 인증 파트너
         </h2>
-        {/* ★ 수정 3: 왼쪽 정렬 flex-start */}
+        {/* flex-start로 왼쪽 정렬 */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'flex-start' }}>
           {premiumItems.map((item) => (
             <div key={item.id} onClick={() => goToKakao(item.kakaoUrl)} className="hover-card" 
                  style={{ 
                    width: '100%',
                    maxWidth: '380px', 
-                   aspectRatio: '2.1 / 1', 
+                   aspectRatio: '2.1 / 1', // 비율 고정
                    border: '2px solid #FF9000', 
                    borderRadius: '20px', 
                    overflow: 'hidden', 
@@ -177,13 +190,13 @@ export default function Home() {
       {/* 5. 실시간 매입 업체 (왼쪽 정렬) */}
       <div style={{ padding: '60px 0', width: '90%', maxWidth: '1200px', margin: '0 auto' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '30px', color: '#FFF' }}>실시간 등록 매입 업체</h2>
-        {/* ★ 수정 3: 왼쪽 정렬 flex-start */}
+        {/* flex-start로 왼쪽 정렬 */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'flex-start' }}>
           {normalItems.map((item) => (
             <div key={item.id} className="hover-card" 
                  style={{ 
                    width: '100%',
-                   maxWidth: '250px',
+                   maxWidth: '250px', 
                    backgroundColor: '#1E293B', 
                    borderRadius: '16px', 
                    overflow: 'hidden', 
@@ -199,9 +212,9 @@ export default function Home() {
                   <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '5px', color: '#F1F5F9' }}>{item.name}</h3>
                   <p style={{ color: '#94A3B8', fontSize: '13px', marginBottom: '15px', height: '40px', overflow: 'hidden' }}>{item.desc}</p>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', borderTop: '1px solid #334155', paddingTop: '12px' }}>
-                  <span style={{ color: '#FF9000', fontWeight: 'bold', fontSize: '14px' }}>{item.price}</span>
-                  <button onClick={() => goToKakao(item.kakaoUrl)} style={{ backgroundColor: '#FEE500', color: '#000', padding: '6px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px' }}>카톡 문의</button>
+                <div style={{ borderTop: '1px solid #334155', paddingTop: '12px' }}>
+                  <div style={{ color: '#FF9000', fontWeight: 'bold', fontSize: '14px', marginBottom: '10px' }}>{item.price}</div>
+                  <button onClick={() => goToKakao(item.kakaoUrl)} style={{ width: '100%', backgroundColor: '#FEE500', color: '#000', padding: '8px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}>카톡 문의하기</button>
                 </div>
               </div>
             </div>
