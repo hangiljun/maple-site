@@ -2,14 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { db } from '../firebase';
-import { collection, query, orderBy, onSnapshot, limit, doc } from 'firebase/firestore';
+// ★ 수정: 'where' 추가 (정확한 필터링을 위해 필수)
+import { collection, query, orderBy, onSnapshot, limit, doc, where } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function Home() {
   const [items, setItems] = useState<any[]>([]);
-  // 메인 배너 전용 변수
+  
+  // ★ 수정 1: 로딩 상태 추가 (깜빡임 방지)
   const [mainBanner, setMainBanner] = useState<any>(null);
+  const [bannerLoading, setBannerLoading] = useState(true); 
+
   const [reviews, setReviews] = useState<any[]>([]);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [today, setToday] = useState('');
@@ -26,15 +30,23 @@ export default function Home() {
     const qItems = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
     const unsubItems = onSnapshot(qItems, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-    // ★ 핵심 로직: 최신 50개를 가져와서 '홈 (메인)' 타입만 골라냄
-    const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(50));
+    // ★ 수정 2: 정석 쿼리 사용 (where + orderBy)
+    // 데이터가 50개, 100개 넘어가도 '홈 (메인)' 배너를 정확히 찾아냅니다.
+    const qBanners = query(
+      collection(db, 'banners'),
+      where('type', '==', '홈 (메인)'), // 이름표가 정확히 '홈 (메인)'인 것만
+      orderBy('createdAt', 'desc'),     // 최신순으로
+      limit(1)                          // 딱 1개 가져오기
+    );
+
     const unsubBanners = onSnapshot(qBanners, (s) => {
-      const allBanners = s.docs.map(d => d.data());
-      // '홈 (메인)' 태그가 달린 것 중 가장 최신 1개 찾기
-      const found = allBanners.find((b: any) => b.type === '홈 (메인)');
-      
-      console.log("로드된 배너:", found); // 디버깅용 로그
-      setMainBanner(found || null);
+      if (!s.empty) {
+        setMainBanner(s.docs[0].data());
+      } else {
+        setMainBanner(null);
+      }
+      // 데이터 로딩이 끝났음을 알림
+      setBannerLoading(false);
     });
 
     const qReviews = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(10));
@@ -126,21 +138,25 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* 3. 메인 배너 */}
+      {/* 3. 메인 배너 (★ 수정 3: 로딩 상태 처리 & minHeight 추가) */}
       <div style={{ width: '100%', backgroundColor: '#1E293B', display: 'flex', justifyContent: 'center' }}>
         <div style={{ 
           width: '100%', 
           maxWidth: '1200px', 
           aspectRatio: '3.75 / 1', 
+          minHeight: '200px', // ★ 최소 높이 보장 (안 보이는 현상 방지)
           position: 'relative', 
           overflow: 'hidden'
         }}>
-          {mainBanner ? (
-            <div style={{ width: '100%', height: '100%', backgroundImage: `url(${mainBanner.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'brightness(0.7)' }}></div>
-          ) : ( 
-            <div style={{ width: '100%', height: '100%', background: 'linear-gradient(45deg, #1E293B, #0F172A)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B' }}>
-              배너를 등록해주세요.
-            </div> 
+          {/* 로딩 중이 아닐 때만 내용을 보여줌 */}
+          {!bannerLoading && (
+            mainBanner ? (
+              <div style={{ width: '100%', height: '100%', backgroundImage: `url(${mainBanner.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'brightness(0.7)' }}></div>
+            ) : ( 
+              <div style={{ width: '100%', height: '100%', background: 'linear-gradient(45deg, #1E293B, #0F172A)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B' }}>
+                배너를 등록해주세요.
+              </div> 
+            )
           )}
           
           <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', width: '100%', maxWidth: '800px', padding: '0 20px' }}>
