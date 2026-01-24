@@ -6,7 +6,7 @@ import { collection, addDoc, deleteDoc, doc, getDocs, getDoc, setDoc, query, ord
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export default function AdminDashboard() {
-  // ★ 보안 설정: 요청하신 비밀번호로 설정되었습니다.
+  // ★ 보안 설정
   const ADMIN_PASSWORD = "rlfwns55%%"; 
 
   const [password, setPassword] = useState('');
@@ -69,9 +69,9 @@ function MenuButton({ label, active, onClick }: any) {
   );
 }
 
-// 1. 메인 페이지 설정 (실시간 바 & Q&A)
+// 1. 메인 페이지 설정
 function MainConfigManager() {
-  const [statusText, setStatusText] = useState(''); // 줄바꿈으로 구분된 텍스트
+  const [statusText, setStatusText] = useState('');
   const [qnaList, setQnaList] = useState<{question: string, answer: string}[]>([]);
   const [newQ, setNewQ] = useState({ question: '', answer: '' });
 
@@ -124,10 +124,7 @@ function MainConfigManager() {
         </div>
         {qnaList.map((q, i) => (
           <div key={i} style={{ borderBottom: '1px solid #EEE', padding: '10px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <div style={{ fontWeight: 'bold', color: '#FF9000' }}>Q. {q.question}</div>
-              <div>A. {q.answer}</div>
-            </div>
+            <div><div style={{ fontWeight: 'bold', color: '#FF9000' }}>Q. {q.question}</div><div>A. {q.answer}</div></div>
             <button onClick={() => deleteQna(i)} style={{ backgroundColor: '#FF4444', color: '#FFF', border: 'none', padding: '5px 10px', borderRadius: '5px', cursor: 'pointer' }}>삭제</button>
           </div>
         ))}
@@ -136,7 +133,7 @@ function MainConfigManager() {
   );
 }
 
-// 1. 업체 관리 (★ 수정됨: 사진 권장 사이즈 안내 추가)
+// 2. 업체 관리 (★ 권장 규격 추가됨)
 function CompanyManager() {
   const [items, setItems] = useState<any[]>([]);
   const [name, setName] = useState('');
@@ -181,19 +178,17 @@ function CompanyManager() {
           <input placeholder="카톡 링크" value={kakaoUrl} onChange={e => setKakaoUrl(e.target.value)} style={inputStyle} />
           <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><input type="checkbox" checked={isPremium} onChange={e => setIsPremium(e.target.checked)} /> 프리미엄 등록</label>
         </div>
-        
-        {/* ★ 수정됨: 권장 사이즈 안내 추가 */}
         <div style={{ marginBottom: '15px' }}>
           <input type="file" name="image" accept="image/*" />
+          {/* ★ 규격 안내 문구 */}
           <div style={{ marginTop: '10px', fontSize: '13px', fontWeight: 'bold' }}>
             {isPremium ? (
-              <span style={{ color: '#FF9000' }}>📢 프리미엄 권장 사이즈: 760 x 360 px (약 2:1 비율)</span>
+              <span style={{ color: '#FF9000' }}>📢 프리미엄 권장: 760 x 360 px (약 2:1 비율)</span>
             ) : (
-              <span style={{ color: '#555' }}>📢 일반 업체 권장 사이즈: 500 x 280 px (세로형)</span>
+              <span style={{ color: '#555' }}>📢 일반 업체 권장: 500 x 280 px (약 1.8:1 비율)</span>
             )}
           </div>
         </div>
-
         <button type="submit" disabled={loading} style={{...btnStyle, marginTop:'15px'}}>{loading ? "등록 중..." : "등록하기"}</button>
       </form>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
@@ -208,7 +203,7 @@ function CompanyManager() {
   );
 }
 
-// 2. 배너 관리 (기존 유지)
+// 3. 배너 관리 (★ 권장 규격 추가됨)
 function BannerManager() {
   const handleBannerUpdate = async (e: any, type: string) => {
     const file = e.target.files[0];
@@ -218,7 +213,7 @@ function BannerManager() {
       await uploadBytes(imgRef, file);
       const imageUrl = await getDownloadURL(imgRef);
       await addDoc(collection(db, 'banners'), { type, imageUrl, createdAt: serverTimestamp() });
-      alert(`${type} 배너 변경 완료`);
+      alert(`${type} 배너 변경 완료!`);
     } catch (err) { alert("업로드 실패"); }
   };
   return (
@@ -228,6 +223,10 @@ function BannerManager() {
         {['홈 (메인)', '공지사항', '거래방법', '이용후기'].map((menu, idx) => (
           <div key={idx} style={{ backgroundColor: '#FFF', padding: '20px', borderRadius: '15px' }}>
             <h3>{menu} 배너</h3>
+            {/* ★ 규격 안내 문구 */}
+            <p style={{ fontSize: '12px', color: '#FF9000', marginBottom: '10px' }}>
+              {menu.includes('홈') ? '💡 권장 사이즈: 1200 x 320 px' : '💡 권장 사이즈: 1200 x 300 px'}
+            </p>
             <input type="file" onChange={(e) => handleBannerUpdate(e, menu)} />
           </div>
         ))}
@@ -236,7 +235,7 @@ function BannerManager() {
   );
 }
 
-// 3. 게시글 관리 (기존 유지)
+// 4. 게시글 관리
 function PostManager() {
   const [activeCollection, setActiveCollection] = useState('notices');
   const [noticeCategory, setNoticeCategory] = useState('공지사항'); 
@@ -350,7 +349,7 @@ function PostManager() {
   );
 }
 
-// 5. 후기 관리 (기존 유지)
+// 5. 후기 관리
 function ReviewManager() {
   const [reviews, setReviews] = useState<any[]>([]);
   const fetchReviews = async () => {

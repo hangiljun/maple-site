@@ -8,7 +8,8 @@ import Link from 'next/link';
 
 export default function Home() {
   const [items, setItems] = useState<any[]>([]);
-  const [banners, setBanners] = useState<any[]>([]);
+  // ★ 수정: 메인 배너를 찾아서 저장할 상태 변수
+  const [mainBanner, setMainBanner] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [today, setToday] = useState('');
@@ -25,8 +26,14 @@ export default function Home() {
     const qItems = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
     const unsubItems = onSnapshot(qItems, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-    const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(1));
-    const unsubBanners = onSnapshot(qBanners, (s) => setBanners(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+    // ★ 수정: 배너를 넉넉히(20개) 가져와서 '홈 (메인)' 타입만 골라냄 (DB 덮어씌움 문제 해결)
+    const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(20));
+    const unsubBanners = onSnapshot(qBanners, (s) => {
+      const allBanners = s.docs.map(d => d.data());
+      // 여러 배너 중 '홈 (메인)' 태그가 달린 것만 찾음
+      const homeBanner = allBanners.find((b: any) => b.type === '홈 (메인)');
+      setMainBanner(homeBanner || null);
+    });
 
     const qReviews = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(10));
     const unsubReviews = onSnapshot(qReviews, (s) => setReviews(s.docs.map(d => ({ id: d.id, ...d.data() }))));
@@ -62,7 +69,7 @@ export default function Home() {
   };
 
   return (
-    <div style={{ backgroundColor: '#0F172A', minHeight: '100vh', color: '#F8FAFC', fontFamily: "'Noto Sans KR', sans-serif" }}>
+    <div style={{ backgroundColor: '#0F172A', minHeight: '100vh', color: '#F8FAFC', fontFamily: "'Noto Sans KR', sans-serif", overflowX: 'hidden' }}>
       
       <style jsx global>{`
         .hover-card { transition: all 0.3s ease; }
@@ -80,7 +87,7 @@ export default function Home() {
           <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981', boxShadow: '0 0 8px #10b981' }}></span>
           <span>{today} 실시간 운영 중</span>
           <span style={{ color: '#334155' }}>|</span>
-          <span style={{ color: '#FF9000' }}>평균 응답 시간 1분 내외</span>
+          <span style={{ color: '#FF9000' }}>평균 응답 시간 3분 내외</span>
         </div>
         <div style={{ backgroundColor: '#0f172a', overflow: 'hidden', whiteSpace: 'nowrap', padding: '6px 0', borderTop: '1px solid #1e293b' }}>
           <div className="marquee" style={{ display: 'inline-block', fontSize: '12px', color: '#64748b' }}>
@@ -117,38 +124,45 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* 3. 메인 배너 */}
-      <div style={{ width: '100%', height: '320px', backgroundColor: '#1E293B', position: 'relative', overflow: 'hidden' }}>
-        {banners.length > 0 ? (
-          <div style={{ width: '100%', height: '100%', backgroundImage: `url(${banners[0].imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'brightness(0.7)' }}></div>
-        ) : ( <div style={{ width: '100%', height: '100%', background: 'linear-gradient(45deg, #1E293B, #0F172A)' }}></div> )}
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', width: '90%', maxWidth: '800px' }}>
-          <h1 style={{ fontSize: '28px', fontWeight: '900', color: '#FFF', marginBottom: '15px', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>메이플 아이템 <span style={{ color: '#FF9000' }}>최고가 매입</span> & 시세 비교</h1>
-          <p style={{ color: '#E2E8F0', fontWeight: '500', fontSize: '16px', backgroundColor: 'rgba(0,0,0,0.5)', display: 'inline-block', padding: '8px 20px', borderRadius: '30px', backdropFilter: 'blur(5px)' }}>검증된 1등 업체들과 안전하게 거래하세요</p>
+      {/* 3. 메인 배너 (★수정: 모바일/PC 반응형 비율 유지 및 데이터 필터링 적용) */}
+      <div style={{ width: '100%', backgroundColor: '#1E293B', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ 
+          width: '100%', 
+          maxWidth: '1200px', // PC 최대 크기
+          aspectRatio: '3.75 / 1', // 1200:320 비율 고정 (이미지 안 잘림)
+          position: 'relative', 
+          overflow: 'hidden'
+        }}>
+          {mainBanner ? (
+            <div style={{ width: '100%', height: '100%', backgroundImage: `url(${mainBanner.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'brightness(0.7)' }}></div>
+          ) : ( <div style={{ width: '100%', height: '100%', background: 'linear-gradient(45deg, #1E293B, #0F172A)' }}></div> )}
+          
+          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', width: '100%', padding: '0 20px' }}>
+            <h1 style={{ fontSize: 'clamp(18px, 4vw, 28px)', fontWeight: '900', color: '#FFF', marginBottom: '15px', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>메이플 아이템 <span style={{ color: '#FF9000' }}>최고가 매입</span> & 시세 비교</h1>
+            <p style={{ color: '#E2E8F0', fontWeight: '500', fontSize: 'clamp(12px, 3vw, 16px)', backgroundColor: 'rgba(0,0,0,0.5)', display: 'inline-block', padding: '8px 20px', borderRadius: '30px', backdropFilter: 'blur(5px)' }}>검증된 1등 업체들과 안전하게 거래하세요</p>
+          </div>
         </div>
       </div>
 
-      {/* 4. 프리미엄 인증 파트너 (★수정됨: 고정 크기 적용) */}
-      <div style={{ padding: '50px 5% 0 5%' }}>
+      {/* 4. 프리미엄 인증 파트너 (★수정: 비율 고정으로 모바일/PC 완벽 대응) */}
+      <div style={{ padding: '50px 0', width: '90%', maxWidth: '1200px', margin: '0 auto' }}>
         <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px', color: '#FF9000', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#FF9000', boxShadow: '0 0 10px #FF9000' }}></span>
           프리미엄 인증 파트너
         </h2>
-        
-        {/* ★ 수정: display flex, wrap, gap 사용 및 카드 width/height 고정 */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
           {premiumItems.map((item) => (
             <div key={item.id} onClick={() => goToKakao(item.kakaoUrl)} className="hover-card" 
                  style={{ 
-                   width: '380px',    // ★ 고정 가로 너비
-                   height: '180px',   // ★ 고정 세로 높이
+                   width: '100%',
+                   maxWidth: '380px', 
+                   aspectRatio: '2.1 / 1', // 2.1:1 비율 고정 (사진 절대 안 잘림)
                    border: '2px solid #FF9000', 
                    borderRadius: '20px', 
                    overflow: 'hidden', 
                    cursor: 'pointer', 
                    position: 'relative', 
                    backgroundColor: '#1E293B',
-                   flexShrink: 0      // ★ 줄어듦 방지
                  }}>
               <div style={{ position: 'absolute', top: 0, right: 0, backgroundColor: '#FF9000', color: '#000', fontSize: '11px', fontWeight: 'bold', padding: '4px 12px', borderBottomLeftRadius: '10px', zIndex: 10 }}>공식인증</div>
               <img src={item.imageUrl} alt="메이플스토리 공식 인증 안전 거래 업체" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.9' }} />
@@ -157,32 +171,34 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 5. 실시간 매입 업체 (★수정됨: 고정 크기 적용) */}
-      <div style={{ padding: '60px 5%' }}>
+      {/* 5. 실시간 매입 업체 (★수정: 비율 고정으로 모바일/PC 완벽 대응) */}
+      <div style={{ padding: '60px 0', width: '90%', maxWidth: '1200px', margin: '0 auto' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '30px', color: '#FFF' }}>실시간 등록 매입 업체</h2>
-        
-        {/* ★ 수정: display flex, wrap, gap 사용 및 카드 width/height 고정 */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
           {normalItems.map((item) => (
             <div key={item.id} className="hover-card" 
                  style={{ 
-                   width: '250px',      // ★ 고정 가로 너비
-                   height: '320px',     // ★ 고정 세로 높이 (내용 포함)
+                   width: '100%',
+                   maxWidth: '250px', 
                    backgroundColor: '#1E293B', 
                    borderRadius: '16px', 
                    overflow: 'hidden', 
                    border: '1px solid #334155',
-                   flexShrink: 0        // ★ 줄어듦 방지
+                   display: 'flex',
+                   flexDirection: 'column'
                  }}>
-              <div style={{ width: '100%', height: '140px', overflow: 'hidden' }}>
+              {/* 이미지 영역 비율 1.8:1 고정 */}
+              <div style={{ width: '100%', aspectRatio: '1.8 / 1', overflow: 'hidden' }}>
                 <img src={item.imageUrl} alt="메이플 실시간 매입 업체" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
-              <div style={{ padding: '15px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '5px', color: '#F1F5F9', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</h3>
-                <p style={{ color: '#94A3B8', fontSize: '13px', marginBottom: '10px', height: '40px', overflow: 'hidden' }}>{item.desc}</p>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', borderTop: '1px solid #334155', paddingTop: '12px' }}>
-                  <span style={{ color: '#FF9000', fontWeight: 'bold', fontSize: '14px' }}>{item.price}</span>
-                  <button onClick={() => goToKakao(item.kakaoUrl)} style={{ backgroundColor: '#FEE500', color: '#000', padding: '6px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px' }}>카톡 문의</button>
+              <div style={{ padding: '15px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '5px', color: '#F1F5F9', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</h3>
+                  <p style={{ color: '#94A3B8', fontSize: '13px', marginBottom: '10px', height: '40px', overflow: 'hidden' }}>{item.desc}</p>
+                </div>
+                <div style={{ borderTop: '1px solid #334155', paddingTop: '12px' }}>
+                  <div style={{ color: '#FF9000', fontWeight: 'bold', fontSize: '14px', marginBottom: '10px' }}>{item.price}</div>
+                  <button onClick={() => goToKakao(item.kakaoUrl)} style={{ width: '100%', backgroundColor: '#FEE500', color: '#000', padding: '8px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}>카톡 문의하기</button>
                 </div>
               </div>
             </div>
@@ -191,21 +207,21 @@ export default function Home() {
       </div>
 
       {/* 6. 업체 비교 */}
-      <div style={{ padding: '80px 5%', backgroundColor: '#0B1120', borderTop: '1px solid #1E293B' }}>
+      <div style={{ padding: '80px 0', backgroundColor: '#0B1120', borderTop: '1px solid #1E293B' }}>
         <h2 style={{ textAlign: 'center', fontSize: '24px', marginBottom: '50px', color: '#FFF' }}>
           <span style={{ color: '#FF9000' }}>메이플 아이템</span> 업체 비교, 저희는 다릅니다.
         </h2>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap', maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
           <ComparisonCard title="장사꾼 A" subtitle="게임내 고성능 확성기로 홍보하는 사람" items={["오직 메소 ", "평균 70% 낮은 매입가", "아이템 시세를 경매장 최소가", "시세측정 이해 불가"]} />
           <ComparisonCard title="메이플 아이템" subtitle="공식 인증 업체" isMain={true} items={["메소 / 무통장 거래 가능 (업체보증)", "업계 최고 매입가 85% ", "365일 24시간 상시 대기", "합리적인 경매장 시세 측정"]} />
-          <ComparisonCard title="B 장사꾼" subtitle="1인 웹사이트,블로그 업체" items={["무조건 선 받으려고 하는 업체", "수수료,가위값을 판매자에게 부담", "느린 대답 / 지연 이체", "신뢰도 부족"]} />
+          <ComparisonCard title="장사꾼 B" subtitle="1인 웹사이트,블로그 업체" items={["무조건 선 받으려고 하는 업체", "수수료,가위값을 판매자에게 부담", "느린 대답 / 지연 이체", "신뢰도 부족"]} />
         </div>
       </div>
 
       {/* 7. 실시간 후기 */}
-      <div style={{ padding: '60px 5%', borderTop: '1px solid #1E293B', backgroundColor: '#0F172A' }}>
+      <div style={{ padding: '60px 0', borderTop: '1px solid #1E293B', backgroundColor: '#0F172A' }}>
           <h2 style={{ textAlign: 'center', fontSize: '22px', marginBottom: '30px', color: '#FFF' }}>📢 실시간 거래 후기</h2>
-          <div style={{ maxWidth: '600px', margin: '0 auto', backgroundColor: '#1E293B', borderRadius: '20px', padding: '40px', border: '1px solid #334155', minHeight: '160px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ maxWidth: '600px', margin: '0 auto', backgroundColor: '#1E293B', borderRadius: '20px', padding: '40px', border: '1px solid #334155', minHeight: '160px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '90%' }}>
             {reviews.length > 0 ? (
               <div key={currentReviewIndex} className="review-fade" style={{ textAlign: 'center', width: '100%' }}>
                 <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#FF9000', marginBottom: '15px' }}>{reviews[currentReviewIndex].title}</div>
