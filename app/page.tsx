@@ -2,15 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { db } from '../firebase';
-// 배너 100개까지 넉넉히 검사
+// ★ 수정: doc 하나만 있으면 됨 (복잡한 쿼리 제거)
 import { collection, query, orderBy, onSnapshot, limit, doc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function Home() {
   const [items, setItems] = useState<any[]>([]);
-  // 메인 배너 담을 변수
   const [mainBanner, setMainBanner] = useState<any>(null);
+  // ★ 추가: 로딩 상태 (깜빡임 방지)
+  const [bannerLoading, setBannerLoading] = useState(true);
+
   const [reviews, setReviews] = useState<any[]>([]);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [today, setToday] = useState('');
@@ -27,24 +29,17 @@ export default function Home() {
     const qItems = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
     const unsubItems = onSnapshot(qItems, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-    // ★★★ [핵심] 배너 찾기 로직 강화 ★★★
-    // 1. 최신 100개를 가져옴 (다른 배너에 밀려도 찾을 수 있게)
-    const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(100));
-    
-    const unsubBanners = onSnapshot(qBanners, (s) => {
-      const allBanners = s.docs.map(d => ({ id: d.id, ...d.data() }));
-      
-      console.log("전체 배너 목록 로드됨:", allBanners); // F12 콘솔에서 확인 가능
-
-      // 2. '홈 (메인)'이 정확하지 않아도, '홈'이나 '메인' 글자만 들어있으면 찾아냄!
-      // (DB에 "홈 (메인) " 같이 공백이 있어도 찾아냅니다)
-      const found = allBanners.find((b: any) => {
-        const type = b.type || ""; 
-        return type.includes('홈') || type.includes('메인');
-      });
-      
-      console.log("최종 선택된 배너:", found);
-      setMainBanner(found || null);
+    // ★★★ [핵심 변경] 'home_main'이라는 문서 ID 하나만 바라봄 ★★★
+    // 이제 순서 밀릴 걱정 없음, 100% 내가 올린 최신 메인 배너만 뜸
+    const unsubBanner = onSnapshot(doc(db, 'banners', 'home_main'), (docSnap) => {
+      if (docSnap.exists()) {
+        console.log("✅ 메인 배너 로드 성공:", docSnap.data());
+        setMainBanner(docSnap.data());
+      } else {
+        console.log("❌ 메인 배너 없음 (관리자 페이지에서 등록 필요)");
+        setMainBanner(null);
+      }
+      setBannerLoading(false); // 로딩 끝!
     });
 
     const qReviews = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(10));
@@ -59,7 +54,7 @@ export default function Home() {
     });
 
     return () => {
-      unsubItems(); unsubBanners(); unsubReviews(); unsubConfig();
+      unsubItems(); unsubBanner(); unsubReviews(); unsubConfig();
     };
   }, []);
 
@@ -136,22 +131,25 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* 3. 메인 배너 (★수정: minHeight 추가하여 로딩/에러 시에도 공간 확보) */}
+      {/* 3. 메인 배너 (★수정: 로딩 상태 처리 & minHeight 추가) */}
       <div style={{ width: '100%', backgroundColor: '#1E293B', display: 'flex', justifyContent: 'center' }}>
         <div style={{ 
           width: '100%', 
           maxWidth: '1200px', 
           aspectRatio: '3.75 / 1', 
-          minHeight: '200px', // ★ 안전장치
+          minHeight: '200px', // ★ 최소 높이 보장 (로딩 중 납작해짐 방지)
           position: 'relative', 
           overflow: 'hidden'
         }}>
-          {mainBanner ? (
-            <div style={{ width: '100%', height: '100%', backgroundImage: `url(${mainBanner.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'brightness(0.7)' }}></div>
-          ) : ( 
-            <div style={{ width: '100%', height: '100%', background: 'linear-gradient(45deg, #1E293B, #0F172A)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B' }}>
-              배너를 불러오는 중입니다...
-            </div> 
+          {/* 로딩 중이 아닐 때만 내용을 보여줌 */}
+          {!bannerLoading && (
+            mainBanner ? (
+              <div style={{ width: '100%', height: '100%', backgroundImage: `url(${mainBanner.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'brightness(0.7)' }}></div>
+            ) : ( 
+              <div style={{ width: '100%', height: '100%', background: 'linear-gradient(45deg, #1E293B, #0F172A)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B' }}>
+                배너를 등록해주세요.
+              </div> 
+            )
           )}
           
           <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', width: '100%', maxWidth: '800px', padding: '0 20px' }}>
@@ -161,13 +159,12 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 4. 프리미엄 인증 파트너 (왼쪽 정렬) */}
+      {/* 4. 프리미엄 인증 파트너 */}
       <div style={{ padding: '50px 0', width: '90%', maxWidth: '1200px', margin: '0 auto' }}>
         <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px', color: '#FF9000', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#FF9000', boxShadow: '0 0 10px #FF9000' }}></span>
           프리미엄 인증 파트너
         </h2>
-        {/* ★ 왼쪽 정렬 */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'flex-start' }}>
           {premiumItems.map((item) => (
             <div key={item.id} onClick={() => goToKakao(item.kakaoUrl)} className="hover-card" 
@@ -189,10 +186,9 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 5. 실시간 매입 업체 (왼쪽 정렬) */}
+      {/* 5. 실시간 매입 업체 */}
       <div style={{ padding: '60px 0', width: '90%', maxWidth: '1200px', margin: '0 auto' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '30px', color: '#FFF' }}>실시간 등록 매입 업체</h2>
-        {/* ★ 왼쪽 정렬 */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'flex-start' }}>
           {normalItems.map((item) => (
             <div key={item.id} className="hover-card" 

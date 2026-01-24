@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { db, storage } from '../../firebase';
+// ★ setDoc 추가됨 (덮어쓰기 기능)
 import { collection, addDoc, deleteDoc, doc, getDocs, getDoc, setDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
@@ -131,7 +132,7 @@ function MainConfigManager() {
   );
 }
 
-// 2. 업체 관리 (★ 수정됨: 사진 권장 사이즈 안내 추가)
+// 2. 업체 관리
 function CompanyManager() {
   const [items, setItems] = useState<any[]>([]);
   const [name, setName] = useState('');
@@ -176,8 +177,6 @@ function CompanyManager() {
           <input placeholder="카톡 링크" value={kakaoUrl} onChange={e => setKakaoUrl(e.target.value)} style={inputStyle} />
           <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><input type="checkbox" checked={isPremium} onChange={e => setIsPremium(e.target.checked)} /> 프리미엄 등록</label>
         </div>
-        
-        {/* ★ 수정됨: 권장 사이즈 안내 추가 */}
         <div style={{ marginBottom: '15px' }}>
           <input type="file" name="image" accept="image/*" />
           <div style={{ marginTop: '10px', fontSize: '13px', fontWeight: 'bold' }}>
@@ -188,7 +187,6 @@ function CompanyManager() {
             )}
           </div>
         </div>
-
         <button type="submit" disabled={loading} style={{...btnStyle, marginTop:'15px'}}>{loading ? "등록 중..." : "등록하기"}</button>
       </form>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
@@ -203,18 +201,35 @@ function CompanyManager() {
   );
 }
 
-// 3. 배너 관리 (★ 수정됨: 배너 사이즈 안내 추가)
+// ★★★ 3. 배너 관리 (여기가 완전히 바뀜) ★★★
 function BannerManager() {
   const handleBannerUpdate = async (e: any, type: string) => {
     const file = e.target.files[0];
     if (!file) return;
     try {
-      const imgRef = ref(storage, `banners/${type}_${Date.now()}`);
+      // 1. 문서 ID를 고정합니다. (이제 무조건 이 이름으로만 저장됨)
+      let docId = '';
+      if (type === '홈 (메인)') docId = 'home_main';
+      else if (type === '공지사항') docId = 'notice_main';
+      else if (type === '거래방법') docId = 'howto_main';
+      else if (type === '이용후기') docId = 'review_main';
+      
+      const imgRef = ref(storage, `banners/${docId}_${Date.now()}`);
       await uploadBytes(imgRef, file);
       const imageUrl = await getDownloadURL(imgRef);
-      await addDoc(collection(db, 'banners'), { type, imageUrl, createdAt: serverTimestamp() });
-      alert(`${type} 배너 변경 완료`);
-    } catch (err) { alert("업로드 실패"); }
+
+      // 2. addDoc(추가) 대신 setDoc(덮어쓰기) 사용
+      await setDoc(doc(db, 'banners', docId), { 
+        type, 
+        imageUrl, 
+        createdAt: serverTimestamp() 
+      });
+
+      alert(`${type} 배너가 성공적으로 변경되었습니다!`);
+    } catch (err) { 
+      console.error(err);
+      alert("업로드 실패"); 
+    }
   };
   return (
     <div>
@@ -223,7 +238,6 @@ function BannerManager() {
         {['홈 (메인)', '공지사항', '거래방법', '이용후기'].map((menu, idx) => (
           <div key={idx} style={{ backgroundColor: '#FFF', padding: '20px', borderRadius: '15px' }}>
             <h3>{menu} 배너</h3>
-            {/* ★ 추가: 배너 권장 사이즈 안내 */}
             <p style={{ fontSize: '12px', color: '#FF9000', marginBottom: '10px' }}>
               {menu.includes('홈') ? '💡 권장: 1200 x 320 px (PC)' : '💡 권장: 1200 x 300 px (서브)'}
             </p>
