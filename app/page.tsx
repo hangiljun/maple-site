@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 export default function Home() {
   const [items, setItems] = useState<any[]>([]);
-  // ★ 수정: 메인 배너를 찾아서 저장할 상태 변수
+  // ★ 수정: 메인 배너 전용 상태 변수 추가
   const [mainBanner, setMainBanner] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
@@ -26,13 +26,13 @@ export default function Home() {
     const qItems = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
     const unsubItems = onSnapshot(qItems, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-    // ★ 수정: 배너를 넉넉히(20개) 가져와서 '홈 (메인)' 타입만 골라냄 (DB 덮어씌움 문제 해결)
+    // ★ 수정: 배너를 20개 정도 가져와서 그 중 '홈 (메인)' 타입만 찾아서 설정 (DB 덮어씌움 방지)
     const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(20));
     const unsubBanners = onSnapshot(qBanners, (s) => {
       const allBanners = s.docs.map(d => d.data());
-      // 여러 배너 중 '홈 (메인)' 태그가 달린 것만 찾음
-      const homeBanner = allBanners.find((b: any) => b.type === '홈 (메인)');
-      setMainBanner(homeBanner || null);
+      // '홈 (메인)' 태그가 달린 배너 찾기
+      const foundBanner = allBanners.find((b: any) => b.type === '홈 (메인)');
+      setMainBanner(foundBanner || null);
     });
 
     const qReviews = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(10));
@@ -87,7 +87,7 @@ export default function Home() {
           <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981', boxShadow: '0 0 8px #10b981' }}></span>
           <span>{today} 실시간 운영 중</span>
           <span style={{ color: '#334155' }}>|</span>
-          <span style={{ color: '#FF9000' }}>평균 응답 시간 3분 내외</span>
+          <span style={{ color: '#FF9000' }}>평균 응답 시간 1분 내외</span>
         </div>
         <div style={{ backgroundColor: '#0f172a', overflow: 'hidden', whiteSpace: 'nowrap', padding: '6px 0', borderTop: '1px solid #1e293b' }}>
           <div className="marquee" style={{ display: 'inline-block', fontSize: '12px', color: '#64748b' }}>
@@ -124,12 +124,12 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* 3. 메인 배너 (★수정: 모바일/PC 반응형 비율 유지 및 데이터 필터링 적용) */}
+      {/* 3. 메인 배너 (★수정: 비율 유지 & 데이터 필터링 적용) */}
       <div style={{ width: '100%', backgroundColor: '#1E293B', display: 'flex', justifyContent: 'center' }}>
         <div style={{ 
           width: '100%', 
-          maxWidth: '1200px', // PC 최대 크기
-          aspectRatio: '3.75 / 1', // 1200:320 비율 고정 (이미지 안 잘림)
+          maxWidth: '1200px', // PC 최대폭
+          aspectRatio: '1200 / 320', // 비율 고정 (이미지 안 잘림)
           position: 'relative', 
           overflow: 'hidden'
         }}>
@@ -144,7 +144,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 4. 프리미엄 인증 파트너 (★수정: 비율 고정으로 모바일/PC 완벽 대응) */}
+      {/* 4. 프리미엄 인증 파트너 (★수정: 비율 고정으로 모바일/PC 대응) */}
       <div style={{ padding: '50px 0', width: '90%', maxWidth: '1200px', margin: '0 auto' }}>
         <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px', color: '#FF9000', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#FF9000', boxShadow: '0 0 10px #FF9000' }}></span>
@@ -156,7 +156,7 @@ export default function Home() {
                  style={{ 
                    width: '100%',
                    maxWidth: '380px', 
-                   aspectRatio: '2.1 / 1', // 2.1:1 비율 고정 (사진 절대 안 잘림)
+                   aspectRatio: '380 / 180', // 비율 고정 (사진 절대 안 잘림)
                    border: '2px solid #FF9000', 
                    borderRadius: '20px', 
                    overflow: 'hidden', 
@@ -171,7 +171,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 5. 실시간 매입 업체 (★수정: 비율 고정으로 모바일/PC 완벽 대응) */}
+      {/* 5. 실시간 매입 업체 (★수정: 비율 고정) */}
       <div style={{ padding: '60px 0', width: '90%', maxWidth: '1200px', margin: '0 auto' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '30px', color: '#FFF' }}>실시간 등록 매입 업체</h2>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
@@ -188,7 +188,7 @@ export default function Home() {
                    flexDirection: 'column'
                  }}>
               {/* 이미지 영역 비율 1.8:1 고정 */}
-              <div style={{ width: '100%', aspectRatio: '1.8 / 1', overflow: 'hidden' }}>
+              <div style={{ width: '100%', aspectRatio: '250 / 140', overflow: 'hidden' }}>
                 <img src={item.imageUrl} alt="메이플 실시간 매입 업체" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <div style={{ padding: '15px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -214,7 +214,7 @@ export default function Home() {
         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap', maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
           <ComparisonCard title="장사꾼 A" subtitle="게임내 고성능 확성기로 홍보하는 사람" items={["오직 메소 ", "평균 70% 낮은 매입가", "아이템 시세를 경매장 최소가", "시세측정 이해 불가"]} />
           <ComparisonCard title="메이플 아이템" subtitle="공식 인증 업체" isMain={true} items={["메소 / 무통장 거래 가능 (업체보증)", "업계 최고 매입가 85% ", "365일 24시간 상시 대기", "합리적인 경매장 시세 측정"]} />
-          <ComparisonCard title="장사꾼 B" subtitle="1인 웹사이트,블로그 업체" items={["무조건 선 받으려고 하는 업체", "수수료,가위값을 판매자에게 부담", "느린 대답 / 지연 이체", "신뢰도 부족"]} />
+          <ComparisonCard title="B 장사꾼" subtitle="1인 웹사이트,블로그 업체" items={["무조건 선 받으려고 하는 업체", "수수료,가위값을 판매자에게 부담", "느린 대답 / 지연 이체", "신뢰도 부족"]} />
         </div>
       </div>
 
