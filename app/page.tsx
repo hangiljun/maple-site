@@ -1,3 +1,6 @@
+// ★ 수정 1: 캐시 강제 무효화 (이 줄이 있어야 내용이 바로 바뀝니다)
+export const dynamic = 'force-dynamic'; 
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -8,8 +11,7 @@ import Link from 'next/link';
 
 export default function Home() {
   const [items, setItems] = useState<any[]>([]);
-  // ★ 수정: 메인 배너 전용 변수
-  const [mainBanner, setMainBanner] = useState<any>(null);
+  const [mainBanner, setMainBanner] = useState<any>(null); // 메인 배너 상태
   const [reviews, setReviews] = useState<any[]>([]);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [today, setToday] = useState('');
@@ -26,10 +28,11 @@ export default function Home() {
     const qItems = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
     const unsubItems = onSnapshot(qItems, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-    // ★ 수정: 배너 50개 가져와서 '홈 (메인)'만 골라냄
+    // ★ 수정 2: 배너를 넉넉히 가져와서 '홈 (메인)'만 정확히 찾아냄
     const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(50));
     const unsubBanners = onSnapshot(qBanners, (s) => {
       const allBanners = s.docs.map(d => d.data());
+      // '홈 (메인)' 태그가 정확히 일치하는 배너 중 가장 최신 것 찾기
       const homeBanner = allBanners.find((b: any) => b.type === '홈 (메인)');
       setMainBanner(homeBanner || null);
     });
@@ -123,7 +126,7 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* 3. 메인 배너 (비율 고정) */}
+      {/* 3. 메인 배너 (비율 고정 & 메인 배너만 표시) */}
       <div style={{ width: '100%', backgroundColor: '#1E293B', display: 'flex', justifyContent: 'center' }}>
         <div style={{ 
           width: '100%', 
@@ -136,7 +139,7 @@ export default function Home() {
             <div style={{ width: '100%', height: '100%', backgroundImage: `url(${mainBanner.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'brightness(0.7)' }}></div>
           ) : ( <div style={{ width: '100%', height: '100%', background: 'linear-gradient(45deg, #1E293B, #0F172A)' }}></div> )}
           
-          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', width: '100%', padding: '0 20px' }}>
+          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', width: '100%', maxWidth: '800px', padding: '0 20px' }}>
             <h1 style={{ fontSize: 'clamp(18px, 4vw, 28px)', fontWeight: '900', color: '#FFF', marginBottom: '15px', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>메이플 아이템 <span style={{ color: '#FF9000' }}>최고가 매입</span> & 시세 비교</h1>
             <p style={{ color: '#E2E8F0', fontWeight: '500', fontSize: 'clamp(12px, 3vw, 16px)', backgroundColor: 'rgba(0,0,0,0.5)', display: 'inline-block', padding: '8px 20px', borderRadius: '30px', backdropFilter: 'blur(5px)' }}>검증된 1등 업체들과 안전하게 거래하세요</p>
           </div>
@@ -149,7 +152,7 @@ export default function Home() {
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#FF9000', boxShadow: '0 0 10px #FF9000' }}></span>
           프리미엄 인증 파트너
         </h2>
-        {/* ★ 수정: 왼쪽 정렬 flex-start */}
+        {/* ★ 수정 3: 왼쪽 정렬 flex-start */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'flex-start' }}>
           {premiumItems.map((item) => (
             <div key={item.id} onClick={() => goToKakao(item.kakaoUrl)} className="hover-card" 
@@ -174,7 +177,7 @@ export default function Home() {
       {/* 5. 실시간 매입 업체 (왼쪽 정렬) */}
       <div style={{ padding: '60px 0', width: '90%', maxWidth: '1200px', margin: '0 auto' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '30px', color: '#FFF' }}>실시간 등록 매입 업체</h2>
-        {/* ★ 수정: 왼쪽 정렬 flex-start */}
+        {/* ★ 수정 3: 왼쪽 정렬 flex-start */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'flex-start' }}>
           {normalItems.map((item) => (
             <div key={item.id} className="hover-card" 
