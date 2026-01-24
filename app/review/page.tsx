@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { db, storage } from '../../firebase';
-import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, limit } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useRouter } from 'next/navigation';
 
@@ -12,19 +12,32 @@ export default function ReviewPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  // ★ 수정: 배너 상태 추가
+  const [banner, setBanner] = useState<any>(null);
   const router = useRouter();
 
   const [form, setForm] = useState({ title: '', nickname: '', password: '', content: '' });
   const [image, setImage] = useState<File | null>(null);
 
   useEffect(() => {
+    // 1. 리뷰 목록 가져오기
     const q = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (s) => {
       const data = s.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setReviews(data);
       setFilteredReviews(data);
     });
-    return () => unsubscribe();
+
+    // ★ 수정: 배너 50개 중 '이용후기' 타입만 찾기
+    const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(50));
+    const unsubBanners = onSnapshot(qBanners, (s) => {
+      const allBanners = s.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const targetBanner = allBanners.find((b: any) => b.type === '이용후기');
+      setBanner(targetBanner || null);
+    });
+
+    return () => { unsubscribe(); unsubBanners(); }
   }, []);
 
   const handleSearch = () => {
@@ -71,6 +84,19 @@ export default function ReviewPage() {
           <span style={{ color: '#FF9000', cursor: 'pointer' }}>이용후기</span>
         </div>
       </nav>
+
+      {/* ★ 수정: 배너가 있을 때만 표시 & 비율 고정 */}
+      {banner && (
+        <div style={{ width: '100%', backgroundColor: '#1E293B', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ width: '100%', maxWidth: '1200px', aspectRatio: '4/1', position: 'relative', overflow: 'hidden' }}>
+            <img src={banner.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.6' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15, 23, 42, 0.4)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'white' }}>
+              <h1 style={{ fontSize: '32px', fontWeight: 'bold' }}>이용후기</h1>
+              <p style={{ fontSize: '16px', marginTop: '10px', color: '#CBD5E1' }}>고객님들의 소중한 거래 후기를 확인하세요.</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>

@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 export default function Home() {
   const [items, setItems] = useState<any[]>([]);
-  // ★ 수정: 메인 배너 전용 상태
+  // ★ 수정: 메인 배너 전용 변수
   const [mainBanner, setMainBanner] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
@@ -26,13 +26,12 @@ export default function Home() {
     const qItems = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
     const unsubItems = onSnapshot(qItems, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-    // ★ 수정: 배너 로딩 로직 강화 (최신 50개 중 '홈 (메인)' 타입을 찾음)
+    // ★ 수정: 배너 50개 가져와서 '홈 (메인)'만 골라냄
     const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(50));
     const unsubBanners = onSnapshot(qBanners, (s) => {
       const allBanners = s.docs.map(d => d.data());
-      // '홈 (메인)' 태그가 달린 가장 최신 배너 1개를 찾아서 설정
-      const foundBanner = allBanners.find((b: any) => b.type === '홈 (메인)');
-      setMainBanner(foundBanner || null);
+      const homeBanner = allBanners.find((b: any) => b.type === '홈 (메인)');
+      setMainBanner(homeBanner || null);
     });
 
     const qReviews = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(10));
@@ -124,12 +123,12 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* 3. 메인 배너 (★수정: 비율 유지 & 데이터 필터링 적용) */}
+      {/* 3. 메인 배너 (비율 고정) */}
       <div style={{ width: '100%', backgroundColor: '#1E293B', display: 'flex', justifyContent: 'center' }}>
         <div style={{ 
           width: '100%', 
-          maxWidth: '1200px', // PC 최대폭
-          aspectRatio: '3.75 / 1', // 1200:320 비율 고정 (이미지 안 잘림)
+          maxWidth: '1200px', 
+          aspectRatio: '3.75 / 1', // 1200:320 비율
           position: 'relative', 
           overflow: 'hidden'
         }}>
@@ -144,13 +143,14 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 4. 프리미엄 인증 파트너 (★수정: 왼쪽 정렬 flex-start 적용) */}
+      {/* 4. 프리미엄 인증 파트너 (왼쪽 정렬) */}
       <div style={{ padding: '50px 0', width: '90%', maxWidth: '1200px', margin: '0 auto' }}>
         <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px', color: '#FF9000', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#FF9000', boxShadow: '0 0 10px #FF9000' }}></span>
           프리미엄 인증 파트너
         </h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'flex-start' }}> {/* ★ 왼쪽 정렬 */}
+        {/* ★ 수정: 왼쪽 정렬 flex-start */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'flex-start' }}>
           {premiumItems.map((item) => (
             <div key={item.id} onClick={() => goToKakao(item.kakaoUrl)} className="hover-card" 
                  style={{ 
@@ -171,20 +171,21 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 5. 실시간 매입 업체 (★수정: 왼쪽 정렬 flex-start 적용) */}
+      {/* 5. 실시간 매입 업체 (왼쪽 정렬) */}
       <div style={{ padding: '60px 0', width: '90%', maxWidth: '1200px', margin: '0 auto' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '30px', color: '#FFF' }}>실시간 등록 매입 업체</h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'flex-start' }}> {/* ★ 왼쪽 정렬 */}
+        {/* ★ 수정: 왼쪽 정렬 flex-start */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'flex-start' }}>
           {normalItems.map((item) => (
             <div key={item.id} className="hover-card" 
                  style={{ 
                    width: '100%',
-                   maxWidth: '250px', 
+                   maxWidth: '250px',
                    backgroundColor: '#1E293B', 
                    borderRadius: '16px', 
                    overflow: 'hidden', 
                    border: '1px solid #334155',
-                   display: 'flex',
+                   display: 'flex', 
                    flexDirection: 'column'
                  }}>
               <div style={{ width: '100%', aspectRatio: '1.8 / 1', overflow: 'hidden' }}>
@@ -192,12 +193,12 @@ export default function Home() {
               </div>
               <div style={{ padding: '15px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div>
-                  <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '5px', color: '#F1F5F9', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</h3>
-                  <p style={{ color: '#94A3B8', fontSize: '13px', marginBottom: '10px', height: '40px', overflow: 'hidden' }}>{item.desc}</p>
+                  <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '5px', color: '#F1F5F9' }}>{item.name}</h3>
+                  <p style={{ color: '#94A3B8', fontSize: '13px', marginBottom: '15px', height: '40px', overflow: 'hidden' }}>{item.desc}</p>
                 </div>
-                <div style={{ borderTop: '1px solid #334155', paddingTop: '12px' }}>
-                  <div style={{ color: '#FF9000', fontWeight: 'bold', fontSize: '14px', marginBottom: '10px' }}>{item.price}</div>
-                  <button onClick={() => goToKakao(item.kakaoUrl)} style={{ width: '100%', backgroundColor: '#FEE500', color: '#000', padding: '8px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}>카톡 문의하기</button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', borderTop: '1px solid #334155', paddingTop: '12px' }}>
+                  <span style={{ color: '#FF9000', fontWeight: 'bold', fontSize: '14px' }}>{item.price}</span>
+                  <button onClick={() => goToKakao(item.kakaoUrl)} style={{ backgroundColor: '#FEE500', color: '#000', padding: '6px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px' }}>카톡 문의</button>
                 </div>
               </div>
             </div>
