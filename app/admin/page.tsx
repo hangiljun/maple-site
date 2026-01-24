@@ -39,6 +39,7 @@ export default function AdminDashboard() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif", backgroundColor: '#F5F5F5' }}>
+      {/* 사이드바 메뉴 */}
       <div style={{ width: '250px', backgroundColor: '#333', color: '#FFF', padding: '30px 20px', flexShrink: 0 }}>
         <h1 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '40px', color: '#FF9000' }}>관리자 센터</h1>
         <MenuButton label="메인 페이지 설정" active={activeTab === 'main_config'} onClick={() => setActiveTab('main_config')} />
@@ -48,6 +49,7 @@ export default function AdminDashboard() {
         <MenuButton label="이용후기 관리" active={activeTab === 'review'} onClick={() => setActiveTab('review')} />
       </div>
       
+      {/* 메인 컨텐츠 영역 */}
       <div style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
         {activeTab === 'main_config' && <MainConfigManager />}
         {activeTab === 'company' && <CompanyManager />}
@@ -129,7 +131,7 @@ function MainConfigManager() {
   );
 }
 
-// 2. 업체 관리 (★ 수정됨: 권장 사이즈 안내 추가)
+// 2. 업체 관리 (★ 수정됨: 사진 권장 사이즈 안내 추가)
 function CompanyManager() {
   const [items, setItems] = useState<any[]>([]);
   const [name, setName] = useState('');

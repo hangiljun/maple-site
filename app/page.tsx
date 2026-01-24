@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 export default function Home() {
   const [items, setItems] = useState<any[]>([]);
-  // ★ 수정: 메인 배너 전용 상태 변수 추가
+  // ★ 수정: 메인 배너 전용 상태
   const [mainBanner, setMainBanner] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
@@ -26,11 +26,11 @@ export default function Home() {
     const qItems = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
     const unsubItems = onSnapshot(qItems, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-    // ★ 수정: 배너를 20개 정도 가져와서 그 중 '홈 (메인)' 타입만 찾아서 설정 (DB 덮어씌움 방지)
-    const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(20));
+    // ★ 수정: 배너 로딩 로직 강화 (최신 50개 중 '홈 (메인)' 타입을 찾음)
+    const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(50));
     const unsubBanners = onSnapshot(qBanners, (s) => {
       const allBanners = s.docs.map(d => d.data());
-      // '홈 (메인)' 태그가 달린 배너 찾기
+      // '홈 (메인)' 태그가 달린 가장 최신 배너 1개를 찾아서 설정
       const foundBanner = allBanners.find((b: any) => b.type === '홈 (메인)');
       setMainBanner(foundBanner || null);
     });
@@ -129,7 +129,7 @@ export default function Home() {
         <div style={{ 
           width: '100%', 
           maxWidth: '1200px', // PC 최대폭
-          aspectRatio: '1200 / 320', // 비율 고정 (이미지 안 잘림)
+          aspectRatio: '3.75 / 1', // 1200:320 비율 고정 (이미지 안 잘림)
           position: 'relative', 
           overflow: 'hidden'
         }}>
@@ -144,19 +144,19 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 4. 프리미엄 인증 파트너 (★수정: 비율 고정으로 모바일/PC 대응) */}
+      {/* 4. 프리미엄 인증 파트너 (★수정: 왼쪽 정렬 flex-start 적용) */}
       <div style={{ padding: '50px 0', width: '90%', maxWidth: '1200px', margin: '0 auto' }}>
         <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px', color: '#FF9000', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#FF9000', boxShadow: '0 0 10px #FF9000' }}></span>
           프리미엄 인증 파트너
         </h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'flex-start' }}> {/* ★ 왼쪽 정렬 */}
           {premiumItems.map((item) => (
             <div key={item.id} onClick={() => goToKakao(item.kakaoUrl)} className="hover-card" 
                  style={{ 
                    width: '100%',
                    maxWidth: '380px', 
-                   aspectRatio: '380 / 180', // 비율 고정 (사진 절대 안 잘림)
+                   aspectRatio: '2.1 / 1', 
                    border: '2px solid #FF9000', 
                    borderRadius: '20px', 
                    overflow: 'hidden', 
@@ -171,10 +171,10 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 5. 실시간 매입 업체 (★수정: 비율 고정) */}
+      {/* 5. 실시간 매입 업체 (★수정: 왼쪽 정렬 flex-start 적용) */}
       <div style={{ padding: '60px 0', width: '90%', maxWidth: '1200px', margin: '0 auto' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '30px', color: '#FFF' }}>실시간 등록 매입 업체</h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'flex-start' }}> {/* ★ 왼쪽 정렬 */}
           {normalItems.map((item) => (
             <div key={item.id} className="hover-card" 
                  style={{ 
@@ -187,8 +187,7 @@ export default function Home() {
                    display: 'flex',
                    flexDirection: 'column'
                  }}>
-              {/* 이미지 영역 비율 1.8:1 고정 */}
-              <div style={{ width: '100%', aspectRatio: '250 / 140', overflow: 'hidden' }}>
+              <div style={{ width: '100%', aspectRatio: '1.8 / 1', overflow: 'hidden' }}>
                 <img src={item.imageUrl} alt="메이플 실시간 매입 업체" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <div style={{ padding: '15px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
