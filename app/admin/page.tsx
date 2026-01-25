@@ -1,53 +1,99 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { db, storage } from '../../firebase';
-// ★ setDoc 추가됨 (덮어쓰기 기능)
+// ★ auth 추가됨
+import { db, storage, auth } from '../../firebase';
 import { collection, addDoc, deleteDoc, doc, getDocs, getDoc, setDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+// ★ 파이어베이스 인증 관련 함수들 추가
+import { signInWithEmailAndPassword, onAuthStateChanged, signOut, User } from 'firebase/auth';
 
 export default function AdminDashboard() {
-  const ADMIN_PASSWORD = "rlfwns55%%"; 
-
+  // ★ 더 이상 코드에 비밀번호를 적지 않습니다!
+  
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true); // 로딩 상태 (깜빡임 방지)
   const [activeTab, setActiveTab] = useState('company'); 
 
-  const checkLogin = () => {
-    if (password === ADMIN_PASSWORD) { 
-      setIsLoggedIn(true);
-    } else {
-      alert('비밀번호가 틀렸습니다.');
+  // 1. 사이트 접속 시 로그인 상태인지 확인 (새로고침 해도 유지됨)
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false); // 확인 끝났으니 로딩 해제
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // 2. 로그인 함수 (구글 서버에 물어봄)
+  const handleLogin = async (e: any) => {
+    e.preventDefault();
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      // 성공하면 useEffect에서 자동으로 감지해서 화면을 넘겨줌
+    } catch (error) {
+      alert('로그인 실패! 이메일이나 비밀번호를 확인해주세요.');
     }
   };
 
-  if (!isLoggedIn) {
+  // 3. 로그아웃 함수
+  const handleLogout = async () => {
+    if (confirm("로그아웃 하시겠습니까?")) {
+      await signOut(auth);
+    }
+  };
+
+  // 로딩 중이면 흰 화면 (깜빡임 방지)
+  if (loading) return <div style={{ height: '100vh', backgroundColor: '#0F172A' }}></div>;
+
+  // 로그인이 안 되어 있으면 [로그인 화면] 보여줌
+  if (!user) {
     return (
       <div style={{ height: '100vh', backgroundColor: '#0F172A', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#FFF', fontFamily: "'Noto Sans KR', sans-serif" }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '30px', color: '#FF9000' }}>🔒 관리자 접속</h2>
-        <input 
-          type="password" 
-          placeholder="관리자 비밀번호 입력" 
-          value={password} 
-          onChange={(e) => setPassword(e.target.value)} 
-          onKeyDown={(e) => e.key === 'Enter' && checkLogin()}
-          style={{ padding: '15px', borderRadius: '10px', border: '1px solid #334155', backgroundColor: '#1E293B', color: '#FFF', marginBottom: '20px', width: '300px', outline: 'none', fontSize: '16px', textAlign: 'center' }}
-        />
-        <button onClick={checkLogin} style={{ padding: '15px 50px', backgroundColor: '#FF9000', color: '#000', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', fontSize: '16px' }}>접속하기</button>
+        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '30px', color: '#FF9000' }}>🔒 관리자 보안 접속</h2>
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '300px' }}>
+          <input 
+            type="email" 
+            placeholder="관리자 이메일 (예: admin@...)" 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)} 
+            style={loginInputStyle}
+            required
+          />
+          <input 
+            type="password" 
+            placeholder="비밀번호" 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+            style={loginInputStyle}
+            required
+          />
+          <button type="submit" style={{ padding: '15px', backgroundColor: '#FF9000', color: '#000', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', fontSize: '16px' }}>
+            로그인
+          </button>
+        </form>
       </div>
     );
   }
 
+  // 로그인이 되어 있으면 [관리자 대시보드] 보여줌
   return (
     <div style={{ display: 'flex', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif", backgroundColor: '#F5F5F5' }}>
       {/* 사이드바 메뉴 */}
-      <div style={{ width: '250px', backgroundColor: '#333', color: '#FFF', padding: '30px 20px', flexShrink: 0 }}>
+      <div style={{ width: '250px', backgroundColor: '#333', color: '#FFF', padding: '30px 20px', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
         <h1 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '40px', color: '#FF9000' }}>관리자 센터</h1>
         <MenuButton label="메인 페이지 설정" active={activeTab === 'main_config'} onClick={() => setActiveTab('main_config')} />
         <MenuButton label="업체 등록/관리" active={activeTab === 'company'} onClick={() => setActiveTab('company')} />
         <MenuButton label="배너 이미지 관리" active={activeTab === 'banner'} onClick={() => setActiveTab('banner')} />
         <MenuButton label="공지/방법 관리" active={activeTab === 'write'} onClick={() => setActiveTab('write')} />
         <MenuButton label="이용후기 관리" active={activeTab === 'review'} onClick={() => setActiveTab('review')} />
+        
+        {/* 로그아웃 버튼 (맨 아래) */}
+        <div style={{ marginTop: 'auto', borderTop: '1px solid #555', paddingTop: '20px' }}>
+          <div style={{ fontSize: '12px', color: '#CCC', marginBottom: '10px' }}>{user.email}님 접속중</div>
+          <button onClick={handleLogout} style={{ width: '100%', padding: '10px', backgroundColor: '#FF4444', color: '#FFF', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>로그아웃</button>
+        </div>
       </div>
       
       {/* 메인 컨텐츠 영역 */}
@@ -62,11 +108,16 @@ export default function AdminDashboard() {
   );
 }
 
+// 스타일 및 하위 컴포넌트들
+const loginInputStyle = { padding: '15px', borderRadius: '10px', border: '1px solid #334155', backgroundColor: '#1E293B', color: '#FFF', outline: 'none', fontSize: '16px' };
+
 function MenuButton({ label, active, onClick }: any) {
   return (
-    <div onClick={onClick} style={{ padding: '15px', marginBottom: '10px', backgroundColor: active ? '#FF9000' : 'transparent', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', transition: '0.3s' }}>{label}</div>
+    <div onClick={onClick} style={{ padding: '15px', marginBottom: '10px', backgroundColor: active ? '#FF9000' : 'transparent', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', transition: '0.3s', color: active ? '#000' : '#FFF' }}>{label}</div>
   );
 }
+
+// --- 아래부터는 기존 기능 매니저들 (그대로 유지) ---
 
 // 1. 메인 페이지 설정
 function MainConfigManager() {
@@ -201,13 +252,12 @@ function CompanyManager() {
   );
 }
 
-// ★★★ 3. 배너 관리 (여기가 완전히 바뀜) ★★★
+// 3. 배너 관리
 function BannerManager() {
   const handleBannerUpdate = async (e: any, type: string) => {
     const file = e.target.files[0];
     if (!file) return;
     try {
-      // 1. 문서 ID를 고정합니다. (이제 무조건 이 이름으로만 저장됨)
       let docId = '';
       if (type === '홈 (메인)') docId = 'home_main';
       else if (type === '공지사항') docId = 'notice_main';
@@ -218,7 +268,6 @@ function BannerManager() {
       await uploadBytes(imgRef, file);
       const imageUrl = await getDownloadURL(imgRef);
 
-      // 2. addDoc(추가) 대신 setDoc(덮어쓰기) 사용
       await setDoc(doc(db, 'banners', docId), { 
         type, 
         imageUrl, 

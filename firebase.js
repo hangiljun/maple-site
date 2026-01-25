@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-import { getAuth } from "firebase/auth";
+import { getAuth } from "firebase/auth"; // ★ 로그인 기능 필수 라이브러리
 
 const firebaseConfig = {
   apiKey: "AIzaSyABvyebJmW2GlaiLNvbWxuOSXbntkk21mA",
@@ -17,4 +17,4 @@ const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
 export const storage = getStorage(app);
-export const auth = getAuth(app); // 로그인 기능을 위해 필수!
+export const auth = getAuth(app); // ★ 인증 객체 내보내기
