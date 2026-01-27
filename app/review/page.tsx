@@ -73,7 +73,8 @@ export default function ReviewPage() {
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', borderBottom: '1px solid #334155', backgroundColor: 'rgba(15, 23, 42, 0.95)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
           <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-             <img src="/logo.png" alt="로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+              {/* ★ 수정: alt="메이플 아이템 로고" 추가 */}
+             <img src="/logo.png" alt="메이플 아이템 로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
           </div>
           <div style={{ fontWeight: '900', color: '#FF9000', fontSize: '20px' }}>메이플 아이템</div>
         </div>
@@ -89,7 +90,8 @@ export default function ReviewPage() {
       {banner && (
         <div style={{ width: '100%', backgroundColor: '#1E293B', display: 'flex', justifyContent: 'center' }}>
           <div style={{ width: '100%', maxWidth: '1200px', aspectRatio: '4/1', position: 'relative', overflow: 'hidden' }}>
-            <img src={banner.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.6' }} />
+            {/* ★ 수정: alt="이용후기 페이지 상단 배너" 추가 */}
+            <img src={banner.imageUrl} alt="이용후기 페이지 상단 배너" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.6' }} />
             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15, 23, 42, 0.4)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'white' }}>
               <h1 style={{ fontSize: '32px', fontWeight: 'bold' }}>이용후기</h1>
               <p style={{ fontSize: '16px', marginTop: '10px', color: '#CBD5E1' }}>고객님들의 소중한 거래 후기를 확인하세요.</p>

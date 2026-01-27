@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 
 export default function HowtoPage() {
   const [howtos, setHowtos] = useState<any[]>([]);
-  const [banner, setBanner] = useState<any>(null); // 단일 배너 상태
+  const [banner, setBanner] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('전체');
   const router = useRouter();
 
@@ -14,7 +14,6 @@ export default function HowtoPage() {
     const q = query(collection(db, 'howto'), orderBy('createdAt', 'desc'));
     const unsubHowto = onSnapshot(q, (s) => setHowtos(s.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
 
-    // ★ 수정: 배너 50개 중 '거래방법' 타입만 찾기
     const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(50));
     const unsubBanners = onSnapshot(qBanners, (s) => {
       const allBanners = s.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -39,7 +38,8 @@ export default function HowtoPage() {
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', backgroundColor: 'rgba(15, 23, 42, 0.95)', borderBottom: '1px solid #334155', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
           <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <img src="/logo.png" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+            {/* ★ 수정: alt="메이플 아이템 로고" 추가 */}
+            <img src="/logo.png" alt="메이플 아이템 로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
           </div>
           <div style={{ fontSize: '20px', fontWeight: '900', color: '#FF9000' }}>메이플 아이템</div>
         </div>
@@ -51,10 +51,10 @@ export default function HowtoPage() {
         </div>
       </nav>
 
-      {/* ★ 수정: 배너 비율 고정 */}
       <div style={{ width: '100%', backgroundColor: '#1E293B', display: 'flex', justifyContent: 'center' }}>
         <div style={{ width: '100%', maxWidth: '1200px', aspectRatio: '4/1', position: 'relative', overflow: 'hidden' }}>
-          {banner && <img src={banner.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.6' }} />}
+          {/* ★ 수정: alt="거래방법 배너" 추가 */}
+          {banner && <img src={banner.imageUrl} alt="거래방법 배너" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.6' }} />}
           <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15, 23, 42, 0.4)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'white' }}>
             <h1 style={{ fontSize: '32px', fontWeight: 'bold' }}>거래 방법</h1>
             <p style={{ fontSize: '16px', marginTop: '10px', color: '#CBD5E1' }}>안전한 거래 절차와 가이드를 확인하세요.</p>
@@ -75,7 +75,8 @@ export default function HowtoPage() {
             return (
               <div key={h.id} onClick={() => router.push(`/howto/${h.id}`)} style={{ backgroundColor: '#1E293B', borderRadius: '20px', overflow: 'hidden', cursor: 'pointer', border: '1px solid #334155' }}>
                 <div style={{ position: 'relative', width: '100%', height: '180px', backgroundColor: '#333' }}>
-                  {thumbnail ? <img src={thumbnail} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.9' }} /> : <div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center', color:'#555', fontSize:'13px'}}>이미지 없음</div>}
+                  {/* ★ 수정: alt={h.title} 추가 */}
+                  {thumbnail ? <img src={thumbnail} alt={h.title} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.9' }} /> : <div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center', color:'#555', fontSize:'13px'}}>이미지 없음</div>}
                   <div style={{ position: 'absolute', top: '15px', left: '15px', backgroundColor: '#FF9000', color: '#000', fontSize: '11px', fontWeight: 'bold', padding: '4px 10px', borderRadius: '5px' }}>{h.category}</div>
                 </div>
                 <div style={{ padding: '20px' }}>

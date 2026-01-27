@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 
 export default function NoticePage() {
   const [notices, setNotices] = useState<any[]>([]);
-  const [banner, setBanner] = useState<any>(null); // 단일 배너 상태
+  const [banner, setBanner] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('전체');
   const router = useRouter();
 
@@ -21,7 +21,6 @@ export default function NoticePage() {
       setNotices(data);
     });
 
-    // ★ 수정: 배너 50개 중 '공지사항' 타입만 찾기
     const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(50));
     const unsubBanners = onSnapshot(qBanners, (s) => {
       const allBanners = s.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -46,7 +45,8 @@ export default function NoticePage() {
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', backgroundColor: 'rgba(15, 23, 42, 0.95)', borderBottom: '1px solid #334155', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
           <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <img src="/logo.png" style={{ width: '30px', height: '30px', objectFit: 'contain' }} onError={(e)=>(e.currentTarget.style.display='none')} />
+            {/* ★ 수정: alt="메이플 아이템 로고" 추가 */}
+            <img src="/logo.png" alt="메이플 아이템 로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} onError={(e)=>(e.currentTarget.style.display='none')} />
           </div>
           <div style={{ fontSize: '20px', fontWeight: '900', color: '#FF9000' }}>메이플 아이템</div>
         </div>
@@ -58,10 +58,10 @@ export default function NoticePage() {
         </div>
       </nav>
 
-      {/* ★ 수정: 배너 비율 고정 (1200:300) */}
       <div style={{ width: '100%', backgroundColor: '#1E293B', display: 'flex', justifyContent: 'center' }}>
         <div style={{ width: '100%', maxWidth: '1200px', aspectRatio: '4/1', position: 'relative', overflow: 'hidden' }}>
-          {banner && <img src={banner.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.6' }} />}
+          {/* ★ 수정: alt="공지사항 배너" 추가 */}
+          {banner && <img src={banner.imageUrl} alt="공지사항 배너" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.6' }} />}
           <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15, 23, 42, 0.4)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'white' }}>
             <h1 style={{ fontSize: '32px', fontWeight: 'bold', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>공지사항</h1>
             <p style={{ fontSize: '16px', marginTop: '10px', color: '#CBD5E1' }}>새로운 소식과 이벤트를 확인하세요.</p>
@@ -83,7 +83,8 @@ export default function NoticePage() {
               <div key={n.id} onClick={() => router.push(`/notice/${n.id}`)} 
                    style={{ backgroundColor: '#1E293B', borderRadius: '20px', overflow: 'hidden', cursor: 'pointer', border: n.isPinned ? '2px solid #FF9000' : '1px solid #334155', boxShadow: n.isPinned ? '0 0 15px rgba(255, 144, 0, 0.2)' : 'none' }}>
                 <div style={{ position: 'relative', width: '100%', height: '180px', backgroundColor: '#333' }}>
-                  {thumbnail ? ( <img src={thumbnail} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.9' }} /> ) : ( <div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center', color:'#555', fontSize:'13px'}}>이미지 없음</div> )}
+                  {/* ★ 수정: alt={n.title} 추가 */}
+                  {thumbnail ? ( <img src={thumbnail} alt={n.title} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.9' }} /> ) : ( <div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center', color:'#555', fontSize:'13px'}}>이미지 없음</div> )}
                   {n.isPinned && <div style={{ position: 'absolute', top: '15px', right: '15px', fontSize: '20px' }}>📌</div>}
                   <div style={{ position: 'absolute', top: '15px', left: '15px', backgroundColor: '#FF9000', color: '#000', fontSize: '11px', fontWeight: 'bold', padding: '4px 10px', borderRadius: '5px' }}>{n.category || '공지'}</div>
                 </div>
