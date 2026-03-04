@@ -1,8 +1,17 @@
 import './globals.css';
 import KakaoChatButton from './components/KakaoChatButton';
 import { Metadata } from 'next';
+import { Noto_Sans_KR } from 'next/font/google';
+
+const notoSansKr = Noto_Sans_KR({
+  subsets: ['latin'],
+  weight: ['400', '500', '700', '900'],
+  display: 'swap',
+  preload: false,
+});
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.maplestoryitem.com'),
   // ★ [수정 포인트] 제목 맨 앞에 '메이플스토리' 풀네임을 넣었습니다. (검색 노출 최적화)
   title: '메이플스토리 아이템 & 급처템 - 전 서버 최고가 매입 및 시세 비교',
   
@@ -49,10 +58,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ko">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/> 
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap" rel="stylesheet" />
-        <link rel="canonical" href="https://www.maplestoryitem.com" />
+<link rel="canonical" href="https://www.maplestoryitem.com" />
       </head>
-      <body>
+      <body className={notoSansKr.className}>
         {children}
         <KakaoChatButton />
       </body>

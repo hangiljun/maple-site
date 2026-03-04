@@ -6,6 +6,7 @@ import { db } from '../firebase';
 import { collection, query, orderBy, onSnapshot, limit, doc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Home() {
   const [items, setItems] = useState<any[]>([]);
@@ -118,7 +119,7 @@ export default function Home() {
         <Link href="/" style={{ textDecoration: 'none' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
             <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <img src="/logo.png" alt="메이플 아이템 최고가 매입 로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+              <Image src="/logo.png" alt="메이플 아이템 최고가 매입 로고" width={30} height={30} style={{ objectFit: 'contain' }} priority />
             </div>
             <div style={{ fontSize: '20px', fontWeight: '900', color: '#FF9000', letterSpacing: '-0.5px' }} className="neon-text">메이플 아이템</div>
           </div>
