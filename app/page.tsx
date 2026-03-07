@@ -76,8 +76,44 @@ export default function Home() {
     window.open(safeUrl, '_blank');
   };
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': 'https://www.maplestoryitem.com/#website',
+        url: 'https://www.maplestoryitem.com',
+        name: '메이플 아이템',
+        description: '메이플스토리 급처템, 메소, 아이템 전 서버 최고가 매입',
+        inLanguage: 'ko',
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: 'https://www.maplestoryitem.com/notice?q={search_term_string}',
+          'query-input': 'required name=search_term_string',
+        },
+      },
+      {
+        '@type': 'Organization',
+        '@id': 'https://www.maplestoryitem.com/#organization',
+        name: '메이플 아이템',
+        url: 'https://www.maplestoryitem.com',
+        logo: {
+          '@type': 'ImageObject',
+          url: 'https://www.maplestoryitem.com/logo.png',
+        },
+        description: '메이플스토리 아이템, 메소 전 서버 최고가 매입 및 검증 업체 플랫폼',
+        areaServed: 'KR',
+        serviceType: '게임 아이템 거래 플랫폼',
+      },
+    ],
+  };
+
   return (
     <div style={{ backgroundColor: '#0F172A', minHeight: '100vh', color: '#F8FAFC', fontFamily: "'Noto Sans KR', sans-serif", overflowX: 'hidden' }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       
       <style jsx global>{`
         .hover-card { transition: all 0.3s ease; }

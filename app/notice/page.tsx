@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { db } from '../../firebase';
 import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function NoticePage() {
   const [notices, setNotices] = useState<any[]>([]);
@@ -80,8 +81,8 @@ export default function NoticePage() {
           {filteredNotices.map((n) => {
             const thumbnail = n.imageUrl || extractFirstImg(n.content);
             return (
-              <div key={n.id} onClick={() => router.push(`/notice/${n.id}`)} 
-                   style={{ backgroundColor: '#1E293B', borderRadius: '20px', overflow: 'hidden', cursor: 'pointer', border: n.isPinned ? '2px solid #FF9000' : '1px solid #334155', boxShadow: n.isPinned ? '0 0 15px rgba(255, 144, 0, 0.2)' : 'none' }}>
+              <Link key={n.id} href={`/notice/${n.id}`}
+                   style={{ display: 'block', textDecoration: 'none', backgroundColor: '#1E293B', borderRadius: '20px', overflow: 'hidden', cursor: 'pointer', border: n.isPinned ? '2px solid #FF9000' : '1px solid #334155', boxShadow: n.isPinned ? '0 0 15px rgba(255, 144, 0, 0.2)' : 'none' }}>
                 <div style={{ position: 'relative', width: '100%', height: '180px', backgroundColor: '#333' }}>
                   {/* ★ 수정: alt={n.title} 추가 */}
                   {thumbnail ? ( <img src={thumbnail} alt={n.title} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.9' }} /> ) : ( <div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center', color:'#555', fontSize:'13px'}}>이미지 없음</div> )}
@@ -95,7 +96,7 @@ export default function NoticePage() {
                     <span style={{ color: '#FF9000' }}>자세히 →</span>
                   </div>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>

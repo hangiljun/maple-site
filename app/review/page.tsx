@@ -5,6 +5,7 @@ import { db, storage } from '../../firebase';
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, limit } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function ReviewPage() {
   const [reviews, setReviews] = useState<any[]>([]);
@@ -117,9 +118,10 @@ export default function ReviewPage() {
         {filteredReviews.map((r, i) => (
           <div key={r.id} style={{ display: 'flex', padding: '15px 0', borderBottom: '1px solid #334155', textAlign: 'center', fontSize: '14px', alignItems: 'center', color: '#CBD5E1' }}>
             <div style={{ width: '10%', color: '#64748B' }}>{filteredReviews.length - i}</div>
-            <div style={{ width: '55%', textAlign: 'left', paddingLeft: '20px', cursor: 'pointer', fontWeight: '500', color: '#F8FAFC' }} 
-                 onClick={() => router.push(`/review/${r.id}`)}>
-              {r.title} {r.imageUrl && <span style={{ backgroundColor: '#FF9000', color: '#000', fontSize: '10px', padding: '2px 5px', borderRadius: '4px', marginLeft: '5px' }}>IMG</span>}
+            <div style={{ width: '55%', textAlign: 'left', paddingLeft: '20px' }}>
+              <Link href={`/review/${r.id}`} style={{ textDecoration: 'none', fontWeight: '500', color: '#F8FAFC', display: 'block' }}>
+                {r.title} {r.imageUrl && <span style={{ backgroundColor: '#FF9000', color: '#000', fontSize: '10px', padding: '2px 5px', borderRadius: '4px', marginLeft: '5px' }}>IMG</span>}
+              </Link>
             </div>
             <div style={{ width: '15%' }}>{r.nickname.split('@')[0]}</div>
             <div style={{ width: '10%', color: '#64748B' }}>{r.createdAt?.toDate().toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}</div>
