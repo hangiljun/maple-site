@@ -190,8 +190,8 @@ export default function Home() {
           )}
           
           <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', width: '100%', maxWidth: '800px', padding: '0 20px' }}>
-            <h1 style={{ fontSize: 'clamp(18px, 4vw, 28px)', fontWeight: '900', color: '#FFF', marginBottom: '15px', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>메이플 아이템 <span style={{ color: '#FF9000' }}>최고가 매입</span> & 시세 비교</h1>
-            <p style={{ color: '#E2E8F0', fontWeight: '500', fontSize: 'clamp(12px, 3vw, 16px)', backgroundColor: 'rgba(0,0,0,0.5)', display: 'inline-block', padding: '8px 20px', borderRadius: '30px', backdropFilter: 'blur(5px)' }}>검증된 1등 업체들과 안전하게 거래하세요</p>
+            <h1 style={{ fontSize: 'clamp(18px, 4vw, 28px)', fontWeight: '900', color: '#FFF', marginBottom: '15px', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>메이플급처 <span style={{ color: '#FF9000' }}>최고가 매입</span> & 시세 비교</h1>
+            <p style={{ color: '#E2E8F0', fontWeight: '500', fontSize: 'clamp(12px, 3vw, 16px)', backgroundColor: 'rgba(0,0,0,0.5)', display: 'inline-block', padding: '8px 20px', borderRadius: '30px', backdropFilter: 'blur(5px)' }}>메이플급처 전문 검증 업체들과 안전하게 거래하세요</p>
           </div>
         </div>
       </div>

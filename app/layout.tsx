@@ -14,10 +14,10 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://www.maplestoryitem.com'),
   title: {
     template: '%s | 메이플 아이템',
-    default: '메이플스토리 아이템 & 급처템 - 전 서버 최고가 매입 및 시세 비교',
+    default: '메이플급처 & 메이플스토리 아이템 - 전 서버 최고가 매입 및 시세 비교',
   },
-  description: '메이플스토리 급처템, 메소, 아이템 전 서버 최고가 매입. 24시간 상담 및 검증된 업체 리스트를 통해 안전하게 급처 거래하세요.',
-  keywords: '메이플스토리, 메이플, 메이플 급처, 메이플스토리 급처, 급처템, 아이템 매입, 메소 거래, 메이플 시세, 메이플 장사, 전서버 매입, 아이템 거래',
+  description: '메이플급처, 메이플스토리 급처템, 메소, 아이템 전 서버 최고가 매입. 24시간 상담 및 검증된 업체 리스트를 통해 안전하게 메이플급처 거래하세요.',
+  keywords: '메이플급처, 메이플스토리급처, 메이플 급처, 메이플스토리, 메이플, 메이플스토리 급처, 급처템, 아이템 매입, 메소 거래, 메이플 시세, 메이플 장사, 전서버 매입, 아이템 거래',
 
   alternates: {
     canonical: 'https://www.maplestoryitem.com',
@@ -29,8 +29,8 @@ export const metadata: Metadata = {
   },
 
   openGraph: {
-    title: '메이플스토리 아이템 & 급처템 - 전 서버 최고가 매입',
-    description: '안전한 업체 검증, 실시간 시세 확인, 24시간 즉시 거래.',
+    title: '메이플급처 & 메이플스토리 아이템 - 전 서버 최고가 매입',
+    description: '메이플급처, 안전한 업체 검증, 실시간 시세 확인, 24시간 즉시 거래.',
     url: 'https://www.maplestoryitem.com',
     siteName: '메이플 아이템',
     images: [
@@ -47,8 +47,8 @@ export const metadata: Metadata = {
 
   twitter: {
     card: 'summary_large_image',
-    title: '메이플스토리 아이템 & 급처템 - 전 서버 최고가 매입',
-    description: '안전한 업체 검증, 실시간 시세 확인, 24시간 즉시 거래.',
+    title: '메이플급처 & 메이플스토리 아이템 - 전 서버 최고가 매입',
+    description: '메이플급처, 안전한 업체 검증, 실시간 시세 확인, 24시간 즉시 거래.',
     images: ['/og-image.png'],
   },
 
