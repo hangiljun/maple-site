@@ -13,8 +13,7 @@ export default function ReviewPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
-  
-  // ★ 수정: 배너 상태 추가
+
   const [banner, setBanner] = useState<any>(null);
   const router = useRouter();
 
@@ -22,7 +21,6 @@ export default function ReviewPage() {
   const [image, setImage] = useState<File | null>(null);
 
   useEffect(() => {
-    // 1. 리뷰 목록 가져오기
     const q = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (s) => {
       const data = s.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -30,7 +28,6 @@ export default function ReviewPage() {
       setFilteredReviews(data);
     });
 
-    // ★ 수정: 배너 50개 중 '이용후기' 타입만 찾기
     const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(50));
     const unsubBanners = onSnapshot(qBanners, (s) => {
       const allBanners = s.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -42,7 +39,7 @@ export default function ReviewPage() {
   }, []);
 
   const handleSearch = () => {
-    const filtered = reviews.filter(r => 
+    const filtered = reviews.filter(r =>
       r.title.includes(searchTerm) || r.nickname.includes(searchTerm) || r.content.includes(searchTerm)
     );
     setFilteredReviews(filtered);
@@ -69,17 +66,16 @@ export default function ReviewPage() {
   };
 
   return (
-    <div style={{ backgroundColor: '#0F172A', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif", color: '#F8FAFC' }}>
-      
-      <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', borderBottom: '1px solid #334155', backgroundColor: 'rgba(15, 23, 42, 0.95)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)', alignItems: 'center' }}>
+    <div style={{ backgroundColor: '#F8FAFC', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif", color: '#1E293B' }}>
+
+      <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', borderBottom: '1px solid #E2E8F0', backgroundColor: 'rgba(255, 255, 255, 0.95)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)', alignItems: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
-          <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {/* ★ 수정: alt="메이플 아이템 로고" 추가 */}
+          <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2E8F0' }}>
              <img src="/logo.png" alt="메이플 아이템 로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
           </div>
           <div style={{ fontWeight: '900', color: '#FF9000', fontSize: '20px' }}>메이플 아이템</div>
         </div>
-        <div style={{ display: 'flex', gap: '20px', fontWeight: '600', fontSize: '15px', color: '#94A3B8' }}>
+        <div style={{ display: 'flex', gap: '20px', fontWeight: '600', fontSize: '15px', color: '#64748B' }}>
           <span style={{ cursor: 'pointer' }} onClick={() => router.push('/')}>홈</span>
           <span style={{ cursor: 'pointer' }} onClick={() => router.push('/notice')}>공지사항</span>
           <span style={{ cursor: 'pointer' }} onClick={() => router.push('/howto')}>거래방법</span>
@@ -87,15 +83,13 @@ export default function ReviewPage() {
         </div>
       </nav>
 
-      {/* ★ 수정: 배너가 있을 때만 표시 & 비율 고정 */}
       {banner && (
-        <div style={{ width: '100%', backgroundColor: '#1E293B', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ width: '100%', backgroundColor: '#E2E8F0', display: 'flex', justifyContent: 'center' }}>
           <div style={{ width: '100%', maxWidth: '1200px', aspectRatio: '4/1', position: 'relative', overflow: 'hidden' }}>
-            {/* ★ 수정: alt="이용후기 페이지 상단 배너" 추가 */}
-            <img src={banner.imageUrl} alt="이용후기 페이지 상단 배너" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.6' }} />
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15, 23, 42, 0.4)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'white' }}>
-              <h1 style={{ fontSize: '32px', fontWeight: 'bold' }}>이용후기</h1>
-              <p style={{ fontSize: '16px', marginTop: '10px', color: '#CBD5E1' }}>고객님들의 소중한 거래 후기를 확인하세요.</p>
+            <img src={banner.imageUrl} alt="이용후기 페이지 상단 배너" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.65' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.35)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'white' }}>
+              <h1 style={{ fontSize: '32px', fontWeight: 'bold', textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>이용후기</h1>
+              <p style={{ fontSize: '16px', marginTop: '10px', color: 'rgba(255,255,255,0.9)' }}>고객님들의 소중한 거래 후기를 확인하세요.</p>
             </div>
           </div>
         </div>
@@ -103,11 +97,11 @@ export default function ReviewPage() {
 
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-             <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: '#FF9000', margin: 0 }}>이용후기</h2>
-             <button onClick={() => setShowForm(true)} style={{ backgroundColor: '#FF9000', color: '#FFF', padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ 후기 쓰기</button>
+             <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1E293B', margin: 0 }}>이용후기</h2>
+             <button onClick={() => setShowForm(true)} style={{ backgroundColor: '#FF9000', color: '#FFF', padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 2px 8px rgba(255,144,0,0.3)' }}>+ 후기 쓰기</button>
         </div>
-        
-        <div style={{ borderTop: '2px solid #FF9000', borderBottom: '1px solid #334155', padding: '15px 0', display: 'flex', fontWeight: 'bold', textAlign: 'center', backgroundColor: '#1E293B', fontSize: '14px' }}>
+
+        <div style={{ borderTop: '2px solid #FF9000', borderBottom: '1px solid #E2E8F0', padding: '15px 0', display: 'flex', fontWeight: 'bold', textAlign: 'center', backgroundColor: '#F8FAFC', fontSize: '14px', color: '#64748B' }}>
           <div style={{ width: '10%' }}>번호</div>
           <div style={{ width: '55%' }}>제목</div>
           <div style={{ width: '15%' }}>작성자</div>
@@ -116,58 +110,62 @@ export default function ReviewPage() {
         </div>
 
         {filteredReviews.map((r, i) => (
-          <div key={r.id} style={{ display: 'flex', padding: '15px 0', borderBottom: '1px solid #334155', textAlign: 'center', fontSize: '14px', alignItems: 'center', color: '#CBD5E1' }}>
-            <div style={{ width: '10%', color: '#64748B' }}>{filteredReviews.length - i}</div>
+          <div key={r.id} style={{ display: 'flex', padding: '15px 0', borderBottom: '1px solid #F1F5F9', textAlign: 'center', fontSize: '14px', alignItems: 'center', color: '#475569', backgroundColor: '#FFFFFF', transition: 'background 0.2s' }}
+            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#FFFBF5')}
+            onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#FFFFFF')}
+          >
+            <div style={{ width: '10%', color: '#94A3B8' }}>{filteredReviews.length - i}</div>
             <div style={{ width: '55%', textAlign: 'left', paddingLeft: '20px' }}>
-              <Link href={`/review/${r.id}`} style={{ textDecoration: 'none', fontWeight: '500', color: '#F8FAFC', display: 'block' }}>
-                {r.title} {r.imageUrl && <span style={{ backgroundColor: '#FF9000', color: '#000', fontSize: '10px', padding: '2px 5px', borderRadius: '4px', marginLeft: '5px' }}>IMG</span>}
+              <Link href={`/review/${r.id}`} style={{ textDecoration: 'none', fontWeight: '500', color: '#1E293B', display: 'block' }}>
+                {r.title} {r.imageUrl && <span style={{ backgroundColor: '#FFF3E0', color: '#FF9000', fontSize: '10px', padding: '2px 5px', borderRadius: '4px', marginLeft: '5px', border: '1px solid #FFD0A0' }}>IMG</span>}
               </Link>
             </div>
             <div style={{ width: '15%' }}>{r.nickname.split('@')[0]}</div>
-            <div style={{ width: '10%', color: '#64748B' }}>{r.createdAt?.toDate().toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}</div>
-            <div style={{ width: '10%', color: '#64748B' }}>{r.views || 0}</div>
+            <div style={{ width: '10%', color: '#94A3B8' }}>{r.createdAt?.toDate().toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}</div>
+            <div style={{ width: '10%', color: '#94A3B8' }}>{r.views || 0}</div>
           </div>
         ))}
 
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '40px', gap: '10px' }}>
-          <input 
-            placeholder="제목 및 내용 검색" 
+          <input
+            placeholder="제목 및 내용 검색"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ padding: '12px 20px', border: '1px solid #334155', width: '350px', borderRadius: '8px', backgroundColor: '#1E293B', color: '#FFF', outline: 'none' }}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            style={{ padding: '12px 20px', border: '1px solid #E2E8F0', width: '350px', borderRadius: '8px', backgroundColor: '#FFFFFF', color: '#1E293B', outline: 'none', fontSize: '14px' }}
           />
-          <button onClick={handleSearch} style={{ padding: '10px 25px', backgroundColor: '#334155', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', color: '#FFF' }}>검색</button>
+          <button onClick={handleSearch} style={{ padding: '10px 25px', backgroundColor: '#FF9000', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', color: '#FFF', boxShadow: '0 2px 8px rgba(255,144,0,0.3)' }}>검색</button>
         </div>
       </div>
 
       {showForm && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(3px)' }}>
-          <div style={{ backgroundColor: '#1E293B', padding: '30px', borderRadius: '15px', width: '90%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', border: '1px solid #334155', color: '#FFF' }}>
-            <h3 style={{ marginBottom: '20px', fontWeight: 'bold', fontSize: '20px', borderBottom: '1px solid #334155', paddingBottom: '10px', color: '#FF9000' }}>후기 작성</h3>
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
+          <div style={{ backgroundColor: '#FFFFFF', padding: '30px', borderRadius: '16px', width: '90%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', border: '1px solid #E2E8F0', boxShadow: '0 20px 60px rgba(0,0,0,0.15)', color: '#1E293B' }}>
+            <h3 style={{ marginBottom: '20px', fontWeight: 'bold', fontSize: '20px', borderBottom: '1px solid #F1F5F9', paddingBottom: '10px', color: '#FF9000' }}>후기 작성</h3>
             <div style={{ marginBottom: '15px' }}>
-              <p style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#94A3B8' }}>제목 *</p>
-              <input value={form.title} onChange={e => setForm({...form, title: e.target.value})} style={darkInputStyle} />
+              <p style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#64748B' }}>제목 *</p>
+              <input value={form.title} onChange={e => setForm({...form, title: e.target.value})} style={lightInputStyle} />
             </div>
             <div style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#94A3B8' }}>작성자 *</p>
-                <input placeholder="닉네임" value={form.nickname} onChange={e => setForm({...form, nickname: e.target.value})} style={darkInputStyle} />
+                <p style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#64748B' }}>작성자 *</p>
+                <input placeholder="닉네임" value={form.nickname} onChange={e => setForm({...form, nickname: e.target.value})} style={lightInputStyle} />
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#94A3B8' }}>비밀번호 *</p>
-                <input type="password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} style={darkInputStyle} />
+                <p style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#64748B' }}>비밀번호 *</p>
+                <input type="password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} style={lightInputStyle} />
               </div>
             </div>
             <div style={{ marginBottom: '15px' }}>
-              <textarea value={form.content} onChange={e => setForm({...form, content: e.target.value})} style={{ ...darkInputStyle, height: '200px', resize: 'none' }} placeholder="내용을 입력하세요" />
+              <textarea value={form.content} onChange={e => setForm({...form, content: e.target.value})} style={{ ...lightInputStyle, height: '200px', resize: 'none' }} placeholder="내용을 입력하세요" />
             </div>
             <div style={{ marginBottom: '20px' }}>
-              <p style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#94A3B8' }}>사진 첨부</p>
-              <input type="file" onChange={e => setImage(e.target.files![0])} style={{ color: '#CBD5E1' }} />
+              <p style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#64748B' }}>사진 첨부</p>
+              <input type="file" onChange={e => setImage(e.target.files![0])} style={{ color: '#475569' }} />
             </div>
             <div style={{ display: 'flex', gap: '10px' }}>
-              <button onClick={handleUpload} disabled={loading} style={{ flex: 1, padding: '15px', backgroundColor: '#FF9000', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>{loading ? '저장 중...' : '작성 완료'}</button>
-              <button onClick={() => setShowForm(false)} style={{ flex: 1, padding: '15px', backgroundColor: '#334155', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>취소</button>
+              <button onClick={handleUpload} disabled={loading} style={{ flex: 1, padding: '15px', backgroundColor: '#FF9000', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 2px 8px rgba(255,144,0,0.3)' }}>{loading ? '저장 중...' : '작성 완료'}</button>
+              <button onClick={() => setShowForm(false)} style={{ flex: 1, padding: '15px', backgroundColor: '#F1F5F9', color: '#64748B', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>취소</button>
             </div>
           </div>
         </div>
@@ -176,4 +174,4 @@ export default function ReviewPage() {
   );
 }
 
-const darkInputStyle = { width: '100%', padding: '12px', border: '1px solid #334155', borderRadius: '8px', fontSize: '14px', backgroundColor: '#0F172A', color: '#FFF', outline: 'none' };
+const lightInputStyle: React.CSSProperties = { width: '100%', padding: '12px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '14px', backgroundColor: '#F8FAFC', color: '#1E293B', outline: 'none' };

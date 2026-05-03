@@ -34,16 +34,15 @@ export default function HowtoPage() {
   const filteredHowtos = activeTab === '전체' ? howtos : howtos.filter(h => h.category === activeTab);
 
   return (
-    <div style={{ backgroundColor: '#0F172A', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif", color: '#F8FAFC' }}>
-      <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', backgroundColor: 'rgba(15, 23, 42, 0.95)', borderBottom: '1px solid #334155', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)' }}>
+    <div style={{ backgroundColor: '#F8FAFC', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif", color: '#1E293B' }}>
+      <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', backgroundColor: 'rgba(255, 255, 255, 0.95)', borderBottom: '1px solid #E2E8F0', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
-          <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {/* ★ 수정: alt="메이플 아이템 로고" 추가 */}
+          <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2E8F0' }}>
             <img src="/logo.png" alt="메이플 아이템 로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
           </div>
           <div style={{ fontSize: '20px', fontWeight: '900', color: '#FF9000' }}>메이플 아이템</div>
         </div>
-        <div style={{ display: 'flex', gap: '25px', fontSize: '15px', fontWeight: '600', color: '#94A3B8' }}>
+        <div style={{ display: 'flex', gap: '25px', fontSize: '15px', fontWeight: '600', color: '#64748B' }}>
           <span style={{ cursor: 'pointer' }} onClick={() => router.push('/')}>홈</span>
           <span style={{ cursor: 'pointer' }} onClick={() => router.push('/notice')}>공지사항</span>
           <span style={{ cursor: 'pointer', color: '#FF9000' }}>거래방법</span>
@@ -51,13 +50,12 @@ export default function HowtoPage() {
         </div>
       </nav>
 
-      <div style={{ width: '100%', backgroundColor: '#1E293B', display: 'flex', justifyContent: 'center' }}>
+      <div style={{ width: '100%', backgroundColor: '#E2E8F0', display: 'flex', justifyContent: 'center' }}>
         <div style={{ width: '100%', maxWidth: '1200px', aspectRatio: '4/1', position: 'relative', overflow: 'hidden' }}>
-          {/* ★ 수정: alt="거래방법 배너" 추가 */}
-          {banner && <img src={banner.imageUrl} alt="거래방법 배너" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.6' }} />}
-          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15, 23, 42, 0.4)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'white' }}>
-            <h1 style={{ fontSize: '32px', fontWeight: 'bold' }}>거래 방법</h1>
-            <p style={{ fontSize: '16px', marginTop: '10px', color: '#CBD5E1' }}>안전한 거래 절차와 가이드를 확인하세요.</p>
+          {banner && <img src={banner.imageUrl} alt="거래방법 배너" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.65' }} />}
+          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: banner ? 'rgba(0, 0, 0, 0.35)' : 'rgba(255, 144, 0, 0.85)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'white' }}>
+            <h1 style={{ fontSize: '32px', fontWeight: 'bold', textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>거래 방법</h1>
+            <p style={{ fontSize: '16px', marginTop: '10px', color: 'rgba(255,255,255,0.9)' }}>안전한 거래 절차와 가이드를 확인하세요.</p>
           </div>
         </div>
       </div>
@@ -65,7 +63,7 @@ export default function HowtoPage() {
       <div style={{ padding: '60px 5%', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ display: 'flex', gap: '10px', marginBottom: '40px', flexWrap: 'wrap' }}>
           {['전체', '거래 방법', '거래 주의 사항'].map((tab) => (
-            <button key={tab} onClick={() => setActiveTab(tab)} style={{ padding: '10px 20px', borderRadius: '30px', border: activeTab === tab ? '1px solid #FF9000' : '1px solid #334155', backgroundColor: activeTab === tab ? '#FF9000' : '#1E293B', color: activeTab === tab ? '#000' : '#CBD5E1', fontWeight: 'bold', cursor: 'pointer', transition: '0.3s' }}>{tab}</button>
+            <button key={tab} onClick={() => setActiveTab(tab)} style={{ padding: '10px 20px', borderRadius: '30px', border: activeTab === tab ? '1px solid #FF9000' : '1px solid #E2E8F0', backgroundColor: activeTab === tab ? '#FF9000' : '#FFFFFF', color: activeTab === tab ? '#FFF' : '#64748B', fontWeight: 'bold', cursor: 'pointer', transition: '0.3s', boxShadow: activeTab === tab ? '0 2px 8px rgba(255,144,0,0.3)' : 'none' }}>{tab}</button>
           ))}
         </div>
 
@@ -73,15 +71,17 @@ export default function HowtoPage() {
           {filteredHowtos.map((h) => {
             const thumbnail = h.imageUrl || extractFirstImg(h.content);
             return (
-              <div key={h.id} onClick={() => router.push(`/howto/${h.id}`)} style={{ backgroundColor: '#1E293B', borderRadius: '20px', overflow: 'hidden', cursor: 'pointer', border: '1px solid #334155' }}>
-                <div style={{ position: 'relative', width: '100%', height: '180px', backgroundColor: '#333' }}>
-                  {/* ★ 수정: alt={h.title} 추가 */}
-                  {thumbnail ? <img src={thumbnail} alt={h.title} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.9' }} /> : <div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center', color:'#555', fontSize:'13px'}}>이미지 없음</div>}
-                  <div style={{ position: 'absolute', top: '15px', left: '15px', backgroundColor: '#FF9000', color: '#000', fontSize: '11px', fontWeight: 'bold', padding: '4px 10px', borderRadius: '5px' }}>{h.category}</div>
+              <div key={h.id} onClick={() => router.push(`/howto/${h.id}`)} style={{ backgroundColor: '#FFFFFF', borderRadius: '20px', overflow: 'hidden', cursor: 'pointer', border: '1px solid #E2E8F0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', transition: 'all 0.3s ease' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 10px 24px rgba(255,144,0,0.15)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'none'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)'; }}
+              >
+                <div style={{ position: 'relative', width: '100%', height: '180px', backgroundColor: '#F1F5F9' }}>
+                  {thumbnail ? <img src={thumbnail} alt={h.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center', color:'#94A3B8', fontSize:'13px'}}>이미지 없음</div>}
+                  <div style={{ position: 'absolute', top: '15px', left: '15px', backgroundColor: '#FF9000', color: '#FFF', fontSize: '11px', fontWeight: 'bold', padding: '4px 10px', borderRadius: '5px' }}>{h.category}</div>
                 </div>
                 <div style={{ padding: '20px' }}>
-                  <h3 style={{ fontSize: '17px', fontWeight: 'bold', color: '#F1F5F9' }}>{h.title}</h3>
-                  <div style={{ fontSize: '12px', color: '#64748B', display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
+                  <h3 style={{ fontSize: '17px', fontWeight: 'bold', color: '#1E293B' }}>{h.title}</h3>
+                  <div style={{ fontSize: '12px', color: '#94A3B8', display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
                     <span>{h.createdAt?.toDate().toLocaleDateString()}</span>
                     <span style={{ color: '#FF9000', fontWeight: 'bold' }}>자세히 보기 →</span>
                   </div>
