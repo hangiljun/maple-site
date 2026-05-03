@@ -18,32 +18,50 @@ export default function NoticeDetailClient({ id }: { id: string }) {
     fetchNotice();
   }, [id]);
 
-  if (!notice) return <div style={{ textAlign: 'center', padding: '100px' }}>로딩 중...</div>;
+  if (!notice) return (
+    <div style={{ textAlign: 'center', padding: '100px', backgroundColor: '#F8FAFC', minHeight: '100vh', color: '#64748B' }}>
+      로딩 중...
+    </div>
+  );
 
   return (
-    <div style={{ backgroundColor: '#FFF', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif" }}>
-      <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 60px', borderBottom: '1px solid #EEE' }}>
-        <div style={{ fontWeight: '900', color: '#FF9000', cursor: 'pointer', fontSize: '20px' }} onClick={() => router.push('/')}>메이플 아이템</div>
-        <button onClick={() => router.back()} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#666', fontWeight: 'bold' }}>뒤로가기</button>
+    <div style={{ backgroundColor: '#F8FAFC', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif", color: '#1E293B' }}>
+      <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', borderBottom: '1px solid #E2E8F0', backgroundColor: 'rgba(255,255,255,0.95)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)', alignItems: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
+          <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2E8F0' }}>
+            <img src="/logo.png" alt="메이플 아이템 로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+          </div>
+          <div style={{ fontWeight: '900', color: '#FF9000', fontSize: '20px' }}>메이플 아이템</div>
+        </div>
+        <button onClick={() => router.back()} style={{ border: '1px solid #E2E8F0', background: '#FFFFFF', cursor: 'pointer', color: '#64748B', fontWeight: 'bold', padding: '8px 16px', borderRadius: '8px', fontSize: '14px' }}>← 뒤로가기</button>
       </nav>
 
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 20px' }}>
-        <span style={{ color: '#00aaff', fontWeight: 'bold', fontSize: '16px' }}>{notice.category}</span>
-        <h1 style={{ fontSize: '32px', margin: '15px 0 40px 0', fontWeight: 'bold', lineHeight: '1.3' }}>{notice.title}</h1>
+        <span style={{ color: '#FF9000', fontWeight: 'bold', fontSize: '14px', backgroundColor: '#FFF3E0', padding: '4px 12px', borderRadius: '20px', border: '1px solid #FFD0A0' }}>{notice.category}</span>
+        <h1 style={{ fontSize: '30px', margin: '20px 0 15px 0', fontWeight: 'bold', lineHeight: '1.4', color: '#1E293B' }}>{notice.title}</h1>
+
+        <div style={{ paddingBottom: '20px', borderBottom: '1px solid #E2E8F0', marginBottom: '40px', color: '#94A3B8', fontSize: '14px' }}>
+          {notice.createdAt?.toDate().toLocaleDateString()}
+        </div>
 
         {notice.imageUrl && (
-          <div style={{ width: '100%', borderRadius: '20px', overflow: 'hidden', marginBottom: '40px', border: '1px solid #EEE' }}>
+          <div style={{ width: '100%', borderRadius: '16px', overflow: 'hidden', marginBottom: '40px', border: '1px solid #E2E8F0' }}>
             <img src={notice.imageUrl} style={{ width: '100%', display: 'block' }} alt={notice.title} />
           </div>
         )}
 
         <div
-          style={{ fontSize: '18px', lineHeight: '1.8', color: '#333' }}
+          style={{ fontSize: '17px', lineHeight: '1.9', color: '#334155' }}
           className="notice-content"
-          dangerouslySetInnerHTML={{
-            __html: notice.content.replace(/\n/g, '<br/>')
-          }}
+          dangerouslySetInnerHTML={{ __html: notice.content.replace(/\n/g, '<br/>') }}
         />
+
+        <button
+          onClick={() => router.push('/notice')}
+          style={{ marginTop: '60px', width: '100%', padding: '15px', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', border: '1px solid #E2E8F0', backgroundColor: '#FFFFFF', color: '#64748B', fontSize: '15px' }}
+        >
+          목록으로 돌아가기
+        </button>
       </div>
 
       <style jsx global>{`
@@ -53,6 +71,7 @@ export default function NoticeDetailClient({ id }: { id: string }) {
           display: block;
           margin: 20px 0;
           border-radius: 10px;
+          border: 1px solid #E2E8F0;
         }
       `}</style>
     </div>

@@ -109,18 +109,22 @@ export default function ReviewDetailClient({ id }: { id: string }) {
     }
   };
 
-  if (!review) return <div style={{ textAlign: 'center', padding: '100px', backgroundColor: '#0F172A', minHeight: '100vh', color: '#FFF' }}>로딩 중...</div>;
+  if (!review) return (
+    <div style={{ textAlign: 'center', padding: '100px', backgroundColor: '#F8FAFC', minHeight: '100vh', color: '#64748B' }}>
+      로딩 중...
+    </div>
+  );
 
   return (
-    <div style={{ backgroundColor: '#0F172A', minHeight: '100vh', color: '#F8FAFC', fontFamily: "'Noto Sans KR', sans-serif", overflowX: 'hidden' }}>
-      <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', borderBottom: '1px solid #334155', backgroundColor: 'rgba(15, 23, 42, 0.95)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)', alignItems: 'center' }}>
+    <div style={{ backgroundColor: '#F8FAFC', minHeight: '100vh', color: '#1E293B', fontFamily: "'Noto Sans KR', sans-serif", overflowX: 'hidden' }}>
+      <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', borderBottom: '1px solid #E2E8F0', backgroundColor: 'rgba(255,255,255,0.95)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)', alignItems: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
-          <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2E8F0' }}>
             <img src="/logo.png" style={{ width: '30px', height: '30px', objectFit: 'contain' }} alt="메이플 아이템 로고" />
           </div>
           <div style={{ fontWeight: '900', color: '#FF9000', fontSize: '20px' }}>메이플 아이템</div>
         </div>
-        <button onClick={() => router.back()} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#94A3B8', fontWeight: 'bold' }}>뒤로가기</button>
+        <button onClick={() => router.back()} style={{ border: '1px solid #E2E8F0', background: '#FFFFFF', cursor: 'pointer', color: '#64748B', fontWeight: 'bold', padding: '8px 16px', borderRadius: '8px', fontSize: '14px' }}>← 뒤로가기</button>
       </nav>
 
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 20px', width: '100%', boxSizing: 'border-box' }}>
@@ -129,29 +133,29 @@ export default function ReviewDetailClient({ id }: { id: string }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             <h2 style={{ color: '#FF9000' }}>게시글 수정</h2>
             <input value={editForm.title} onChange={e => setEditForm({...editForm, title: e.target.value})} style={inputStyle} />
-            <textarea value={editForm.content} onChange={e => setEditForm({...editForm, content: e.target.value})} style={{ ...inputStyle, height: '300px' }} />
+            <textarea value={editForm.content} onChange={e => setEditForm({...editForm, content: e.target.value})} style={{ ...inputStyle, height: '300px', resize: 'none' }} />
             <div style={{ display: 'flex', gap: '10px' }}>
-              <button onClick={handleUpdatePost} style={{ ...btnStyle, backgroundColor: '#FF9000', color: '#000' }}>수정 완료</button>
-              <button onClick={() => setIsEditing(false)} style={btnStyle}>취소</button>
+              <button onClick={handleUpdatePost} style={{ ...btnStyle, backgroundColor: '#FF9000', color: '#FFF', flex: 1 }}>수정 완료</button>
+              <button onClick={() => setIsEditing(false)} style={{ ...btnStyle, backgroundColor: '#F1F5F9', color: '#64748B', flex: 1 }}>취소</button>
             </div>
           </div>
         ) : (
           <>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
-              <h1 style={{ fontSize: '30px', fontWeight: 'bold', marginBottom: '15px', color: '#FF9000', wordBreak: 'keep-all' }}>{review.title}</h1>
+              <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '15px', color: '#1E293B', wordBreak: 'keep-all', flex: 1 }}>{review.title}</h1>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button onClick={handleEditPost} style={smallBtnStyle}>수정</button>
-                <button onClick={handleDeletePost} style={smallBtnStyle}>삭제</button>
+                <button onClick={handleDeletePost} style={{ ...smallBtnStyle, borderColor: '#FCA5A5', color: '#EF4444' }}>삭제</button>
               </div>
             </div>
 
-            <div style={{ paddingBottom: '20px', borderBottom: '1px solid #334155', marginBottom: '30px', color: '#94A3B8', fontSize: '14px' }}>
+            <div style={{ paddingBottom: '20px', borderBottom: '1px solid #E2E8F0', marginBottom: '30px', color: '#94A3B8', fontSize: '14px' }}>
               작성자: {review.nickname?.split('@')[0]} | 조회수: {review.views || 0} | 추천: {review.likes || 0} | 날짜: {review.createdAt?.toDate().toLocaleDateString()}
             </div>
 
-            <div style={{ minHeight: '300px', lineHeight: '1.9', fontSize: '17px', color: '#E2E8F0', wordBreak: 'break-all' }}>
+            <div style={{ minHeight: '300px', lineHeight: '1.9', fontSize: '17px', color: '#334155', wordBreak: 'break-all' }}>
               {review.imageUrl && (
-                <div style={{ marginBottom: '30px', borderRadius: '15px', overflow: 'hidden', border: '1px solid #334155' }}>
+                <div style={{ marginBottom: '30px', borderRadius: '15px', overflow: 'hidden', border: '1px solid #E2E8F0' }}>
                   <img src={review.imageUrl} style={{ width: '100%', display: 'block' }} alt="후기 인증샷" />
                 </div>
               )}
@@ -160,40 +164,43 @@ export default function ReviewDetailClient({ id }: { id: string }) {
 
             <div style={{ textAlign: 'center', margin: '50px 0' }}>
               <button onClick={handleLike} style={{ backgroundColor: 'transparent', border: '2px solid #FF9000', color: '#FF9000', padding: '12px 30px', borderRadius: '30px', fontSize: '18px', fontWeight: 'bold', cursor: 'pointer' }}>
-                추천 {review.likes || 0}
+                👍 추천 {review.likes || 0}
               </button>
             </div>
           </>
         )}
 
-        <div style={{ marginTop: '50px', borderTop: '1px solid #334155', paddingTop: '30px' }}>
-          <h3 style={{ fontSize: '20px', marginBottom: '20px' }}>댓글 {comments.length}</h3>
+        {/* 댓글 영역 */}
+        <div style={{ marginTop: '50px', borderTop: '1px solid #E2E8F0', paddingTop: '30px' }}>
+          <h3 style={{ fontSize: '18px', marginBottom: '20px', color: '#1E293B', fontWeight: 'bold' }}>댓글 {comments.length}</h3>
 
           <div style={{ marginBottom: '30px' }}>
             {comments.map((c) => (
-              <div key={c.id} style={{ padding: '15px', borderBottom: '1px solid #1E293B', display: 'flex', justifyContent: 'space-between' }}>
+              <div key={c.id} style={{ padding: '15px', borderBottom: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', backgroundColor: '#FFFFFF', borderRadius: '8px', marginBottom: '8px', border: '1px solid #F1F5F9' }}>
                 <div style={{ width: '85%' }}>
                   <div style={{ fontWeight: 'bold', color: '#FF9000', marginBottom: '5px', fontSize: '14px' }}>{c.nickname}</div>
-                  <div style={{ fontSize: '15px', color: '#CBD5E1', wordBreak: 'break-all' }}>{c.content}</div>
+                  <div style={{ fontSize: '15px', color: '#475569', wordBreak: 'break-all' }}>{c.content}</div>
                 </div>
-                <button onClick={() => handleDeleteComment(c.id, c.password)} style={{ background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', fontSize: '12px', minWidth: '40px' }}>삭제</button>
+                <button onClick={() => handleDeleteComment(c.id, c.password)} style={{ background: 'none', border: 'none', color: '#CBD5E1', cursor: 'pointer', fontSize: '12px', minWidth: '40px' }}>삭제</button>
               </div>
             ))}
           </div>
 
-          <form onSubmit={handleAddComment} style={{ backgroundColor: '#1E293B', padding: '20px', borderRadius: '10px' }}>
+          <form onSubmit={handleAddComment} style={{ backgroundColor: '#FFFFFF', padding: '20px', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
-              <input placeholder="닉네임" value={newComment.nickname} onChange={e => setNewComment({...newComment, nickname: e.target.value})} style={inputStyle} />
-              <input type="password" placeholder="비밀번호" value={newComment.password} onChange={e => setNewComment({...newComment, password: e.target.value})} style={inputStyle} />
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <input placeholder="닉네임" value={newComment.nickname} onChange={e => setNewComment({...newComment, nickname: e.target.value})} style={{ ...inputStyle, flex: 1 }} />
+                <input type="password" placeholder="비밀번호" value={newComment.password} onChange={e => setNewComment({...newComment, password: e.target.value})} style={{ ...inputStyle, flex: 1 }} />
+              </div>
             </div>
             <textarea placeholder="댓글 내용을 입력하세요" value={newComment.content} onChange={e => setNewComment({...newComment, content: e.target.value})} style={{ ...inputStyle, width: '100%', height: '80px', resize: 'none', boxSizing: 'border-box' }} />
-            <button type="submit" style={{ ...btnStyle, width: '100%', marginTop: '10px', backgroundColor: '#FF9000', color: '#000' }}>댓글 등록</button>
+            <button type="submit" style={{ ...btnStyle, width: '100%', marginTop: '10px', backgroundColor: '#FF9000', color: '#FFF' }}>댓글 등록</button>
           </form>
         </div>
 
         <button
           onClick={() => router.push('/review')}
-          style={{ ...btnStyle, marginTop: '50px', width: '100%', backgroundColor: '#1E293B', color: '#FFF', border: '1px solid #334155' }}
+          style={{ ...btnStyle, marginTop: '40px', width: '100%', backgroundColor: '#FFFFFF', color: '#64748B', border: '1px solid #E2E8F0' }}
         >
           목록으로 돌아가기
         </button>
@@ -202,6 +209,6 @@ export default function ReviewDetailClient({ id }: { id: string }) {
   );
 }
 
-const inputStyle = { backgroundColor: '#0F172A', border: '1px solid #334155', color: '#FFF', padding: '10px', borderRadius: '5px', outline: 'none', fontSize: '14px', boxSizing: 'border-box' as const, width: '100%' };
-const btnStyle = { padding: '15px', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', border: 'none' };
-const smallBtnStyle = { backgroundColor: 'transparent', border: '1px solid #475569', color: '#94A3B8', padding: '5px 10px', borderRadius: '5px', fontSize: '12px', cursor: 'pointer' };
+const inputStyle: React.CSSProperties = { backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', color: '#1E293B', padding: '10px 14px', borderRadius: '8px', outline: 'none', fontSize: '14px', boxSizing: 'border-box', width: '100%' };
+const btnStyle: React.CSSProperties = { padding: '13px', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', border: 'none', fontSize: '14px' };
+const smallBtnStyle: React.CSSProperties = { backgroundColor: 'transparent', border: '1px solid #E2E8F0', color: '#64748B', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' };
