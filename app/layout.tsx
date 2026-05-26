@@ -21,6 +21,9 @@ export const metadata: Metadata = {
 
   alternates: {
     canonical: 'https://www.maplestoryitem.com',
+    types: {
+      'application/rss+xml': 'https://www.maplestoryitem.com/rss.xml',
+    },
   },
 
   icons: {
