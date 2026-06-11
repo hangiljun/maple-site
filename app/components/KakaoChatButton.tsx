@@ -2,7 +2,7 @@
 
 export default function KakaoChatButton() {
   // 예시 주소였던 sPInyN7g를 삭제하고, 사용자님의 진짜 주소로 변경했습니다.
-  const KAKAO_URL = "https://open.kakao.com/o/sKg86b7f"; 
+  const KAKAO_URL = "https://open.kakao.com/o/sx49Xazi";
 
   return (
     <div style={{ position: 'fixed', bottom: '25px', right: '25px', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
