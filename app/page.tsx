@@ -93,7 +93,7 @@ export default function Home() {
         url: 'https://www.maplestoryitem.com',
         logo: {
           '@type': 'ImageObject',
-          url: 'https://www.maplestoryitem.com/logo.png',
+          url: 'https://www.maplestoryitem.com/favicon-new.png',
         },
         description: '메이플스토리 아이템, 메소 전 서버 최고가 매입 및 검증 업체 플랫폼',
         areaServed: 'KR',
@@ -148,7 +148,7 @@ export default function Home() {
         <Link href="/" style={{ textDecoration: 'none' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
             <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2E8F0' }}>
-              <Image src="/logo.png" alt="메이플 아이템 최고가 매입 로고" width={30} height={30} style={{ objectFit: 'contain' }} priority />
+              <Image src="/favicon-new.png" alt="메이플 아이템 최고가 매입 로고" width={30} height={30} style={{ objectFit: 'contain' }} priority />
             </div>
             <div style={{ fontSize: '20px', fontWeight: '900', color: '#FF9000', letterSpacing: '-0.5px' }}>메이플 아이템</div>
           </div>
