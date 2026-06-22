@@ -27,8 +27,8 @@ export const metadata: Metadata = {
   },
 
   icons: {
-    icon: '/파비콘.png',
-    apple: '/파비콘.png',
+    icon: '/favicon-new.png',
+    apple: '/favicon-new.png',
   },
 
   openGraph: {
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     siteName: '메이플 아이템',
     images: [
       {
-        url: '/링크사진.png',
+        url: '/og-image.png',
         width: 1200,
         height: 630,
         alt: '메이플스토리 급처템 최고가 매입 - 메이플 아이템',
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: '메이플급처 & 메이플스토리 아이템 - 전 서버 최고가 매입',
     description: '메이플급처, 안전한 업체 검증, 실시간 시세 확인, 24시간 즉시 거래.',
-    images: ['/링크사진.png'],
+    images: ['/og-image.png'],
   },
 
   verification: {
