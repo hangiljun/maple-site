@@ -18,6 +18,8 @@ export default function Home() {
 
   const [statusMessages, setStatusMessages] = useState<string[]>([]);
   const [qnaList, setQnaList] = useState<{question: string, answer: string}[]>([]);
+  const [slideIndex, setSlideIndex] = useState(0);
+  const tradePhotos = ['/trade1.png','/trade2.png','/trade3.png','/trade4.png','/trade5.png','/trade6.png','/trade7.png'];
 
   const router = useRouter();
 
@@ -61,6 +63,13 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [reviews]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSlideIndex((prev) => (prev + 1) % tradePhotos.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   const premiumItems = items.filter(item => item.isPremium === true).slice(0, 3);
   const normalItems = items.filter(item => !item.isPremium);
 
@@ -103,7 +112,7 @@ export default function Home() {
   };
 
   return (
-    <div style={{ backgroundColor: '#F8FAFC', minHeight: '100vh', color: '#1E293B', fontFamily: "'Noto Sans KR', sans-serif", overflowX: 'hidden' }}>
+    <div style={{ backgroundColor: '#F8FAFC', minHeight: '100vh', color: '#1E293B', fontFamily: "'Noto Sans KR', sans-serif" }}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -145,14 +154,12 @@ export default function Home() {
 
       {/* 2. 네비게이션 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', backgroundColor: 'rgba(255, 255, 255, 0.95)', borderBottom: '1px solid #E2E8F0', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-        <Link href="/" style={{ textDecoration: 'none' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-            <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2E8F0' }}>
-              <Image src="/favicon-new.png" alt="메이플 아이템 최고가 매입 로고" width={30} height={30} style={{ objectFit: 'contain' }} priority />
-            </div>
-            <div style={{ fontSize: '20px', fontWeight: '900', color: '#FF9000', letterSpacing: '-0.5px' }}>메이플 아이템</div>
+        <div onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+          <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2E8F0' }}>
+            <Image src="/favicon-new.png" alt="메이플 아이템 최고가 매입 로고" width={30} height={30} style={{ objectFit: 'contain' }} priority />
           </div>
-        </Link>
+          <div style={{ fontSize: '20px', fontWeight: '900', color: '#FF9000', letterSpacing: '-0.5px' }}>메이플 아이템</div>
+        </div>
         <div style={{ display: 'flex', gap: '20px', fontSize: '15px', fontWeight: '600', color: '#64748B' }}>
           <Link href="/" style={{ textDecoration: 'none' }}><span style={{ cursor: 'pointer', color: '#FF9000' }}>홈</span></Link>
           <Link href="/notice" style={{ textDecoration: 'none', color: '#64748B' }}><span style={{ cursor: 'pointer' }}>공지사항</span></Link>
@@ -277,6 +284,37 @@ export default function Home() {
               </div>
             ) : ( <div style={{ color: '#94A3B8' }}>등록된 후기가 없습니다.</div> )}
           </div>
+      </div>
+
+      {/* 7.5. 거래 인증 사진 슬라이드 */}
+      <div style={{ padding: '60px 0', backgroundColor: '#FFFFFF', borderTop: '1px solid #E2E8F0' }}>
+        <h2 style={{ textAlign: 'center', fontSize: '22px', marginBottom: '30px', color: '#1E293B' }}>📸 실시간 거래 인증</h2>
+        <div style={{ position: 'relative', maxWidth: '500px', margin: '0 auto', padding: '0 40px' }}>
+          <div style={{ borderRadius: '20px', overflow: 'hidden', aspectRatio: '4/3', backgroundColor: '#F1F5F9' }}>
+            <img
+              src={tradePhotos[slideIndex]}
+              alt={`메이플급처 거래 인증 사진 ${slideIndex + 1}`}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'opacity 0.4s ease' }}
+            />
+          </div>
+          <button
+            onClick={() => setSlideIndex((prev) => (prev - 1 + tradePhotos.length) % tradePhotos.length)}
+            style={{ position: 'absolute', left: '0', top: '50%', transform: 'translateY(-60%)', width: '36px', height: '36px', borderRadius: '50%', border: 'none', backgroundColor: 'rgba(0,0,0,0.35)', color: '#FFF', fontSize: '20px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >‹</button>
+          <button
+            onClick={() => setSlideIndex((prev) => (prev + 1) % tradePhotos.length)}
+            style={{ position: 'absolute', right: '0', top: '50%', transform: 'translateY(-60%)', width: '36px', height: '36px', borderRadius: '50%', border: 'none', backgroundColor: 'rgba(0,0,0,0.35)', color: '#FFF', fontSize: '20px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >›</button>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '16px' }}>
+            {tradePhotos.map((_, i) => (
+              <div
+                key={i}
+                onClick={() => setSlideIndex(i)}
+                style={{ width: i === slideIndex ? '20px' : '8px', height: '8px', borderRadius: '4px', backgroundColor: i === slideIndex ? '#FF9000' : '#CBD5E1', cursor: 'pointer', transition: 'all 0.3s ease' }}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* 8. 자주 묻는 질문 (Q&A) */}
