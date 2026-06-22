@@ -179,6 +179,9 @@ function CompanyManager() {
   const [kakaoUrl, setKakaoUrl] = useState('');
   const [isPremium, setIsPremium] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editImageUrl, setEditImageUrl] = useState('');
+  const formRef = useRef<HTMLFormElement>(null);
 
   const fetchItems = async () => {
     const q = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
@@ -187,18 +190,45 @@ function CompanyManager() {
   };
   useEffect(() => { fetchItems(); }, []);
 
-  const handleAdd = async (e: any) => {
+  const resetForm = () => {
+    setName(''); setDesc(''); setKakaoUrl(''); setIsPremium(false);
+    setEditId(null); setEditImageUrl('');
+    formRef.current?.reset();
+  };
+
+  const handleEdit = (item: any) => {
+    setEditId(item.id);
+    setName(item.name || '');
+    setDesc(item.desc || '');
+    setKakaoUrl(item.kakaoUrl || '');
+    setIsPremium(item.isPremium || false);
+    setEditImageUrl(item.imageUrl || '');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
-    const file = e.target.image.files[0];
-    if (!name || !desc || !file) return alert("정보를 모두 입력해주세요.");
+    if (!name || !desc) return alert("업체명과 설명을 입력해주세요.");
     setLoading(true);
     try {
-      const imgRef = ref(storage, `companies/${Date.now()}`);
-      await uploadBytes(imgRef, file);
-      const imageUrl = await getDownloadURL(imgRef);
-      await addDoc(collection(db, 'items'), { name, price: desc, desc, kakaoUrl, imageUrl, isPremium, createdAt: serverTimestamp() });
-      alert("등록 완료"); fetchItems(); e.target.reset(); setName(''); setDesc(''); setKakaoUrl(''); setIsPremium(false);
-    } catch (err) { alert("등록 실패"); }
+      const file = e.target.image.files[0];
+      let imageUrl = editImageUrl;
+      if (file) {
+        const imgRef = ref(storage, `companies/${Date.now()}`);
+        await uploadBytes(imgRef, file);
+        imageUrl = await getDownloadURL(imgRef);
+      }
+      if (editId) {
+        if (!imageUrl) return alert("이미지가 필요합니다.");
+        await setDoc(doc(db, 'items', editId), { name, price: desc, desc, kakaoUrl, imageUrl, isPremium }, { merge: true });
+        alert("수정 완료!");
+      } else {
+        if (!file) return alert("이미지를 선택해주세요.");
+        await addDoc(collection(db, 'items'), { name, price: desc, desc, kakaoUrl, imageUrl, isPremium, createdAt: serverTimestamp() });
+        alert("등록 완료!");
+      }
+      resetForm(); fetchItems();
+    } catch (err) { alert(editId ? "수정 실패" : "등록 실패"); }
     setLoading(false);
   };
 
@@ -209,7 +239,12 @@ function CompanyManager() {
   return (
     <div>
       <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>업체 등록 및 관리</h2>
-      <form onSubmit={handleAdd} style={{ backgroundColor: '#FFF', padding: '20px', borderRadius: '15px', marginBottom: '30px' }}>
+      <form ref={formRef} onSubmit={handleSubmit} style={{ backgroundColor: editId ? '#FFF8EE' : '#FFF', padding: '20px', borderRadius: '15px', marginBottom: '30px', border: editId ? '2px solid #FF9000' : 'none' }}>
+        {editId && (
+          <div style={{ marginBottom: '15px', fontWeight: 'bold', color: '#FF9000', fontSize: '16px' }}>
+            ✏️ 수정 모드 — {name}
+          </div>
+        )}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
           <input placeholder="업체명" value={name} onChange={e => setName(e.target.value)} style={inputStyle} />
           <input placeholder="설명/가격" value={desc} onChange={e => setDesc(e.target.value)} style={inputStyle} />
@@ -217,6 +252,12 @@ function CompanyManager() {
           <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><input type="checkbox" checked={isPremium} onChange={e => setIsPremium(e.target.checked)} /> 프리미엄 등록</label>
         </div>
         <div style={{ marginBottom: '15px' }}>
+          {editId && editImageUrl && (
+            <div style={{ marginBottom: '10px' }}>
+              <div style={{ fontSize: '13px', color: '#888', marginBottom: '5px' }}>현재 이미지 (새 파일 선택 시 교체됨)</div>
+              <img src={editImageUrl} alt="현재 이미지" style={{ height: '80px', borderRadius: '8px', objectFit: 'cover' }} />
+            </div>
+          )}
           <input type="file" name="image" accept="image/*" />
           <div style={{ marginTop: '10px', fontSize: '13px', fontWeight: 'bold' }}>
             {isPremium ? (
@@ -226,13 +267,25 @@ function CompanyManager() {
             )}
           </div>
         </div>
-        <button type="submit" disabled={loading} style={{...btnStyle, marginTop:'15px'}}>{loading ? "등록 중..." : "등록하기"}</button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button type="submit" disabled={loading} style={{...btnStyle, marginTop:'15px'}}>
+            {loading ? (editId ? "수정 중..." : "등록 중...") : (editId ? "✅ 수정하기" : "등록하기")}
+          </button>
+          {editId && (
+            <button type="button" onClick={resetForm} style={{...btnStyle, marginTop:'15px', backgroundColor:'#888', width:'120px', fontSize:'15px'}}>취소</button>
+          )}
+        </div>
       </form>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
         {items.map(item => (
-          <div key={item.id} style={{ backgroundColor: '#FFF', padding: '15px', borderRadius: '10px', border: '1px solid #DDD' }}>
-            <div style={{ fontWeight: 'bold' }}>{item.name}</div>
-            <button onClick={() => handleDelete(item.id)} style={{ marginTop: '10px', padding: '5px 10px', backgroundColor: '#FF4444', color: '#FFF', border: 'none', borderRadius: '5px' }}>삭제</button>
+          <div key={item.id} style={{ backgroundColor: '#FFF', padding: '15px', borderRadius: '10px', border: editId === item.id ? '2px solid #FF9000' : '1px solid #DDD' }}>
+            {item.imageUrl && <img src={item.imageUrl} alt={item.name} style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '6px', marginBottom: '8px' }} />}
+            <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>{item.isPremium ? '⭐ ' : ''}{item.name}</div>
+            <div style={{ fontSize: '12px', color: '#888', marginBottom: '10px' }}>{item.desc}</div>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button onClick={() => handleEdit(item)} style={{ flex: 1, padding: '5px 0', backgroundColor: '#FF9000', color: '#FFF', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>수정</button>
+              <button onClick={() => handleDelete(item.id)} style={{ flex: 1, padding: '5px 0', backgroundColor: '#FF4444', color: '#FFF', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>삭제</button>
+            </div>
           </div>
         ))}
       </div>
