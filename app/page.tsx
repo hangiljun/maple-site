@@ -190,7 +190,33 @@ export default function Home() {
 
           <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', width: '100%', maxWidth: '800px', padding: '0 20px' }}>
             <h1 style={{ fontSize: 'clamp(18px, 4vw, 28px)', fontWeight: '900', color: '#FFF', marginBottom: '15px', textShadow: '0 2px 10px rgba(0,0,0,0.4)' }}>메이플급처 <span style={{ color: '#FFD700' }}>최고가 매입</span> & 시세 비교</h1>
-            <p style={{ color: '#F1F5F9', fontWeight: '500', fontSize: 'clamp(12px, 3vw, 16px)', backgroundColor: 'rgba(0,0,0,0.45)', display: 'inline-block', padding: '8px 20px', borderRadius: '30px', backdropFilter: 'blur(5px)' }}>메이플급처 전문 검증 업체들과 안전하게 거래하세요</p>
+            <p style={{ color: '#F1F5F9', fontWeight: '500', fontSize: 'clamp(12px, 3vw, 16px)', backgroundColor: 'rgba(0,0,0,0.45)', display: 'inline-block', padding: '8px 20px', borderRadius: '30px', backdropFilter: 'blur(5px)', marginBottom: '20px' }}>메이플급처 전문 검증 업체들과 안전하게 거래하세요</p>
+            <button
+              onClick={() => window.open(mainBanner?.kakaoUrl || '#', '_blank')}
+              style={{
+                backgroundColor: '#FEE500',
+                color: '#000',
+                padding: '12px 30px',
+                fontSize: 'clamp(14px, 3.5vw, 18px)',
+                fontWeight: 'bold',
+                border: 'none',
+                borderRadius: '30px',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(254, 229, 0, 0.4)',
+                transition: 'all 0.3s ease',
+                marginTop: '10px'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(254, 229, 0, 0.6)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = '0 4px 15px rgba(254, 229, 0, 0.4)';
+              }}
+            >
+              💬 카톡 문의하기
+            </button>
           </div>
         </div>
       </div>
@@ -335,8 +361,15 @@ export default function Home() {
         {qnaList.length === 0 && <div style={{ textAlign: 'center', color: '#94A3B8' }}>등록된 질문이 없습니다.</div>}
       </div>
 
-      <footer style={{ backgroundColor: '#F1F5F9', padding: '40px', textAlign: 'center', color: '#94A3B8', fontSize: '12px', borderTop: '1px solid #E2E8F0' }}>
-        © 2026 메이플 아이템. All rights reserved.
+      <footer style={{ backgroundColor: '#F1F5F9', padding: '40px 20px', textAlign: 'center', color: '#94A3B8', fontSize: '12px', borderTop: '1px solid #E2E8F0' }}>
+        <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
+          <Link href="/terms" style={{ color: '#64748B', textDecoration: 'none', fontWeight: '600' }}>이용약관</Link>
+          <span style={{ color: '#CBD5E1' }}>|</span>
+          <Link href="/privacy" style={{ color: '#64748B', textDecoration: 'none', fontWeight: '600' }}>개인정보 처리방침</Link>
+          <span style={{ color: '#CBD5E1' }}>|</span>
+          <Link href="/business-license" style={{ color: '#64748B', textDecoration: 'none', fontWeight: '600' }}>사업자 등록증</Link>
+        </div>
+        <div style={{ color: '#94A3B8' }}>© 2026 메이플 아이템. All rights reserved.</div>
       </footer>
     </div>
   );

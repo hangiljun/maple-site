@@ -295,6 +295,20 @@ function CompanyManager() {
 
 // 3. 배너 관리
 function BannerManager() {
+  const [kakaoUrl, setKakaoUrl] = useState('');
+  const [currentKakaoUrl, setCurrentKakaoUrl] = useState('');
+
+  useEffect(() => {
+    const fetchBannerData = async () => {
+      const docSnap = await getDoc(doc(db, 'banners', 'home_main'));
+      if (docSnap.exists()) {
+        setCurrentKakaoUrl(docSnap.data().kakaoUrl || '');
+        setKakaoUrl(docSnap.data().kakaoUrl || '');
+      }
+    };
+    fetchBannerData();
+  }, []);
+
   const handleBannerUpdate = async (e: any, type: string) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -304,32 +318,73 @@ function BannerManager() {
       else if (type === '공지사항') docId = 'notice_main';
       else if (type === '거래방법') docId = 'howto_main';
       else if (type === '이용후기') docId = 'review_main';
-      
+
       const imgRef = ref(storage, `banners/${docId}_${Date.now()}`);
       await uploadBytes(imgRef, file);
       const imageUrl = await getDownloadURL(imgRef);
 
-      await setDoc(doc(db, 'banners', docId), { 
-        type, 
-        imageUrl, 
-        createdAt: serverTimestamp() 
-      });
+      const updateData: any = {
+        type,
+        imageUrl,
+        createdAt: serverTimestamp()
+      };
+
+      if (docId === 'home_main' && kakaoUrl) {
+        updateData.kakaoUrl = kakaoUrl;
+      }
+
+      await setDoc(doc(db, 'banners', docId), updateData, { merge: true });
 
       alert(`${type} 배너가 성공적으로 변경되었습니다!`);
-    } catch (err) { 
+    } catch (err) {
       console.error(err);
-      alert("업로드 실패"); 
+      alert("업로드 실패");
     }
   };
+
+  const updateKakaoLink = async () => {
+    try {
+      await setDoc(doc(db, 'banners', 'home_main'), { kakaoUrl }, { merge: true });
+      setCurrentKakaoUrl(kakaoUrl);
+      alert('카카오톡 링크가 업데이트되었습니다!');
+    } catch (err) {
+      alert('업데이트 실패');
+    }
+  };
+
   return (
     <div>
       <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>배너 관리</h2>
+
+      {/* 메인 배너 카카오톡 링크 설정 */}
+      <div style={{ backgroundColor: '#FFF8EE', padding: '20px', borderRadius: '15px', marginBottom: '30px', border: '2px solid #FF9000' }}>
+        <h3 style={{ marginBottom: '15px', color: '#FF9000' }}>💬 메인 배너 카카오톡 링크 설정</h3>
+        <p style={{ fontSize: '13px', color: '#888', marginBottom: '10px' }}>메인 대문의 "카톡 문의하기" 버튼에 연결될 카카오톡 링크를 설정하세요.</p>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <input
+            type="text"
+            placeholder="예: https://open.kakao.com/o/..."
+            value={kakaoUrl}
+            onChange={(e) => setKakaoUrl(e.target.value)}
+            style={{ ...inputStyle, flex: 1 }}
+          />
+          <button onClick={updateKakaoLink} style={{ padding: '12px 24px', backgroundColor: '#FF9000', color: '#FFF', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
+            저장
+          </button>
+        </div>
+        {currentKakaoUrl && (
+          <div style={{ marginTop: '10px', fontSize: '12px', color: '#666' }}>
+            현재 링크: <a href={currentKakaoUrl} target="_blank" style={{ color: '#FF9000' }}>{currentKakaoUrl}</a>
+          </div>
+        )}
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
         {['홈 (메인)', '공지사항', '거래방법', '이용후기'].map((menu, idx) => (
           <div key={idx} style={{ backgroundColor: '#FFF', padding: '20px', borderRadius: '15px' }}>
             <h3>{menu} 배너</h3>
             <p style={{ fontSize: '12px', color: '#FF9000', marginBottom: '10px' }}>
-              {menu.includes('홈') ? '💡 권장: 1200 x 320 px (PC)' : '💡 권장: 1200 x 300 px (서브)'}
+              {menu.includes('홈') ? '💡 권장: 1500 x 400 px (PC)' : '💡 권장: 1200 x 300 px (서브)'}
             </p>
             <input type="file" onChange={(e) => handleBannerUpdate(e, menu)} />
           </div>
@@ -351,6 +406,49 @@ function PostManager() {
   const [loading, setLoading] = useState(false);
   const [posts, setPosts] = useState<any[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const insertFormatting = (formatType: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = content.substring(start, end);
+    let formattedText = '';
+
+    switch (formatType) {
+      case 'bold':
+        formattedText = `<strong>${selectedText || '굵게'}</strong>`;
+        break;
+      case 'color-red':
+        formattedText = `<span style="color: #FF0000;">${selectedText || '빨간색 텍스트'}</span>`;
+        break;
+      case 'color-blue':
+        formattedText = `<span style="color: #0066FF;">${selectedText || '파란색 텍스트'}</span>`;
+        break;
+      case 'color-orange':
+        formattedText = `<span style="color: #FF9000;">${selectedText || '주황색 텍스트'}</span>`;
+        break;
+      case 'size-large':
+        formattedText = `<span style="font-size: 20px; font-weight: bold;">${selectedText || '큰 글씨'}</span>`;
+        break;
+      case 'size-xlarge':
+        formattedText = `<span style="font-size: 24px; font-weight: bold;">${selectedText || '아주 큰 글씨'}</span>`;
+        break;
+      case 'highlight':
+        formattedText = `<span style="background-color: #FEE500; padding: 2px 6px; border-radius: 3px; font-weight: bold;">${selectedText || '강조 텍스트'}</span>`;
+        break;
+    }
+
+    const newContent = content.substring(0, start) + formattedText + content.substring(end);
+    setContent(newContent);
+
+    setTimeout(() => {
+      textarea.focus();
+      const newCursorPos = start + formattedText.length;
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
+  };
 
   const fetchPosts = async () => {
     const q = query(collection(db, activeCollection), orderBy('createdAt', 'desc'));
@@ -431,13 +529,37 @@ function PostManager() {
           )}
         </div>
         <div style={{ marginBottom: '15px' }}><input placeholder="제목" value={title} onChange={e => setTitle(e.target.value)} style={{ ...inputStyle, width: '100%' }} /></div>
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ backgroundColor: '#FF9000', color: '#FFF', padding: '10px 20px', borderRadius: '5px', cursor: 'pointer' }}>
-            📷 사진 추가 <input type="file" hidden onChange={handleImageInsert} />
+
+        {/* 텍스트 서식 도구 */}
+        <div style={{ marginBottom: '15px', display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '15px', backgroundColor: '#F8FAFC', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+          <button type="button" onClick={() => insertFormatting('bold')} style={{ padding: '8px 15px', backgroundColor: '#FFF', border: '1px solid #DDD', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' }}>
+            <strong>굵게</strong>
+          </button>
+          <button type="button" onClick={() => insertFormatting('size-large')} style={{ padding: '8px 15px', backgroundColor: '#FFF', border: '1px solid #DDD', borderRadius: '5px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' }}>
+            큰 글씨
+          </button>
+          <button type="button" onClick={() => insertFormatting('size-xlarge')} style={{ padding: '8px 15px', backgroundColor: '#FFF', border: '1px solid #DDD', borderRadius: '5px', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold' }}>
+            더 큰 글씨
+          </button>
+          <button type="button" onClick={() => insertFormatting('color-red')} style={{ padding: '8px 15px', backgroundColor: '#FFF', border: '1px solid #DDD', borderRadius: '5px', cursor: 'pointer', color: '#FF0000', fontWeight: 'bold' }}>
+            빨간색
+          </button>
+          <button type="button" onClick={() => insertFormatting('color-blue')} style={{ padding: '8px 15px', backgroundColor: '#FFF', border: '1px solid #DDD', borderRadius: '5px', cursor: 'pointer', color: '#0066FF', fontWeight: 'bold' }}>
+            파란색
+          </button>
+          <button type="button" onClick={() => insertFormatting('color-orange')} style={{ padding: '8px 15px', backgroundColor: '#FFF', border: '1px solid #DDD', borderRadius: '5px', cursor: 'pointer', color: '#FF9000', fontWeight: 'bold' }}>
+            주황색
+          </button>
+          <button type="button" onClick={() => insertFormatting('highlight')} style={{ padding: '8px 15px', backgroundColor: '#FEE500', border: '1px solid #DDD', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
+            형광펜
+          </button>
+          <label style={{ backgroundColor: '#FF9000', color: '#FFF', padding: '8px 15px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+            📷 사진 <input type="file" hidden onChange={handleImageInsert} />
           </label>
-          {loading && <span> 업로드 중...</span>}
+          {loading && <span style={{ display: 'flex', alignItems: 'center', color: '#FF9000', fontWeight: 'bold' }}> 업로드 중...</span>}
         </div>
-        <textarea ref={textareaRef} value={content} onChange={e => setContent(e.target.value)} placeholder="내용 작성" style={{ width: '100%', height: '400px', padding: '20px', border: '1px solid #DDD' }} />
+
+        <textarea ref={textareaRef} value={content} onChange={e => setContent(e.target.value)} placeholder="내용 작성 (텍스트를 선택한 후 위 버튼을 눌러 서식을 적용하세요)" style={{ width: '100%', height: '400px', padding: '20px', border: '1px solid #DDD', borderRadius: '8px', fontSize: '15px', lineHeight: '1.6' }} />
         <button onClick={handleSubmit} style={{ ...btnStyle, marginTop: '20px' }}>등록하기</button>
       </div>
 
