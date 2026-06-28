@@ -118,13 +118,13 @@ export default function ReviewDetailClient({ id }: { id: string }) {
   return (
     <div style={{ backgroundColor: '#F8FAFC', minHeight: '100vh', color: '#1E293B', fontFamily: "'Noto Sans KR', sans-serif", overflowX: 'hidden' }}>
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', borderBottom: '1px solid #E2E8F0', backgroundColor: 'rgba(255,255,255,0.95)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)', alignItems: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', flexShrink: 0 }} onClick={() => router.push('/')}>
           <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2E8F0' }}>
             <img src="/favicon-new.png" style={{ width: '30px', height: '30px', objectFit: 'contain' }} alt="메이플 아이템 로고" />
           </div>
-          <div style={{ fontWeight: '900', color: '#FF9000', fontSize: '20px' }}>메이플 아이템</div>
+          <div style={{ fontWeight: '900', color: '#FF9000', fontSize: 'clamp(16px, 4vw, 20px)', whiteSpace: 'nowrap' }}>메이플 아이템</div>
         </div>
-        <button onClick={() => router.back()} style={{ border: '1px solid #E2E8F0', background: '#FFFFFF', cursor: 'pointer', color: '#64748B', fontWeight: 'bold', padding: '8px 16px', borderRadius: '8px', fontSize: '14px' }}>← 뒤로가기</button>
+        <button onClick={() => router.back()} style={{ border: '1px solid #E2E8F0', background: '#FFFFFF', cursor: 'pointer', color: '#64748B', fontWeight: 'bold', padding: '8px 16px', borderRadius: '8px', fontSize: 'clamp(12px, 3vw, 14px)', whiteSpace: 'nowrap' }}>← 뒤로가기</button>
       </nav>
 
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 20px', width: '100%', boxSizing: 'border-box' }}>

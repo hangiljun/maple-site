@@ -405,6 +405,7 @@ function PostManager() {
   const [isPinned, setIsPinned] = useState(false);
   const [loading, setLoading] = useState(false);
   const [posts, setPosts] = useState<any[]>([]);
+  const [editId, setEditId] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const insertFormatting = (formatType: string) => {
@@ -477,22 +478,67 @@ function PostManager() {
     setLoading(false);
   };
 
+  const handleEdit = (post: any) => {
+    setEditId(post.id);
+    setTitle(post.title);
+    setContent(post.content);
+    if (activeCollection === 'notices') {
+      setNoticeCategory(post.category || '공지사항');
+      setIsPinned(post.isPinned || false);
+    } else {
+      setHowtoCategory(post.category || '거래 방법');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const resetForm = () => {
+    setEditId(null);
+    setTitle('');
+    setContent('');
+    setIsPinned(false);
+    setNoticeCategory('공지사항');
+    setHowtoCategory('거래 방법');
+  };
+
   const handleSubmit = async () => {
     if (!title || !content) return alert("내용을 입력하세요.");
-    if (confirm("등록하시겠습니까?")) {
+    const confirmMsg = editId ? "수정하시겠습니까?" : "등록하시겠습니까?";
+    if (confirm(confirmMsg)) {
       setLoading(true);
       const finalCategory = activeCollection === 'notices' ? noticeCategory : howtoCategory;
-      await addDoc(collection(db, activeCollection), {
-        title, content, category: finalCategory, 
+      const postData = {
+        title,
+        content,
+        category: finalCategory,
         isPinned: activeCollection === 'notices' ? isPinned : false,
-        createdAt: serverTimestamp()
-      });
-      alert("등록 완료!"); setTitle(''); setContent(''); setIsPinned(false); fetchPosts(); setLoading(false);
+      };
+
+      try {
+        if (editId) {
+          await setDoc(doc(db, activeCollection, editId), postData, { merge: true });
+          alert("수정 완료!");
+        } else {
+          await addDoc(collection(db, activeCollection), {
+            ...postData,
+            createdAt: serverTimestamp()
+          });
+          alert("등록 완료!");
+        }
+        resetForm();
+        fetchPosts();
+      } catch (err) {
+        alert(editId ? "수정 실패" : "등록 실패");
+      }
+      setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if(confirm("삭제하시겠습니까?")) { await deleteDoc(doc(db, activeCollection, id)); fetchPosts(); }
+    if(confirm("삭제하시겠습니까?")) {
+      await deleteDoc(doc(db, activeCollection, id));
+      if (editId === id) resetForm();
+      fetchPosts();
+    }
   };
 
   return (
@@ -503,8 +549,13 @@ function PostManager() {
         <button onClick={() => setActiveCollection('howto')} style={tabStyle(activeCollection === 'howto')}>📘 거래방법 관리</button>
       </div>
 
-      <div style={{ backgroundColor: '#FFF', padding: '30px', borderRadius: '15px', marginBottom: '40px' }}>
-        <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '15px' }}>새 글 작성</h3>
+      <div style={{ backgroundColor: editId ? '#FFF8EE' : '#FFF', padding: '30px', borderRadius: '15px', marginBottom: '40px', border: editId ? '2px solid #FF9000' : 'none' }}>
+        {editId && (
+          <div style={{ marginBottom: '15px', fontWeight: 'bold', color: '#FF9000', fontSize: '16px' }}>
+            ✏️ 수정 모드
+          </div>
+        )}
+        <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '15px' }}>{editId ? '게시글 수정' : '새 글 작성'}</h3>
         <div style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '20px' }}>
           <div>
             <span style={{ fontWeight: 'bold', marginRight: '10px' }}>카테고리:</span>
@@ -560,15 +611,27 @@ function PostManager() {
         </div>
 
         <textarea ref={textareaRef} value={content} onChange={e => setContent(e.target.value)} placeholder="내용 작성 (텍스트를 선택한 후 위 버튼을 눌러 서식을 적용하세요)" style={{ width: '100%', height: '400px', padding: '20px', border: '1px solid #DDD', borderRadius: '8px', fontSize: '15px', lineHeight: '1.6' }} />
-        <button onClick={handleSubmit} style={{ ...btnStyle, marginTop: '20px' }}>등록하기</button>
+        <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+          <button onClick={handleSubmit} disabled={loading} style={{ ...btnStyle, marginTop: 0 }}>
+            {loading ? (editId ? "수정 중..." : "등록 중...") : (editId ? "✅ 수정하기" : "등록하기")}
+          </button>
+          {editId && (
+            <button onClick={resetForm} style={{ ...btnStyle, marginTop: 0, backgroundColor: '#888', width: '120px', fontSize: '15px' }}>
+              취소
+            </button>
+          )}
+        </div>
       </div>
 
       <h3>등록된 글 목록</h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {posts.map(post => (
-          <div key={post.id} style={{ display: 'flex', justifyContent: 'space-between', backgroundColor: '#FFF', padding: '15px', borderRadius: '10px', border: '1px solid #DDD' }}>
+          <div key={post.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: editId === post.id ? '#FFF8EE' : '#FFF', padding: '15px', borderRadius: '10px', border: editId === post.id ? '2px solid #FF9000' : '1px solid #DDD' }}>
             <div>{post.isPinned && '📌'} <span style={{color:'#FF9000', fontWeight:'bold'}}>[{post.category}]</span> {post.title}</div>
-            <button onClick={() => handleDelete(post.id)} style={{ backgroundColor: '#FF4444', color: '#FFF', border: 'none', padding: '5px 10px', borderRadius: '5px' }}>삭제</button>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button onClick={() => handleEdit(post)} style={{ backgroundColor: '#FF9000', color: '#FFF', border: 'none', padding: '5px 15px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>수정</button>
+              <button onClick={() => handleDelete(post.id)} style={{ backgroundColor: '#FF4444', color: '#FFF', border: 'none', padding: '5px 15px', borderRadius: '5px', cursor: 'pointer' }}>삭제</button>
+            </div>
           </div>
         ))}
       </div>

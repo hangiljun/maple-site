@@ -21,7 +21,16 @@ export default function Home() {
   const [slideIndex, setSlideIndex] = useState(0);
   const tradePhotos = ['/trade1.png','/trade2.png','/trade3.png','/trade4.png','/trade5.png','/trade6.png','/trade7.png'];
 
+  const [notices, setNotices] = useState<any[]>([]);
+  const [howto, setHowto] = useState<any[]>([]);
+
   const router = useRouter();
+
+  const extractFirstImage = (content: string) => {
+    if (!content) return null;
+    const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
+    return imgMatch ? imgMatch[1] : null;
+  };
 
   useEffect(() => {
     const now = new Date();
@@ -42,6 +51,12 @@ export default function Home() {
     const qReviews = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(10));
     const unsubReviews = onSnapshot(qReviews, (s) => setReviews(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
+    const qNotices = query(collection(db, 'notices'), orderBy('createdAt', 'desc'), limit(3));
+    const unsubNotices = onSnapshot(qNotices, (s) => setNotices(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+
+    const qHowto = query(collection(db, 'howto'), orderBy('createdAt', 'desc'), limit(3));
+    const unsubHowto = onSnapshot(qHowto, (s) => setHowto(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+
     const unsubConfig = onSnapshot(doc(db, 'site_config', 'main'), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -51,7 +66,7 @@ export default function Home() {
     });
 
     return () => {
-      unsubItems(); unsubBanner(); unsubReviews(); unsubConfig();
+      unsubItems(); unsubBanner(); unsubReviews(); unsubNotices(); unsubHowto(); unsubConfig();
     };
   }, []);
 
@@ -154,17 +169,17 @@ export default function Home() {
 
       {/* 2. 네비게이션 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', backgroundColor: 'rgba(255, 255, 255, 0.95)', borderBottom: '1px solid #E2E8F0', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-        <div onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+        <div onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', flexShrink: 0 }}>
           <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2E8F0' }}>
             <Image src="/favicon-new.png" alt="메이플 아이템 최고가 매입 로고" width={30} height={30} style={{ objectFit: 'contain' }} priority />
           </div>
-          <div style={{ fontSize: '20px', fontWeight: '900', color: '#FF9000', letterSpacing: '-0.5px' }}>메이플 아이템</div>
+          <div style={{ fontSize: 'clamp(16px, 4vw, 20px)', fontWeight: '900', color: '#FF9000', letterSpacing: '-0.5px', whiteSpace: 'nowrap' }}>메이플 아이템</div>
         </div>
-        <div style={{ display: 'flex', gap: '20px', fontSize: '15px', fontWeight: '600', color: '#64748B' }}>
-          <Link href="/" style={{ textDecoration: 'none' }}><span style={{ cursor: 'pointer', color: '#FF9000' }}>홈</span></Link>
-          <Link href="/notice" style={{ textDecoration: 'none', color: '#64748B' }}><span style={{ cursor: 'pointer' }}>공지사항</span></Link>
-          <Link href="/howto" style={{ textDecoration: 'none', color: '#64748B' }}><span style={{ cursor: 'pointer' }}>거래방법</span></Link>
-          <Link href="/review" style={{ textDecoration: 'none', color: '#64748B' }}><span style={{ cursor: 'pointer' }}>이용후기</span></Link>
+        <div style={{ display: 'flex', gap: 'clamp(8px, 3vw, 20px)', fontSize: 'clamp(12px, 3vw, 15px)', fontWeight: '600', color: '#64748B' }}>
+          <Link href="/" style={{ textDecoration: 'none' }}><span style={{ cursor: 'pointer', color: '#FF9000', whiteSpace: 'nowrap' }}>홈</span></Link>
+          <Link href="/notice" style={{ textDecoration: 'none', color: '#64748B' }}><span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>공지사항</span></Link>
+          <Link href="/howto" style={{ textDecoration: 'none', color: '#64748B' }}><span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>거래방법</span></Link>
+          <Link href="/review" style={{ textDecoration: 'none', color: '#64748B' }}><span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>이용후기</span></Link>
         </div>
       </nav>
 
@@ -297,6 +312,70 @@ export default function Home() {
         </div>
       </div>
 
+      {/* 6.5. 공지사항 & 거래방법 프리뷰 */}
+      <div style={{ padding: '60px 0', backgroundColor: '#FFFFFF' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 20px' }}>
+          {/* 공지사항 */}
+          <div style={{ marginBottom: '50px' }}>
+            <h2 style={{ fontSize: '22px', fontWeight: 'bold', color: '#1E293B', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '24px' }}>📢</span> 공지사항
+              <Link href="/notice" style={{ marginLeft: 'auto', fontSize: '14px', color: '#94A3B8', textDecoration: 'none' }}>더보기 →</Link>
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              {notices.map((notice) => {
+                const thumbnail = extractFirstImage(notice.content) || '/favicon-new.png';
+                return (
+                  <Link key={notice.id} href={`/notice/${notice.id}`} style={{ textDecoration: 'none' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '15px', backgroundColor: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0', transition: 'all 0.3s ease', cursor: 'pointer' }}
+                         onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FFF'; e.currentTarget.style.borderColor = '#FF9000'; }}
+                         onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; e.currentTarget.style.borderColor = '#E2E8F0'; }}>
+                      <img src={thumbnail} alt={notice.title} style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />
+                      <div style={{ flex: 1, overflow: 'hidden' }}>
+                        <div style={{ fontSize: '16px', fontWeight: '600', color: '#1E293B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {notice.isPinned && <span style={{ color: '#FF9000', marginRight: '5px' }}>📌</span>}
+                          <span style={{ color: '#FF9000', fontSize: '14px', marginRight: '8px' }}>[{notice.category}]</span>
+                          {notice.title}
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+              {notices.length === 0 && <div style={{ textAlign: 'center', color: '#94A3B8', padding: '30px' }}>등록된 공지사항이 없습니다.</div>}
+            </div>
+          </div>
+
+          {/* 거래방법 */}
+          <div>
+            <h2 style={{ fontSize: '22px', fontWeight: 'bold', color: '#1E293B', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '24px' }}>📘</span> 거래방법
+              <Link href="/howto" style={{ marginLeft: 'auto', fontSize: '14px', color: '#94A3B8', textDecoration: 'none' }}>더보기 →</Link>
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              {howto.map((post) => {
+                const thumbnail = extractFirstImage(post.content) || '/favicon-new.png';
+                return (
+                  <Link key={post.id} href={`/howto/${post.id}`} style={{ textDecoration: 'none' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '15px', backgroundColor: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0', transition: 'all 0.3s ease', cursor: 'pointer' }}
+                         onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FFF'; e.currentTarget.style.borderColor = '#0066FF'; }}
+                         onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; e.currentTarget.style.borderColor = '#E2E8F0'; }}>
+                      <img src={thumbnail} alt={post.title} style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />
+                      <div style={{ flex: 1, overflow: 'hidden' }}>
+                        <div style={{ fontSize: '16px', fontWeight: '600', color: '#1E293B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <span style={{ color: '#0066FF', fontSize: '14px', marginRight: '8px' }}>[{post.category}]</span>
+                          {post.title}
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+              {howto.length === 0 && <div style={{ textAlign: 'center', color: '#94A3B8', padding: '30px' }}>등록된 거래방법이 없습니다.</div>}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* 7. 실시간 후기 */}
       <div style={{ padding: '60px 0', borderTop: '1px solid #E2E8F0', backgroundColor: '#FFFFFF' }}>
           <h2 style={{ textAlign: 'center', fontSize: '22px', marginBottom: '30px', color: '#1E293B' }}>📢 실시간 거래 후기</h2>
@@ -360,6 +439,53 @@ export default function Home() {
           </div>
         ))}
         {qnaList.length === 0 && <div style={{ textAlign: 'center', color: '#94A3B8' }}>등록된 질문이 없습니다.</div>}
+      </div>
+
+      {/* SEO 텍스트 섹션 */}
+      <div style={{ backgroundColor: '#F8FAFC', padding: '80px 20px', borderTop: '1px solid #E2E8F0' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+          <div style={{ marginBottom: '60px' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1E293B', marginBottom: '20px' }}>
+              <span style={{ color: '#FF9000' }}>1.</span> 신속하고 안전한 메이플스토리 급처거래
+            </h2>
+            <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#475569' }}>
+              군입대, 현생(학업·업무) 집중, 혹은 직업 변경으로 소중한 캐릭터와 아이템을 정리할 때!<br/>
+              기약 없는 경매장 등록과 번거로운 유찰 스트레스는 이제 그만.<br/>
+              시세 맞춤 합리적 가격으로 시간 낭비 없이 모험가님의 자산을 즉각 구매해 드립니다.
+            </p>
+          </div>
+
+          <div style={{ marginBottom: '60px' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1E293B', marginBottom: '20px' }}>
+              <span style={{ color: '#FF9000' }}>2.</span> 5분 완성! 초간단 거래방법 (3단계)
+            </h2>
+            <div style={{ fontSize: '16px', lineHeight: '1.8', color: '#475569' }}>
+              <p style={{ marginBottom: '15px' }}><strong style={{ color: '#FF9000' }}>STEP 01.</strong> 아이템 문의: 정리할 장비 정보 및 스크린샷 접수 (실시간 상담)</p>
+              <p style={{ marginBottom: '15px' }}><strong style={{ color: '#FF9000' }}>STEP 02.</strong> 투명한 시세 분석: 통합 경매장 실매물 비교 및 공정한 감정가 제시</p>
+              <p><strong style={{ color: '#FF9000' }}>STEP 03.</strong> 안전 즉시 정산: 가이드라인에 따른 안전 거래 후 대기 시간 없는 거래</p>
+            </div>
+          </div>
+
+          <div>
+            <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1E293B', marginBottom: '20px' }}>
+              <span style={{ color: '#FF9000' }}>3.</span> 우리가 다른 사이트와 차별화되는 이유
+            </h2>
+            <div style={{ fontSize: '16px', lineHeight: '1.8', color: '#475569' }}>
+              <p style={{ marginBottom: '15px' }}>
+                <strong style={{ color: '#1E293B' }}>유저 출신의 공감과 이해:</strong> 정든 템을 보내는 마음을 알기에, 가격 후려치기 없이 객관적인 시세 비교표를 바탕으로 합리적인 가격을 약속합니다.
+              </p>
+              <p style={{ marginBottom: '20px' }}>
+                <strong style={{ color: '#1E293B' }}>정식 사업자 등록의 안전망:</strong> 강동세무서 정식 사업자 등록 및 투명한 세무 신고까지! 국민의 의무를 다합니다. 비공식 개인 장사꾼들과 달리 거래 사기 걱정이 전혀 없습니다.
+              </p>
+              <p style={{ marginBottom: '10px' }}>
+                <strong style={{ color: '#FF9000' }}>챌린저스 :</strong> 챌린저스1, 챌린저스2, 챌린저스3, 챌린저스4 서버를 실시간으로 거래합니다.
+              </p>
+              <p>
+                <strong style={{ color: '#FF9000' }}>일반 월드 :</strong> 스카니아, 루나, 엘리시움, 크로아, 베라, 오로라, 레드, 이노시스, 유니온, 아케인, 노바, 에오스, 헬리오스 서버 지원
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <footer style={{ backgroundColor: '#F1F5F9', padding: '40px 20px', textAlign: 'center', color: '#94A3B8', fontSize: '12px', borderTop: '1px solid #E2E8F0' }}>

@@ -69,17 +69,17 @@ export default function ReviewPage() {
     <div style={{ backgroundColor: '#F8FAFC', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif", color: '#1E293B' }}>
 
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', borderBottom: '1px solid #E2E8F0', backgroundColor: 'rgba(255, 255, 255, 0.95)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)', alignItems: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => router.push('/')}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', flexShrink: 0 }} onClick={() => router.push('/')}>
           <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2E8F0' }}>
              <img src="/favicon-new.png" alt="메이플 아이템 로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
           </div>
-          <div style={{ fontWeight: '900', color: '#FF9000', fontSize: '20px' }}>메이플 아이템</div>
+          <div style={{ fontWeight: '900', color: '#FF9000', fontSize: 'clamp(16px, 4vw, 20px)', whiteSpace: 'nowrap' }}>메이플 아이템</div>
         </div>
-        <div style={{ display: 'flex', gap: '20px', fontWeight: '600', fontSize: '15px', color: '#64748B' }}>
-          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/')}>홈</span>
-          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/notice')}>공지사항</span>
-          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/howto')}>거래방법</span>
-          <span style={{ color: '#FF9000', cursor: 'pointer' }}>이용후기</span>
+        <div style={{ display: 'flex', gap: 'clamp(8px, 3vw, 20px)', fontWeight: '600', fontSize: 'clamp(12px, 3vw, 15px)', color: '#64748B' }}>
+          <span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }} onClick={() => router.push('/')}>홈</span>
+          <span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }} onClick={() => router.push('/notice')}>공지사항</span>
+          <span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }} onClick={() => router.push('/howto')}>거래방법</span>
+          <span style={{ color: '#FF9000', cursor: 'pointer', whiteSpace: 'nowrap' }}>이용후기</span>
         </div>
       </nav>
 

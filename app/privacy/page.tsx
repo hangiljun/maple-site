@@ -8,17 +8,17 @@ export default function PrivacyPage() {
     <div style={{ backgroundColor: '#F8FAFC', minHeight: '100vh', color: '#1E293B', fontFamily: "'Noto Sans KR', sans-serif" }}>
       {/* 네비게이션 */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', backgroundColor: 'rgba(255, 255, 255, 0.95)', borderBottom: '1px solid #E2E8F0', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', textDecoration: 'none' }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', textDecoration: 'none', flexShrink: 0 }}>
           <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2E8F0' }}>
             <Image src="/favicon-new.png" alt="메이플 아이템 최고가 매입 로고" width={30} height={30} style={{ objectFit: 'contain' }} priority />
           </div>
-          <div style={{ fontSize: '20px', fontWeight: '900', color: '#FF9000', letterSpacing: '-0.5px' }}>메이플 아이템</div>
+          <div style={{ fontSize: 'clamp(16px, 4vw, 20px)', fontWeight: '900', color: '#FF9000', letterSpacing: '-0.5px', whiteSpace: 'nowrap' }}>메이플 아이템</div>
         </Link>
-        <div style={{ display: 'flex', gap: '20px', fontSize: '15px', fontWeight: '600', color: '#64748B' }}>
-          <Link href="/" style={{ textDecoration: 'none', color: '#64748B' }}><span style={{ cursor: 'pointer' }}>홈</span></Link>
-          <Link href="/notice" style={{ textDecoration: 'none', color: '#64748B' }}><span style={{ cursor: 'pointer' }}>공지사항</span></Link>
-          <Link href="/howto" style={{ textDecoration: 'none', color: '#64748B' }}><span style={{ cursor: 'pointer' }}>거래방법</span></Link>
-          <Link href="/review" style={{ textDecoration: 'none', color: '#64748B' }}><span style={{ cursor: 'pointer' }}>이용후기</span></Link>
+        <div style={{ display: 'flex', gap: 'clamp(8px, 3vw, 20px)', fontSize: 'clamp(12px, 3vw, 15px)', fontWeight: '600', color: '#64748B' }}>
+          <Link href="/" style={{ textDecoration: 'none', color: '#64748B' }}><span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>홈</span></Link>
+          <Link href="/notice" style={{ textDecoration: 'none', color: '#64748B' }}><span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>공지사항</span></Link>
+          <Link href="/howto" style={{ textDecoration: 'none', color: '#64748B' }}><span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>거래방법</span></Link>
+          <Link href="/review" style={{ textDecoration: 'none', color: '#64748B' }}><span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>이용후기</span></Link>
         </div>
       </nav>
 
@@ -29,18 +29,20 @@ export default function PrivacyPage() {
         <section style={{ marginBottom: '30px' }}>
           <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1E293B', marginBottom: '15px' }}>제1조 (개인정보의 수집 항목 및 이용 목적)</h2>
           <p style={{ lineHeight: '1.8', color: '#475569' }}>
-            메이플 아이템은 다음과 같은 개인정보를 수집하여 이용합니다.<br/><br/>
-            <strong>수집 항목:</strong> 카카오톡 ID, 연락처, 거래 내역<br/>
-            <strong>이용 목적:</strong> 아이템 거래 중개, 고객 문의 응대, 거래 내역 관리
+            메이플 아이템은 다음과 같은 개인정보를 최소한으로 수집합니다.<br/><br/>
+            <strong>수집 항목:</strong> 업체 문의 시 이용자가 자발적으로 제공하는 연락처 (카카오톡 ID 등)<br/>
+            <strong>이용 목적:</strong> 업체 정보 제공, 고객 문의 응대<br/><br/>
+            ※ 본 사이트는 거래를 직접 중개하지 않으며, 거래 내역 등의 정보는 수집하지 않습니다.<br/>
+            ※ 실제 거래는 이용자와 업체 간에 직접 이루어지며, 거래 과정에서 발생하는 개인정보 처리는 각 업체의 책임입니다.
           </p>
         </section>
 
         <section style={{ marginBottom: '30px' }}>
           <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1E293B', marginBottom: '15px' }}>제2조 (개인정보의 보유 및 이용 기간)</h2>
           <p style={{ lineHeight: '1.8', color: '#475569' }}>
-            회사는 이용자의 개인정보를 수집 목적이 달성될 때까지 보유하며, 관련 법령에 따라 일정 기간 보관이 필요한 경우 해당 기간 동안 보관합니다.<br/><br/>
-            <strong>거래 내역:</strong> 5년 (전자상거래법)<br/>
-            <strong>고객 문의 내역:</strong> 3년
+            사이트는 최소한의 개인정보만을 수집하며, 수집 목적이 달성된 후 지체 없이 파기합니다.<br/><br/>
+            <strong>고객 문의 내역:</strong> 문의 응대 완료 후 3개월<br/><br/>
+            ※ 사이트는 거래를 중개하지 않으므로 거래 관련 개인정보는 보유하지 않습니다.
           </p>
         </section>
 
