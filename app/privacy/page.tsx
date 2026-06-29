@@ -1,90 +1,51 @@
 'use client';
 
-import Link from 'next/link';
-import Image from 'next/image';
-
 export default function PrivacyPage() {
   return (
-    <div style={{ backgroundColor: '#F8FAFC', minHeight: '100vh', color: '#1E293B', fontFamily: "'Noto Sans KR', sans-serif" }}>
-      {/* 네비게이션 */}
-      <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', backgroundColor: 'rgba(255, 255, 255, 0.95)', borderBottom: '1px solid #E2E8F0', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', textDecoration: 'none', flexShrink: 0 }}>
-          <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2E8F0' }}>
-            <Image src="/favicon-new.png" alt="메이플 아이템 최고가 매입 로고" width={30} height={30} style={{ objectFit: 'contain' }} priority />
-          </div>
-          <div style={{ fontSize: 'clamp(16px, 4vw, 20px)', fontWeight: '900', color: '#FF9000', letterSpacing: '-0.5px', whiteSpace: 'nowrap' }}>메이플 아이템</div>
-        </Link>
-        <div style={{ display: 'flex', gap: 'clamp(8px, 3vw, 20px)', fontSize: 'clamp(12px, 3vw, 15px)', fontWeight: '600', color: '#64748B' }}>
-          <Link href="/" style={{ textDecoration: 'none', color: '#64748B' }}><span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>홈</span></Link>
-          <Link href="/notice" style={{ textDecoration: 'none', color: '#64748B' }}><span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>공지사항</span></Link>
-          <Link href="/howto" style={{ textDecoration: 'none', color: '#64748B' }}><span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>거래방법</span></Link>
-          <Link href="/review" style={{ textDecoration: 'none', color: '#64748B' }}><span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>이용후기</span></Link>
+    <div style={{ minHeight: '100vh', background: '#F8FAFC', padding: '60px 20px' }}>
+      <main style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: '700', marginBottom: '40px', textAlign: 'center' }}>
+          개인정보 처리방침
+        </h1>
+
+        <div style={{ background: '#FFFFFF', padding: '32px', borderRadius: '12px', lineHeight: '1.8', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>제1조 (개인정보의 수집)</h2>
+            <p style={{ color: '#4B5563' }}>
+              본 사이트는 거래 진행을 위해 최소한의 정보(닉네임, 서버, 연락처)만을 수집합니다.
+            </p>
+          </section>
+
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>제2조 (개인정보의 이용)</h2>
+            <p style={{ color: '#4B5563' }}>
+              수집된 정보는 거래 진행 목적으로만 사용되며, 제3자에게 제공되지 않습니다.
+            </p>
+          </section>
+
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>제3조 (개인정보의 보관 및 파기)</h2>
+            <p style={{ color: '#4B5563' }}>
+              거래 완료 후 일정 기간 보관 후 파기됩니다.
+            </p>
+          </section>
+
+          <section>
+            <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>제4조 (이용자의 권리)</h2>
+            <p style={{ color: '#4B5563' }}>
+              이용자는 언제든지 본인의 개인정보 열람, 수정, 삭제를 요청할 수 있습니다.
+            </p>
+          </section>
+
+          <p style={{ marginTop: '32px', color: '#9CA3AF', fontSize: '14px', textAlign: 'center' }}>
+            시행일: 2026년 6월 24일
+          </p>
         </div>
-      </nav>
 
-      {/* 개인정보 처리방침 내용 */}
-      <div style={{ maxWidth: '900px', margin: '50px auto', padding: '40px', backgroundColor: '#FFF', borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#FF9000', marginBottom: '30px', textAlign: 'center' }}>개인정보 처리방침</h1>
-
-        <section style={{ marginBottom: '30px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1E293B', marginBottom: '15px' }}>제1조 (개인정보의 수집 항목 및 이용 목적)</h2>
-          <p style={{ lineHeight: '1.8', color: '#475569' }}>
-            메이플 아이템은 다음과 같은 개인정보를 최소한으로 수집합니다.<br/><br/>
-            <strong>수집 항목:</strong> 업체 문의 시 이용자가 자발적으로 제공하는 연락처 (카카오톡 ID 등)<br/>
-            <strong>이용 목적:</strong> 업체 정보 제공, 고객 문의 응대<br/><br/>
-            ※ 본 사이트는 거래를 직접 중개하지 않으며, 거래 내역 등의 정보는 수집하지 않습니다.<br/>
-            ※ 실제 거래는 이용자와 업체 간에 직접 이루어지며, 거래 과정에서 발생하는 개인정보 처리는 각 업체의 책임입니다.
-          </p>
-        </section>
-
-        <section style={{ marginBottom: '30px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1E293B', marginBottom: '15px' }}>제2조 (개인정보의 보유 및 이용 기간)</h2>
-          <p style={{ lineHeight: '1.8', color: '#475569' }}>
-            사이트는 최소한의 개인정보만을 수집하며, 수집 목적이 달성된 후 지체 없이 파기합니다.<br/><br/>
-            <strong>고객 문의 내역:</strong> 문의 응대 완료 후 3개월<br/><br/>
-            ※ 사이트는 거래를 중개하지 않으므로 거래 관련 개인정보는 보유하지 않습니다.
-          </p>
-        </section>
-
-        <section style={{ marginBottom: '30px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1E293B', marginBottom: '15px' }}>제3조 (개인정보의 제3자 제공)</h2>
-          <p style={{ lineHeight: '1.8', color: '#475569' }}>
-            회사는 이용자의 개인정보를 원칙적으로 외부에 제공하지 않습니다. 다만, 아래의 경우는 예외로 합니다.<br/>
-            1. 이용자가 사전에 동의한 경우<br/>
-            2. 법령의 규정에 의거하거나, 수사 목적으로 법령에 정해진 절차와 방법에 따라 수사기관의 요구가 있는 경우
-          </p>
-        </section>
-
-        <section style={{ marginBottom: '30px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1E293B', marginBottom: '15px' }}>제4조 (개인정보의 파기 절차 및 방법)</h2>
-          <p style={{ lineHeight: '1.8', color: '#475569' }}>
-            회사는 개인정보 보유 기간이 경과하거나 처리 목적이 달성된 경우 지체 없이 해당 개인정보를 파기합니다.<br/><br/>
-            <strong>파기 절차:</strong> 목적 달성 후 별도의 DB로 옮겨져 내부 방침 및 관련 법령에 따라 일정 기간 보관 후 파기<br/>
-            <strong>파기 방법:</strong> 전자적 파일 형태는 복구 불가능한 방법으로 영구 삭제
-          </p>
-        </section>
-
-        <section style={{ marginBottom: '30px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1E293B', marginBottom: '15px' }}>제5조 (이용자의 권리)</h2>
-          <p style={{ lineHeight: '1.8', color: '#475569' }}>
-            이용자는 언제든지 본인의 개인정보를 조회하거나 수정할 수 있으며, 삭제를 요청할 수 있습니다.<br/>
-            개인정보 관련 문의는 카카오톡 문의를 통해 가능합니다.
-          </p>
-        </section>
-
-        <div style={{ marginTop: '50px', textAlign: 'center' }}>
-          <Link href="/" style={{ color: '#FF9000', fontWeight: 'bold', textDecoration: 'none' }}>← 홈으로 돌아가기</Link>
+        <div style={{ textAlign: 'center', marginTop: '32px' }}>
+          <a href="/" style={{ color: '#667eea', textDecoration: 'none', fontWeight: '600' }}>← 홈으로 돌아가기</a>
         </div>
-      </div>
-
-      <footer style={{ backgroundColor: '#F1F5F9', padding: '40px 20px', textAlign: 'center', color: '#94A3B8', fontSize: '12px', borderTop: '1px solid #E2E8F0', marginTop: '50px' }}>
-        <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
-          <Link href="/terms" style={{ color: '#64748B', textDecoration: 'none', fontWeight: '600' }}>이용약관</Link>
-          <span style={{ color: '#CBD5E1' }}>|</span>
-          <Link href="/privacy" style={{ color: '#FF9000', textDecoration: 'none', fontWeight: '600' }}>개인정보 처리방침</Link>
-        </div>
-        <div style={{ color: '#94A3B8' }}>© 2026 메이플 아이템. All rights reserved.</div>
-      </footer>
+      </main>
     </div>
   );
 }
