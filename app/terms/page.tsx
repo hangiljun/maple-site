@@ -82,8 +82,6 @@ export default function TermsPage() {
           <Link href="/terms" style={{ color: '#FF9000', textDecoration: 'none', fontWeight: '600' }}>이용약관</Link>
           <span style={{ color: '#CBD5E1' }}>|</span>
           <Link href="/privacy" style={{ color: '#64748B', textDecoration: 'none', fontWeight: '600' }}>개인정보 처리방침</Link>
-          <span style={{ color: '#CBD5E1' }}>|</span>
-          <Link href="/business-license" style={{ color: '#64748B', textDecoration: 'none', fontWeight: '600' }}>사업자 등록증</Link>
         </div>
         <div style={{ color: '#94A3B8' }}>© 2026 메이플 아이템. All rights reserved.</div>
       </footer>

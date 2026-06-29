@@ -474,9 +474,6 @@ export default function Home() {
               <p style={{ marginBottom: '15px' }}>
                 <strong style={{ color: '#1E293B' }}>유저 출신의 공감과 이해:</strong> 정든 템을 보내는 마음을 알기에, 가격 후려치기 없이 객관적인 시세 비교표를 바탕으로 합리적인 가격을 약속합니다.
               </p>
-              <p style={{ marginBottom: '20px' }}>
-                <strong style={{ color: '#1E293B' }}>정식 사업자 등록의 안전망:</strong> 강동세무서 정식 사업자 등록 및 투명한 세무 신고까지! 국민의 의무를 다합니다. 비공식 개인 장사꾼들과 달리 거래 사기 걱정이 전혀 없습니다.
-              </p>
               <p style={{ marginBottom: '10px' }}>
                 <strong style={{ color: '#FF9000' }}>챌린저스 :</strong> 챌린저스1, 챌린저스2, 챌린저스3, 챌린저스4 서버를 실시간으로 거래합니다.
               </p>
@@ -493,8 +490,6 @@ export default function Home() {
           <Link href="/terms" style={{ color: '#64748B', textDecoration: 'none', fontWeight: '600' }}>이용약관</Link>
           <span style={{ color: '#CBD5E1' }}>|</span>
           <Link href="/privacy" style={{ color: '#64748B', textDecoration: 'none', fontWeight: '600' }}>개인정보 처리방침</Link>
-          <span style={{ color: '#CBD5E1' }}>|</span>
-          <Link href="/business-license" style={{ color: '#64748B', textDecoration: 'none', fontWeight: '600' }}>사업자 등록증</Link>
         </div>
         <div style={{ color: '#94A3B8' }}>© 2026 메이플 아이템. All rights reserved.</div>
       </footer>

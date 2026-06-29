@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($bytes = [System.IO.File]::ReadAllBytes\\(\"d:\\\\maple-site\\\\public\\\\favicon.ico\"\\); \"파일 크기: $\\($bytes.Length\\) bytes\"; \"첫 4바이트 \\(HEX\\): $\\($bytes[0].ToString\\('X2'\\)\\) $\\($bytes[1].ToString\\('X2'\\)\\) $\\($bytes[2].ToString\\('X2'\\)\\) $\\($bytes[3].ToString\\('X2'\\)\\)\")",
+      "PowerShell($bytes = [System.IO.File]::ReadAllBytes\\(\"d:\\\\maple-site\\\\public\\\\favicon.ico\"\\); \"첫 4바이트 \\(HEX\\): $\\($bytes[0].ToString\\('X2'\\)\\) $\\($bytes[1].ToString\\('X2'\\)\\) $\\($bytes[2].ToString\\('X2'\\)\\) $\\($bytes[3].ToString\\('X2'\\)\\)\")"
+    ],
+    "additionalDirectories": [
+      "d:\\maple-site\\public"
+    ]
+  }
+}
