@@ -307,7 +307,7 @@ export default function Home() {
         </h2>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap', maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
           <ComparisonCard title="장사꾼 A" subtitle="게임내 고성능 확성기로 홍보하는 사람" items={["오직 메소 ", "평균 70% 낮은 매입가", "아이템 시세를 경매장 최소가", "시세측정 이해 불가"]} />
-          <ComparisonCard title="메이플 아이템" subtitle="공식 인증 업체" isMain={true} items={["메소 / 무통장 거래 가능 (업체보증)", "업계 최고 매입가 85% ", "365일 24시간 상시 대기", "합리적인 경매장 시세 측정"]} />
+          <ComparisonCard title="메이플 아이템" subtitle="안전 거래 업체" isMain={true} items={["어떤방식이든 거래가능(업체보증)", "업계 최고 매입가 85% ", "365일 24시간 상시 대기", "합리적인 경매장 시세 측정"]} />
           <ComparisonCard title="B 장사꾼" subtitle="1인 웹사이트,블로그 업체" items={["무조건 선 받으려고 하는 업체", "수수료,가위값을 판매자에게 부담", "느린 대답 / 지연 이체", "신뢰도 부족"]} />
         </div>
       </div>
