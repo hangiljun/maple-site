@@ -20,9 +20,26 @@ export default function NoticeDetailClient({ id }: { id: string }) {
 
   const convertUrlsToLinks = (text: string) => {
     if (!text) return text;
+
+    // HTML 태그를 임시로 보호
+    const tags: string[] = [];
+    let tagIndex = 0;
+
+    // HTML 태그를 플레이스홀더로 치환
+    const withPlaceholders = text.replace(/<[^>]+>/g, (tag) => {
+      tags.push(tag);
+      return `__HTML_TAG_${tagIndex++}__`;
+    });
+
+    // 일반 텍스트의 URL만 변환
     const urlPattern = /(https?:\/\/[^\s<>"]+)/g;
-    return text.replace(urlPattern, (url) => {
+    const withLinks = withPlaceholders.replace(urlPattern, (url) => {
       return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: #FF9000; text-decoration: underline; word-break: break-all;">${url}</a>`;
+    });
+
+    // 플레이스홀더를 원래 HTML 태그로 복원
+    return withLinks.replace(/__HTML_TAG_(\d+)__/g, (match, index) => {
+      return tags[parseInt(index)];
     });
   };
 
