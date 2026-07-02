@@ -466,7 +466,6 @@ function PostManager() {
       const imgRef = ref(storage, `${activeCollection}/${Date.now()}`);
       await uploadBytes(imgRef, file);
       const url = await getDownloadURL(imgRef);
-      // ★ 여기가 수정되었습니다! (alt 추가됨)
       const imgTag = `\n<img src="${url}" alt="메이플스토리 정보 이미지" style="width: 100%; max-width: 800px; margin: 10px 0; border-radius: 10px;" />\n`;
       const textarea = textareaRef.current;
       if (textarea) {
@@ -474,8 +473,14 @@ function PostManager() {
         const end = textarea.selectionEnd;
         setContent(content.substring(0, start) + imgTag + content.substring(end));
       } else { setContent(prev => prev + imgTag); }
-    } catch (err) { alert("사진 실패"); }
+      alert("사진 업로드 완료!");
+    } catch (err: any) {
+      console.error("이미지 업로드 오류:", err);
+      const errorMsg = err?.message || err?.toString() || "알 수 없는 오류";
+      alert(`사진 업로드 실패: ${errorMsg}`);
+    }
     setLoading(false);
+    e.target.value = '';
   };
 
   const handleEdit = (post: any) => {
@@ -526,8 +531,10 @@ function PostManager() {
         }
         resetForm();
         fetchPosts();
-      } catch (err) {
-        alert(editId ? "수정 실패" : "등록 실패");
+      } catch (err: any) {
+        console.error("게시글 저장 오류:", err);
+        const errorMsg = err?.message || err?.toString() || "알 수 없는 오류";
+        alert(`${editId ? "수정" : "등록"} 실패: ${errorMsg}`);
       }
       setLoading(false);
     }
