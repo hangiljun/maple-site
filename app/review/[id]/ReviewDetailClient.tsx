@@ -15,6 +15,15 @@ export default function ReviewDetailClient({ id }: { id: string }) {
 
   const router = useRouter();
 
+  const convertUrlsToLinks = (text: string) => {
+    if (!text) return text;
+    const urlPattern = /(https?:\/\/[^\s<>"]+)/g;
+    const escaped = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return escaped.replace(urlPattern, (url) => {
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: #FF9000; text-decoration: underline; word-break: break-all;">${url}</a>`;
+    });
+  };
+
   useEffect(() => {
     if (!id) return;
 
@@ -159,7 +168,7 @@ export default function ReviewDetailClient({ id }: { id: string }) {
                   <img src={review.imageUrl} style={{ width: '100%', display: 'block' }} alt="후기 인증샷" />
                 </div>
               )}
-              <p style={{ whiteSpace: 'pre-wrap' }}>{review.content}</p>
+              <div style={{ whiteSpace: 'pre-wrap' }} dangerouslySetInnerHTML={{ __html: convertUrlsToLinks(review.content) }} />
             </div>
 
             <div style={{ textAlign: 'center', margin: '50px 0' }}>

@@ -18,6 +18,14 @@ export default function NoticeDetailClient({ id }: { id: string }) {
     fetchNotice();
   }, [id]);
 
+  const convertUrlsToLinks = (text: string) => {
+    if (!text) return text;
+    const urlPattern = /(https?:\/\/[^\s<>"]+)/g;
+    return text.replace(urlPattern, (url) => {
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: #FF9000; text-decoration: underline; word-break: break-all;">${url}</a>`;
+    });
+  };
+
   if (!notice) return (
     <div style={{ textAlign: 'center', padding: '100px', backgroundColor: '#F8FAFC', minHeight: '100vh', color: '#64748B' }}>
       로딩 중...
@@ -53,7 +61,7 @@ export default function NoticeDetailClient({ id }: { id: string }) {
         <div
           style={{ fontSize: '17px', lineHeight: '1.9', color: '#334155' }}
           className="notice-content"
-          dangerouslySetInnerHTML={{ __html: notice.content.replace(/\n/g, '<br/>') }}
+          dangerouslySetInnerHTML={{ __html: convertUrlsToLinks(notice.content.replace(/\n/g, '<br/>')) }}
         />
 
         <button
