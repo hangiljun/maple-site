@@ -15,14 +15,11 @@ export default function NoticePage() {
     const q = query(collection(db, 'notices'), orderBy('createdAt', 'desc'));
     const unsubNotices = onSnapshot(q, (s) => {
       const data = s.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      console.log('공지사항 데이터:', data); // 디버깅용
       data.sort((a: any, b: any) => {
         if (a.isPinned === b.isPinned) return 0;
         return a.isPinned ? -1 : 1;
       });
       setNotices(data);
-    }, (error) => {
-      console.error('공지사항 로드 에러:', error);
     });
 
     const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(50));
@@ -72,14 +69,6 @@ export default function NoticePage() {
       </div>
 
       <div style={{ padding: '60px 5%', maxWidth: '1200px', margin: '0 auto' }}>
-        {/* 디버깅 정보 */}
-        <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#FFF3E0', borderRadius: '10px', border: '1px solid #FF9000' }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>🔍 디버깅 정보</div>
-          <div>전체 공지사항: {notices.length}개</div>
-          <div>현재 탭: {activeTab}</div>
-          <div>필터링된 공지사항: {filteredNotices.length}개</div>
-        </div>
-
         <div style={{ display: 'flex', gap: '10px', marginBottom: '40px', flexWrap: 'wrap' }}>
           {['전체', '공지사항', '메이플 패치', '이벤트', '시세측정 기준'].map((tab) => (
             <button key={tab} onClick={() => setActiveTab(tab)} style={{ padding: '10px 20px', borderRadius: '30px', border: activeTab === tab ? '1px solid #FF9000' : '1px solid #E2E8F0', backgroundColor: activeTab === tab ? '#FF9000' : '#FFFFFF', color: activeTab === tab ? '#FFF' : '#64748B', fontWeight: 'bold', cursor: 'pointer', transition: '0.3s', boxShadow: activeTab === tab ? '0 2px 8px rgba(255,144,0,0.3)' : 'none' }}>{tab}</button>
