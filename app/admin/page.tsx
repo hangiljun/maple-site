@@ -510,7 +510,22 @@ function PostManager() {
   const handleEdit = (post: any) => {
     setEditId(post.id);
     setTitle(post.title);
-    setContent(post.content);
+
+    // 원본(content_raw)이 있으면 원본을, 없으면 HTML을 불러옴
+    if (post.content_raw) {
+      setContent(post.content_raw);
+    } else {
+      // 기존 글은 원본이 없으므로 HTML을 텍스트로 변환
+      let editContent = post.content
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/p>\s*<p>/gi, '\n\n')
+        .replace(/<p>/gi, '')
+        .replace(/<\/p>/gi, '\n')
+        .replace(/\n\n\n+/g, '\n\n') // 3개 이상 연속 줄바꿈을 2개로
+        .trim();
+      setContent(editContent);
+    }
+
     if (activeCollection === 'notices') {
       setNoticeCategory(post.category || '공지사항');
       setIsPinned(post.isPinned || false);
@@ -553,13 +568,13 @@ function PostManager() {
 
         // 빈 태그 및 불필요한 공백 제거
         htmlContent = htmlContent
-          .replace(/<p>\s*<\/p>/g, '') // 빈 p 태그 제거
-          .replace(/<p><\/p>/g, '') // 완전히 빈 p 태그 제거
-          .replace(/(<\/p>)\s*(<p>\s*<\/p>\s*)+/g, '$1') // 연속된 빈 p 태그들 제거
-          .replace(/(<p>\s*<\/p>\s*)+(<table)/g, '$2') // 표 바로 앞의 빈 p 태그 제거
-          .replace(/(<\/table>)\s*(<p>\s*<\/p>\s*)+/g, '$1') // 표 바로 뒤의 빈 p 태그 제거
-          .replace(/<br\s*\/?>\s*(<table)/g, '$1') // 표 바로 앞의 br 태그 제거
-          .replace(/(<\/table>)\s*<br\s*\/?>/g, '$1') // 표 바로 뒤의 br 태그 제거
+          .replace(/<p>\s*<\/p>/g, '')
+          .replace(/<p><\/p>/g, '')
+          .replace(/(<\/p>)\s*(<p>\s*<\/p>\s*)+/g, '$1')
+          .replace(/(<p>\s*<\/p>\s*)+(<table)/g, '$2')
+          .replace(/(<\/table>)\s*(<p>\s*<\/p>\s*)+/g, '$1')
+          .replace(/<br\s*\/?>\s*(<table)/g, '$1')
+          .replace(/(<\/table>)\s*<br\s*\/?>/g, '$1')
           .trim();
       } catch (error) {
         console.error('마크다운 변환 실패:', error);
@@ -570,6 +585,7 @@ function PostManager() {
       const postData = {
         title,
         content: htmlContent,
+        content_raw: content, // 원본도 함께 저장
         category: finalCategory,
         isPinned: activeCollection === 'notices' ? isPinned : false,
       };
@@ -681,8 +697,9 @@ function PostManager() {
           <strong style={{ color: '#0369A1', marginRight: '8px' }}>💡 작성 팁:</strong>
           <span style={{ color: '#0C4A6E' }}>
             <strong>단락 구분</strong> = 엔터 2번 |
-            <strong> 줄바꿈</strong> = 줄 끝 스페이스 2개 + 엔터 |
-            <strong> HTML 태그</strong> 사용 가능 (&lt;br&gt;, &lt;p&gt; 등)
+            <strong> 굵게</strong> = **텍스트** |
+            <strong> 표</strong> = 📊 버튼 |
+            <strong> 서식</strong> = 위 버튼 사용
           </span>
         </div>
 
