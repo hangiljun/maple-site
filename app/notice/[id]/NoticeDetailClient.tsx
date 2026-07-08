@@ -5,18 +5,21 @@ import { db } from '../../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 
-export default function NoticeDetailClient({ id }: { id: string }) {
-  const [notice, setNotice] = useState<any>(null);
+export default function NoticeDetailClient({ id, initialNotice }: { id: string; initialNotice: any }) {
+  const [notice, setNotice] = useState<any>(initialNotice);
   const router = useRouter();
 
   useEffect(() => {
-    const fetchNotice = async () => {
-      const docRef = doc(db, 'notices', id);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) setNotice(docSnap.data());
-    };
-    fetchNotice();
-  }, [id]);
+    // 서버에서 받은 초기 데이터가 없을 때만 클라이언트에서 fetch
+    if (!initialNotice) {
+      const fetchNotice = async () => {
+        const docRef = doc(db, 'notices', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) setNotice(docSnap.data());
+      };
+      fetchNotice();
+    }
+  }, [id, initialNotice]);
 
   const convertUrlsToLinks = (text: string) => {
     if (!text) return text;
@@ -66,7 +69,7 @@ export default function NoticeDetailClient({ id }: { id: string }) {
         <h1 style={{ fontSize: '30px', margin: '20px 0 15px 0', fontWeight: 'bold', lineHeight: '1.4', color: '#1E293B' }}>{notice.title}</h1>
 
         <div style={{ paddingBottom: '20px', borderBottom: '1px solid #E2E8F0', marginBottom: '40px', color: '#94A3B8', fontSize: '14px' }}>
-          {notice.createdAt?.toDate().toLocaleDateString()}
+          {notice.createdAt || (notice.createdAt?.toDate && notice.createdAt.toDate().toLocaleDateString())}
         </div>
 
         {notice.imageUrl && (

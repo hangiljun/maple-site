@@ -5,18 +5,21 @@ import { db } from '../../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 
-export default function HowtoDetailClient({ id }: { id: string }) {
-  const [howto, setHowto] = useState<any>(null);
+export default function HowtoDetailClient({ id, initialHowto }: { id: string; initialHowto: any }) {
+  const [howto, setHowto] = useState<any>(initialHowto);
   const router = useRouter();
 
   useEffect(() => {
-    const fetchHowto = async () => {
-      const docRef = doc(db, 'howto', id);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) setHowto(docSnap.data());
-    };
-    fetchHowto();
-  }, [id]);
+    // 서버에서 받은 초기 데이터가 없을 때만 클라이언트에서 fetch
+    if (!initialHowto) {
+      const fetchHowto = async () => {
+        const docRef = doc(db, 'howto', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) setHowto(docSnap.data());
+      };
+      fetchHowto();
+    }
+  }, [id, initialHowto]);
 
   const convertUrlsToLinks = (text: string) => {
     if (!text) return text;
@@ -66,7 +69,7 @@ export default function HowtoDetailClient({ id }: { id: string }) {
         <h1 style={{ fontSize: '30px', margin: '20px 0 15px 0', fontWeight: 'bold', lineHeight: '1.4', color: '#1E293B' }}>{howto.title}</h1>
 
         <div style={{ paddingBottom: '20px', borderBottom: '1px solid #E2E8F0', marginBottom: '40px', color: '#94A3B8', fontSize: '14px' }}>
-          {howto.createdAt?.toDate().toLocaleDateString()}
+          {howto.createdAt || (howto.createdAt?.toDate && howto.createdAt.toDate().toLocaleDateString())}
         </div>
 
         {howto.imageUrl && (

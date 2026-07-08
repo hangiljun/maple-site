@@ -10,11 +10,20 @@ async function getNotice(id: string) {
     if (!res.ok) return null;
     const data = await res.json();
     const f = data.fields || {};
+
+    // createdAt을 Date 문자열로 변환
+    let createdAtString = '';
+    if (f.createdAt?.timestampValue) {
+      const date = new Date(f.createdAt.timestampValue);
+      createdAtString = date.toLocaleDateString('ko-KR');
+    }
+
     return {
       title: f.title?.stringValue || '',
       content: f.content?.stringValue || '',
       category: f.category?.stringValue || '',
       imageUrl: f.imageUrl?.stringValue || '',
+      createdAt: createdAtString,
     };
   } catch {
     return null;
@@ -49,5 +58,6 @@ export async function generateMetadata(
 
 export default async function NoticePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <NoticeDetailClient id={id} />;
+  const notice = await getNotice(id);
+  return <NoticeDetailClient id={id} initialNotice={notice} />;
 }
