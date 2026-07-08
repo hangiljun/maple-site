@@ -78,7 +78,7 @@ export default function HowtoDetailClient({ id }: { id: string }) {
         <div
           style={{ fontSize: '17px', lineHeight: '1.9', color: '#334155' }}
           className="howto-content"
-          dangerouslySetInnerHTML={{ __html: convertUrlsToLinks(howto.content?.replace(/\n/g, '<br/>') || '') }}
+          dangerouslySetInnerHTML={{ __html: convertUrlsToLinks(howto.content || '') }}
         />
 
         <button
@@ -101,11 +101,17 @@ export default function HowtoDetailClient({ id }: { id: string }) {
         .howto-content table {
           width: 100%;
           border-collapse: collapse;
-          margin: 20px 0;
+          margin: 16px 0;
           background: white;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
           border-radius: 8px;
           overflow: hidden;
+        }
+        .howto-content p + table {
+          margin-top: 16px;
+        }
+        .howto-content table + p {
+          margin-top: 16px;
         }
         .howto-content thead {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
