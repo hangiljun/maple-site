@@ -7,15 +7,30 @@ import { useRouter } from 'next/navigation';
 
 export default function HowtoDetailClient({ id, initialHowto }: { id: string; initialHowto: any }) {
   const [howto, setHowto] = useState<any>(initialHowto);
+  const [loading, setLoading] = useState(!initialHowto);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     // 서버에서 받은 초기 데이터가 없을 때만 클라이언트에서 fetch
     if (!initialHowto) {
       const fetchHowto = async () => {
-        const docRef = doc(db, 'howto', id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) setHowto(docSnap.data());
+        try {
+          setLoading(true);
+          setError(null);
+          const docRef = doc(db, 'howto', id);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            setHowto(docSnap.data());
+          } else {
+            setError('존재하지 않는 거래방법 안내입니다.');
+          }
+        } catch (err) {
+          console.error('거래방법 로드 실패:', err);
+          setError('거래방법을 불러오는 중 오류가 발생했습니다.');
+        } finally {
+          setLoading(false);
+        }
       };
       fetchHowto();
     }
@@ -46,11 +61,32 @@ export default function HowtoDetailClient({ id, initialHowto }: { id: string; in
     });
   };
 
-  if (!howto) return (
-    <div style={{ textAlign: 'center', padding: '100px', backgroundColor: '#F8FAFC', minHeight: '100vh', color: '#64748B' }}>
-      로딩 중...
-    </div>
-  );
+  // 에러 상태
+  if (error) {
+    return (
+      <div style={{ textAlign: 'center', padding: '100px', backgroundColor: '#F8FAFC', minHeight: '100vh', color: '#1E293B' }}>
+        <div style={{ fontSize: '48px', marginBottom: '20px' }}>⚠️</div>
+        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '10px', color: '#EF4444' }}>오류 발생</h2>
+        <p style={{ color: '#64748B', marginBottom: '30px' }}>{error}</p>
+        <button
+          onClick={() => router.push('/howto')}
+          style={{ padding: '12px 24px', backgroundColor: '#FF9000', color: '#FFF', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }}
+        >
+          목록으로 돌아가기
+        </button>
+      </div>
+    );
+  }
+
+  // 로딩 상태
+  if (loading || !howto) {
+    return (
+      <div style={{ textAlign: 'center', padding: '100px', backgroundColor: '#F8FAFC', minHeight: '100vh', color: '#64748B' }}>
+        <div style={{ fontSize: '24px', marginBottom: '10px' }}>⏳</div>
+        <p>로딩 중...</p>
+      </div>
+    );
+  }
 
   // 구조화된 데이터 (JSON-LD) for SEO
   const structuredData = {

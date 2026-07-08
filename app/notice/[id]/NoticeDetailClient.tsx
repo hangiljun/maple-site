@@ -7,15 +7,30 @@ import { useRouter } from 'next/navigation';
 
 export default function NoticeDetailClient({ id, initialNotice }: { id: string; initialNotice: any }) {
   const [notice, setNotice] = useState<any>(initialNotice);
+  const [loading, setLoading] = useState(!initialNotice);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     // 서버에서 받은 초기 데이터가 없을 때만 클라이언트에서 fetch
     if (!initialNotice) {
       const fetchNotice = async () => {
-        const docRef = doc(db, 'notices', id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) setNotice(docSnap.data());
+        try {
+          setLoading(true);
+          setError(null);
+          const docRef = doc(db, 'notices', id);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            setNotice(docSnap.data());
+          } else {
+            setError('존재하지 않는 공지사항입니다.');
+          }
+        } catch (err) {
+          console.error('공지사항 로드 실패:', err);
+          setError('공지사항을 불러오는 중 오류가 발생했습니다.');
+        } finally {
+          setLoading(false);
+        }
       };
       fetchNotice();
     }
@@ -46,11 +61,32 @@ export default function NoticeDetailClient({ id, initialNotice }: { id: string; 
     });
   };
 
-  if (!notice) return (
-    <div style={{ textAlign: 'center', padding: '100px', backgroundColor: '#F8FAFC', minHeight: '100vh', color: '#64748B' }}>
-      로딩 중...
-    </div>
-  );
+  // 에러 상태
+  if (error) {
+    return (
+      <div style={{ textAlign: 'center', padding: '100px', backgroundColor: '#F8FAFC', minHeight: '100vh', color: '#1E293B' }}>
+        <div style={{ fontSize: '48px', marginBottom: '20px' }}>⚠️</div>
+        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '10px', color: '#EF4444' }}>오류 발생</h2>
+        <p style={{ color: '#64748B', marginBottom: '30px' }}>{error}</p>
+        <button
+          onClick={() => router.push('/notice')}
+          style={{ padding: '12px 24px', backgroundColor: '#FF9000', color: '#FFF', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }}
+        >
+          목록으로 돌아가기
+        </button>
+      </div>
+    );
+  }
+
+  // 로딩 상태
+  if (loading || !notice) {
+    return (
+      <div style={{ textAlign: 'center', padding: '100px', backgroundColor: '#F8FAFC', minHeight: '100vh', color: '#64748B' }}>
+        <div style={{ fontSize: '24px', marginBottom: '10px' }}>⏳</div>
+        <p>로딩 중...</p>
+      </div>
+    );
+  }
 
   // 구조화된 데이터 (JSON-LD) for SEO
   const structuredData = {
