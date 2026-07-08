@@ -52,8 +52,40 @@ export default function NoticeDetailClient({ id, initialNotice }: { id: string; 
     </div>
   );
 
+  // 구조화된 데이터 (JSON-LD) for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": notice.title,
+    "datePublished": notice.createdAt || new Date().toISOString(),
+    "dateModified": notice.createdAt || new Date().toISOString(),
+    "author": {
+      "@type": "Organization",
+      "name": "메이플 아이템"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "메이플 아이템",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.maplestoryitem.com/favicon-new.png"
+      }
+    },
+    "description": notice.content.replace(/<[^>]+>/g, '').slice(0, 160),
+    "articleSection": notice.category,
+    ...(notice.imageUrl && {
+      "image": notice.imageUrl
+    })
+  };
+
   return (
     <div style={{ backgroundColor: '#F8FAFC', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif", color: '#1E293B' }}>
+      {/* 구조화된 데이터 */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+
       <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', borderBottom: '1px solid #E2E8F0', backgroundColor: 'rgba(255,255,255,0.95)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)', alignItems: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', flexShrink: 0 }} onClick={() => router.push('/')}>
           <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2E8F0' }}>
