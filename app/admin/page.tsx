@@ -676,6 +676,16 @@ function PostManager() {
           {loading && <span style={{ display: 'flex', alignItems: 'center', color: '#FF9000', fontWeight: 'bold' }}> 업로드 중...</span>}
         </div>
 
+        {/* 마크다운 사용법 안내 */}
+        <div style={{ marginBottom: '10px', padding: '12px', backgroundColor: '#F0F9FF', border: '1px solid #BAE6FD', borderRadius: '8px', fontSize: '13px', lineHeight: '1.6' }}>
+          <strong style={{ color: '#0369A1', marginRight: '8px' }}>💡 작성 팁:</strong>
+          <span style={{ color: '#0C4A6E' }}>
+            <strong>단락 구분</strong> = 엔터 2번 |
+            <strong> 줄바꿈</strong> = 줄 끝 스페이스 2개 + 엔터 |
+            <strong> HTML 태그</strong> 사용 가능 (&lt;br&gt;, &lt;p&gt; 등)
+          </span>
+        </div>
+
         <textarea ref={textareaRef} value={content} onChange={e => setContent(e.target.value)} placeholder="내용 작성 (텍스트를 선택한 후 위 버튼을 눌러 서식을 적용하세요)" style={{ width: '100%', height: '400px', padding: '20px', border: '1px solid #DDD', borderRadius: '8px', fontSize: '15px', lineHeight: '1.6' }} />
         <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
           <button onClick={handleSubmit} disabled={loading} style={{ ...btnStyle, marginTop: 0 }}>
