@@ -98,6 +98,37 @@ export default function HowtoDetailClient({ id }: { id: string }) {
           border-radius: 15px;
           border: 1px solid #E2E8F0;
         }
+        .howto-content table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 20px 0;
+          background: white;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        .howto-content thead {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .howto-content th {
+          padding: 14px 16px;
+          text-align: left;
+          font-weight: 700;
+          color: white;
+          font-size: 15px;
+          border: none;
+        }
+        .howto-content td {
+          padding: 12px 16px;
+          border-bottom: 1px solid #E2E8F0;
+          font-size: 15px;
+        }
+        .howto-content tbody tr:last-child td {
+          border-bottom: none;
+        }
+        .howto-content tbody tr:hover {
+          background: #F8FAFC;
+        }
       `}</style>
     </div>
   );

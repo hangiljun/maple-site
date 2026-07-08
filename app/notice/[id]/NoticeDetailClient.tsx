@@ -98,6 +98,37 @@ export default function NoticeDetailClient({ id }: { id: string }) {
           border-radius: 10px;
           border: 1px solid #E2E8F0;
         }
+        .notice-content table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 20px 0;
+          background: white;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        .notice-content thead {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .notice-content th {
+          padding: 14px 16px;
+          text-align: left;
+          font-weight: 700;
+          color: white;
+          font-size: 15px;
+          border: none;
+        }
+        .notice-content td {
+          padding: 12px 16px;
+          border-bottom: 1px solid #E2E8F0;
+          font-size: 15px;
+        }
+        .notice-content tbody tr:last-child td {
+          border-bottom: none;
+        }
+        .notice-content tbody tr:hover {
+          background: #F8FAFC;
+        }
       `}</style>
     </div>
   );

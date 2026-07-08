@@ -5,6 +5,7 @@ import { db, storage, auth } from '../../firebase';
 import { collection, addDoc, deleteDoc, doc, getDocs, getDoc, setDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signInWithEmailAndPassword, onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { marked } from 'marked';
 
 export default function AdminDashboard() {
   const [email, setEmail] = useState('');
@@ -439,6 +440,29 @@ function PostManager() {
       case 'highlight':
         formattedText = `<span style="background-color: #FEE500; padding: 2px 6px; border-radius: 3px; font-weight: bold;">${selectedText || '강조 텍스트'}</span>`;
         break;
+      case 'table':
+        formattedText = `<table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+  <thead>
+    <tr style="background: #F1F5F9;">
+      <th style="border: 1px solid #CBD5E1; padding: 12px; text-align: left; font-weight: 700;">헤더1</th>
+      <th style="border: 1px solid #CBD5E1; padding: 12px; text-align: left; font-weight: 700;">헤더2</th>
+      <th style="border: 1px solid #CBD5E1; padding: 12px; text-align: left; font-weight: 700;">헤더3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="border: 1px solid #CBD5E1; padding: 12px;">내용1</td>
+      <td style="border: 1px solid #CBD5E1; padding: 12px;">내용2</td>
+      <td style="border: 1px solid #CBD5E1; padding: 12px;">내용3</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #CBD5E1; padding: 12px;">내용4</td>
+      <td style="border: 1px solid #CBD5E1; padding: 12px;">내용5</td>
+      <td style="border: 1px solid #CBD5E1; padding: 12px;">내용6</td>
+    </tr>
+  </tbody>
+</table>`;
+        break;
     }
 
     const newContent = content.substring(0, start) + formattedText + content.substring(end);
@@ -510,10 +534,31 @@ function PostManager() {
     const confirmMsg = editId ? "수정하시겠습니까?" : "등록하시겠습니까?";
     if (confirm(confirmMsg)) {
       setLoading(true);
+
+      // 마크다운을 HTML로 변환
+      marked.setOptions({
+        breaks: true,
+        gfm: true,
+      });
+
+      marked.use({
+        mangle: false,
+        headerIds: false
+      });
+
+      let htmlContent = '';
+      try {
+        const parsed = await marked.parse(content);
+        htmlContent = typeof parsed === 'string' ? parsed : String(parsed);
+      } catch (error) {
+        console.error('마크다운 변환 실패:', error);
+        htmlContent = content;
+      }
+
       const finalCategory = activeCollection === 'notices' ? noticeCategory : howtoCategory;
       const postData = {
         title,
-        content,
+        content: htmlContent,
         category: finalCategory,
         isPinned: activeCollection === 'notices' ? isPinned : false,
       };
@@ -610,6 +655,9 @@ function PostManager() {
           </button>
           <button type="button" onClick={() => insertFormatting('highlight')} style={{ padding: '8px 15px', backgroundColor: '#FEE500', border: '1px solid #DDD', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
             형광펜
+          </button>
+          <button type="button" onClick={() => insertFormatting('table')} style={{ padding: '8px 15px', backgroundColor: '#FFF', border: '1px solid #DDD', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
+            📊 표
           </button>
           <label style={{ backgroundColor: '#FF9000', color: '#FFF', padding: '8px 15px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
             📷 사진 <input type="file" hidden onChange={handleImageInsert} />
