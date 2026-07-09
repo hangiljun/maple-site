@@ -550,36 +550,15 @@ function PostManager() {
     if (confirm(confirmMsg)) {
       setLoading(true);
 
-      // 마크다운을 HTML로 변환
-      marked.setOptions({
-        breaks: true,
-        gfm: true,
-      });
+      // 마크다운 변환
+      let htmlContent = marked.parse(content) as string;
 
-      marked.use({
-        mangle: false,
-        headerIds: false
-      });
-
-      let htmlContent = '';
-      try {
-        const parsed = await marked.parse(content);
-        htmlContent = typeof parsed === 'string' ? parsed : String(parsed);
-
-        // 빈 태그 및 불필요한 공백 제거
-        htmlContent = htmlContent
-          .replace(/<p>\s*<\/p>/g, '')
-          .replace(/<p><\/p>/g, '')
-          .replace(/(<\/p>)\s*(<p>\s*<\/p>\s*)+/g, '$1')
-          .replace(/(<p>\s*<\/p>\s*)+(<table)/g, '$2')
-          .replace(/(<\/table>)\s*(<p>\s*<\/p>\s*)+/g, '$1')
-          .replace(/<br\s*\/?>\s*(<table)/g, '$1')
-          .replace(/(<\/table>)\s*<br\s*\/?>/g, '$1')
-          .trim();
-      } catch (error) {
-        console.error('마크다운 변환 실패:', error);
-        htmlContent = content;
-      }
+      // 표 주변 불필요한 공백 제거
+      htmlContent = htmlContent
+        .replace(/<p>\s*<\/p>/g, '')
+        .replace(/<br>\s*<table/g, '<table')
+        .replace(/<\/table>\s*<br>/g, '</table>')
+        .trim();
 
       const finalCategory = activeCollection === 'notices' ? noticeCategory : howtoCategory;
       const postData = {
@@ -692,14 +671,12 @@ function PostManager() {
           {loading && <span style={{ display: 'flex', alignItems: 'center', color: '#FF9000', fontWeight: 'bold' }}> 업로드 중...</span>}
         </div>
 
-        {/* 마크다운 사용법 안내 */}
+        {/* 작성 안내 */}
         <div style={{ marginBottom: '10px', padding: '12px', backgroundColor: '#F0F9FF', border: '1px solid #BAE6FD', borderRadius: '8px', fontSize: '13px', lineHeight: '1.6' }}>
           <strong style={{ color: '#0369A1', marginRight: '8px' }}>💡 작성 팁:</strong>
           <span style={{ color: '#0C4A6E' }}>
-            <strong>단락 구분</strong> = 엔터 2번 |
-            <strong> 굵게</strong> = **텍스트** |
-            <strong> 표</strong> = 📊 버튼 |
-            <strong> 서식</strong> = 위 버튼 사용
+            <strong>줄바꿈</strong> = &lt;br&gt; 입력 |
+            <strong> 서식</strong> = 위 버튼 클릭 또는 마크다운 (##, **, | 표)
           </span>
         </div>
 
