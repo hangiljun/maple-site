@@ -6,7 +6,7 @@ const FS_BASE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT
 
 async function getNotice(id: string) {
   try {
-    const res = await fetch(`${FS_BASE}/notices/${id}`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${FS_BASE}/notices/${id}`, { cache: 'no-store' });
     if (!res.ok) return null;
     const data = await res.json();
     const f = data.fields || {};
