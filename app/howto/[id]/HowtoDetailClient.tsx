@@ -169,6 +169,15 @@ export default function HowtoDetailClient({ id, initialHowto }: { id: string; in
           border-radius: 15px;
           border: 1px solid #E2E8F0;
         }
+        .howto-content video {
+          max-width: 100%;
+          height: auto;
+          display: block;
+          margin: 30px 0;
+          border-radius: 15px;
+          border: 1px solid #E2E8F0;
+          background: #000;
+        }
         .howto-content table {
           width: 100%;
           border-collapse: collapse;

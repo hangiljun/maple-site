@@ -169,6 +169,15 @@ export default function NoticeDetailClient({ id, initialNotice }: { id: string; 
           border-radius: 10px;
           border: 1px solid #E2E8F0;
         }
+        .notice-content video {
+          max-width: 100%;
+          height: auto;
+          display: block;
+          margin: 20px 0;
+          border-radius: 10px;
+          border: 1px solid #E2E8F0;
+          background: #000;
+        }
         .notice-content table {
           width: 100%;
           border-collapse: collapse;

@@ -507,6 +507,38 @@ function PostManager() {
     e.target.value = '';
   };
 
+  const handleVideoInsert = async (e: any) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // 파일 크기 체크 (50MB 제한)
+    if (file.size > 50 * 1024 * 1024) {
+      alert("동영상 크기는 50MB 이하로 제한됩니다.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const videoRef = ref(storage, `${activeCollection}/videos/${Date.now()}_${file.name}`);
+      await uploadBytes(videoRef, file);
+      const url = await getDownloadURL(videoRef);
+      const videoTag = `\n<video controls src="${url}" style="width: 100%; max-width: 800px; margin: 10px 0; border-radius: 10px;"></video>\n`;
+      const textarea = textareaRef.current;
+      if (textarea) {
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        setContent(content.substring(0, start) + videoTag + content.substring(end));
+      } else { setContent(prev => prev + videoTag); }
+      alert("동영상 업로드 완료!");
+    } catch (err: any) {
+      console.error("동영상 업로드 오류:", err);
+      const errorMsg = err?.message || err?.toString() || "알 수 없는 오류";
+      alert(`동영상 업로드 실패: ${errorMsg}`);
+    }
+    setLoading(false);
+    e.target.value = '';
+  };
+
   const handleEdit = (post: any) => {
     setEditId(post.id);
     setTitle(post.title);
@@ -666,7 +698,10 @@ function PostManager() {
             📊 표
           </button>
           <label style={{ backgroundColor: '#FF9000', color: '#FFF', padding: '8px 15px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-            📷 사진 <input type="file" hidden onChange={handleImageInsert} />
+            📷 사진 <input type="file" hidden accept="image/*" onChange={handleImageInsert} />
+          </label>
+          <label style={{ backgroundColor: '#9333EA', color: '#FFF', padding: '8px 15px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+            📹 동영상 <input type="file" hidden accept="video/*" onChange={handleVideoInsert} />
           </label>
           {loading && <span style={{ display: 'flex', alignItems: 'center', color: '#FF9000', fontWeight: 'bold' }}> 업로드 중...</span>}
         </div>
@@ -676,7 +711,8 @@ function PostManager() {
           <strong style={{ color: '#0369A1', marginRight: '8px' }}>💡 작성 팁:</strong>
           <span style={{ color: '#0C4A6E' }}>
             <strong>줄바꿈</strong> = &lt;br&gt; 입력 |
-            <strong> 서식</strong> = 위 버튼 클릭 또는 마크다운 (##, **, | 표)
+            <strong> 서식</strong> = 위 버튼 클릭 또는 마크다운 (##, **, | 표) |
+            <strong> 동영상</strong> = 50MB 이하
           </span>
         </div>
 
