@@ -522,7 +522,7 @@ function PostManager() {
       const videoRef = ref(storage, `${activeCollection}/videos/${Date.now()}_${file.name}`);
       await uploadBytes(videoRef, file);
       const url = await getDownloadURL(videoRef);
-      const videoTag = `\n<video controls src="${url}" style="width: 100%; max-width: 800px; margin: 10px 0; border-radius: 10px;"></video>\n`;
+      const videoTag = `\n<video autoplay muted loop playsinline controls src="${url}" style="width: 100%; max-width: 800px; margin: 10px 0; border-radius: 10px;"></video>\n`;
       const textarea = textareaRef.current;
       if (textarea) {
         const start = textarea.selectionStart;
