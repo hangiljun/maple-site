@@ -118,48 +118,53 @@ export default function Home() {
     window.open(safeUrl, '_blank');
   };
 
+  // JSON-LD 구조화 데이터 (FAQPage만 - Organization & WebSite는 layout.tsx에 있음)
   const jsonLd = {
-    '@context': 'https://schema.org',
-    '@graph': [
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "@id": "https://www.maplestoryitem.com/#faq",
+    "mainEntity": [
       {
-        '@type': 'WebSite',
-        '@id': 'https://www.maplestoryitem.com/#website',
-        url: 'https://www.maplestoryitem.com',
-        name: '메이플 아이템',
-        description: '메이플스토리 급처템, 메소, 아이템 전 서버 최고가 매입',
-        inLanguage: 'ko',
-        potentialAction: {
-          '@type': 'SearchAction',
-          target: 'https://www.maplestoryitem.com/notice?q={search_term_string}',
-          'query-input': 'required name=search_term_string',
-        },
+        "@type": "Question",
+        "name": "메이플 급처란 무엇인가요?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "메이플 급처는 메이플스토리 게임 내 아이템을 경매장에 올려두면 시간이 오래 걸리니 빠르게 판매 한다. 즉 급하게 처분한다의 줄임말 입니다."
+        }
       },
       {
-        '@type': 'Organization',
-        '@id': 'https://www.maplestoryitem.com/#organization',
-        name: '메이플 아이템',
-        url: 'https://www.maplestoryitem.com',
-        logo: {
-          '@type': 'ImageObject',
-          url: 'https://www.maplestoryitem.com/favicon-new.png',
-        },
-        description: '메이플스토리 아이템, 메소 전 서버 최고가 매입 및 검증 업체 플랫폼',
-        areaServed: 'KR',
-        serviceType: '게임 아이템 거래 플랫폼',
+        "@type": "Question",
+        "name": "거래는 어떻게 진행되나요?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "카카오톡으로 문의 → 아이템 확인 및 시세 안내 → 거래 조건 합의 → 게임 내 거래 진행 → 정산 순서로 진행됩니다. 모든 과정은 투명하게 진행됩니다."
+        }
       },
       {
-        '@type': 'FAQPage',
-        '@id': 'https://www.maplestoryitem.com/#faq',
-        mainEntity: staticFAQ.map((faq) => ({
-          '@type': 'Question',
-          name: faq.question,
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: faq.answer
-          }
-        }))
+        "@type": "Question",
+        "name": "급처템 거래는 안전한가요?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "지금까지 사고 및 문제는 한건도 없었으며, 거래 전 이용후기와 거래 방법을 꼭 확인하시기 바랍니다."
+        }
       },
-    ],
+      {
+        "@type": "Question",
+        "name": "모든 서버의 아이템을 구매하나요?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "네, 챌린저스 서버 및 전 서버 매입을 지원합니다."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "시세는 어떻게 결정되나요?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "아이템 시세는 경매장 판매 기준으로 합니다. 투명해서 판매자분들도 쉽게 이해 합니다."
+        }
+      }
+    ]
   };
 
   return (

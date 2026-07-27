@@ -62,10 +62,59 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // JSON-LD 구조화 데이터 (Organization & WebSite)
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://www.maplestoryitem.com/#organization",
+        "name": "메이플 아이템",
+        "url": "https://www.maplestoryitem.com",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.maplestoryitem.com/favicon-new.png",
+          "width": 512,
+          "height": 512
+        },
+        "description": "메이플스토리 아이템, 메소 전 서버 최고가 매입 및 검증 업체 플랫폼",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "KR"
+        },
+        "areaServed": "KR",
+        "serviceType": "게임 아이템 거래 플랫폼"
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://www.maplestoryitem.com/#website",
+        "url": "https://www.maplestoryitem.com",
+        "name": "메이플 아이템",
+        "description": "메이플스토리 급처템, 메소, 아이템 전 서버 최고가 매입",
+        "publisher": {
+          "@id": "https://www.maplestoryitem.com/#organization"
+        },
+        "inLanguage": "ko",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://www.maplestoryitem.com/notice?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
+  };
+
   return (
     <html lang="ko">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </head>
       <body className={notoSansKr.className}>
         {children}
