@@ -7,6 +7,30 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 
+// 정적 FAQ 데이터 (SEO용 - 서버 렌더링)
+const staticFAQ = [
+  {
+    question: "메이플 급처란 무엇인가요?",
+    answer: "메이플 급처는 메이플스토리 게임 내 아이템을 경매장에 올려두면 시간이 오래 걸리니 빠르게 판매 한다. 즉 급하게 처분한다의 줄임말 입니다."
+  },
+  {
+    question: "거래는 어떻게 진행되나요?",
+    answer: "카카오톡으로 문의 → 아이템 확인 및 시세 안내 → 거래 조건 합의 → 게임 내 거래 진행 → 정산 순서로 진행됩니다. 모든 과정은 투명하게 진행됩니다."
+  },
+  {
+    question: "급처템 거래는 안전한가요?",
+    answer: "지금까지 사고 및 문제는 한건도 없었으며, 거래 전 이용후기와 거래 방법을 꼭 확인하시기 바랍니다."
+  },
+  {
+    question: "모든 서버의 아이템을 구매하나요?",
+    answer: "네, 챌린저스 서버 및 전 서버 매입을 지원합니다."
+  },
+  {
+    question: "시세는 어떻게 결정되나요?",
+    answer: "아이템 시세는 경매장 판매 기준으로 합니다. 투명해서 판매자분들도 쉽게 이해 합니다."
+  }
+];
+
 export default function Home() {
   const [items, setItems] = useState<any[]>([]);
   const [mainBanner, setMainBanner] = useState<any>(null);
@@ -19,7 +43,7 @@ export default function Home() {
   const [statusMessages, setStatusMessages] = useState<string[]>([]);
   const [qnaList, setQnaList] = useState<{question: string, answer: string}[]>([]);
   const [slideIndex, setSlideIndex] = useState(0);
-  const tradePhotos = ['/trade1.png','/trade2.png','/trade3.png','/trade4.png','/trade5.png','/trade6.png','/trade7.png'];
+  const tradePhotos = ['/trade1.webp','/trade2.webp','/trade3.webp','/trade4.webp','/trade5.webp','/trade6.webp','/trade7.webp'];
 
   const [notices, setNotices] = useState<any[]>([]);
   const [howto, setHowto] = useState<any[]>([]);
@@ -122,6 +146,18 @@ export default function Home() {
         description: '메이플스토리 아이템, 메소 전 서버 최고가 매입 및 검증 업체 플랫폼',
         areaServed: 'KR',
         serviceType: '게임 아이템 거래 플랫폼',
+      },
+      {
+        '@type': 'FAQPage',
+        '@id': 'https://www.maplestoryitem.com/#faq',
+        mainEntity: staticFAQ.map((faq) => ({
+          '@type': 'Question',
+          name: faq.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: faq.answer
+          }
+        }))
       },
     ],
   };
@@ -423,10 +459,28 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 8. 자주 묻는 질문 (Q&A) */}
-      <div style={{ maxWidth: '800px', margin: '50px auto', padding: '0 20px 80px' }}>
-        <h2 style={{ textAlign: 'center', color: '#FF9000', marginBottom: '30px', fontSize: '22px' }}>자주 묻는 질문 (Q&A)</h2>
-        {qnaList.map((q, i) => (
+      {/* 8-1. 자주 묻는 질문 (정적 FAQ - SEO용) */}
+      <div style={{ maxWidth: '800px', margin: '50px auto', padding: '0 20px 40px' }}>
+        <h2 style={{ textAlign: 'center', color: '#FF9000', marginBottom: '30px', fontSize: '22px' }}>자주 묻는 질문 (FAQ)</h2>
+        {staticFAQ.map((faq, i) => (
+          <div key={i} style={{ marginBottom: '15px', border: '1px solid #E2E8F0', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 6px rgba(0,0,0,0.04)' }}>
+            <div style={{ padding: '20px', backgroundColor: '#FFFFFF', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ color: '#FF9000' }}>Q.</span>
+              <span style={{ color: '#1E293B' }}>{faq.question}</span>
+            </div>
+            <div style={{ padding: '20px', backgroundColor: '#F8FAFC', color: '#475569', lineHeight: '1.6', borderTop: '1px solid #E2E8F0', fontSize: '15px' }}>
+              <span style={{ color: '#FF9000', fontWeight: 'bold', marginRight: '5px' }}>A.</span>
+              {faq.answer}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 8-2. 관리자 등록 Q&A (실시간 업데이트) */}
+      {qnaList.length > 0 && (
+        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 20px 80px' }}>
+          <h2 style={{ textAlign: 'center', color: '#64748B', marginBottom: '30px', fontSize: '20px' }}>추가 안내사항</h2>
+          {qnaList.map((q, i) => (
           <div key={i} style={{ marginBottom: '15px', border: '1px solid #E2E8F0', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 6px rgba(0,0,0,0.04)' }}>
             <div style={{ padding: '20px', backgroundColor: '#FFFFFF', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{ color: '#FF9000' }}>Q.</span>
@@ -438,8 +492,8 @@ export default function Home() {
             </div>
           </div>
         ))}
-        {qnaList.length === 0 && <div style={{ textAlign: 'center', color: '#94A3B8' }}>등록된 질문이 없습니다.</div>}
-      </div>
+        </div>
+      )}
 
       {/* SEO 텍스트 섹션 */}
       <div style={{ backgroundColor: '#F8FAFC', padding: '80px 20px', borderTop: '1px solid #E2E8F0' }}>
