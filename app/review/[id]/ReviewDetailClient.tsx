@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { db } from '../../../firebase';
+import { db, auth } from '../../../firebase';
 import { doc, getDoc, updateDoc, increment, deleteDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { signInAnonymously } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
 export default function ReviewDetailClient({ id }: { id: string }) {
@@ -27,17 +28,35 @@ export default function ReviewDetailClient({ id }: { id: string }) {
   useEffect(() => {
     if (!id) return;
 
-    const fetchReview = async () => {
-      const docRef = doc(db, 'reviews', id);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setReview({ id: docSnap.id, ...data });
-        setEditForm({ title: data.title, content: data.content });
-        await updateDoc(docRef, { views: increment(1) });
+    // 익명 로그인 후 조회수 증가 (순서 중요!)
+    const init = async () => {
+      try {
+        // 1. 먼저 익명 로그인 완료
+        if (!auth.currentUser) {
+          console.log('익명 로그인 시작...');
+          await signInAnonymously(auth);
+          console.log('익명 로그인 완료:', auth.currentUser);
+        } else {
+          console.log('이미 로그인됨:', auth.currentUser);
+        }
+
+        // 2. 익명 로그인 완료 후 조회수 증가
+        console.log('조회수 증가 시도...');
+        const docRef = doc(db, 'reviews', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setReview({ id: docSnap.id, ...data });
+          setEditForm({ title: data.title, content: data.content });
+          await updateDoc(docRef, { views: increment(1) });
+          console.log('조회수 증가 성공!');
+        }
+      } catch (error) {
+        console.error('초기화 실패:', error);
+        console.error('에러 상세:', error);
       }
     };
-    fetchReview();
+    init();
 
     const q = query(collection(db, 'comments'), where('postId', '==', id));
     const unsubscribe = onSnapshot(q, (s) => {
@@ -54,13 +73,30 @@ export default function ReviewDetailClient({ id }: { id: string }) {
   }, [id]);
 
   const handleLike = async () => {
-    const hasLiked = localStorage.getItem(`liked_${id}`);
-    if (hasLiked) return alert('이미 추천하셨습니다.');
-    const docRef = doc(db, 'reviews', id);
-    await updateDoc(docRef, { likes: increment(1) });
-    setReview((prev: any) => ({ ...prev, likes: (prev.likes || 0) + 1 }));
-    localStorage.setItem(`liked_${id}`, 'true');
-    alert('이 후기를 추천했습니다!');
+    try {
+      // 익명 인증 확인
+      console.log('추천 버튼 클릭 - 현재 인증 상태:', auth.currentUser);
+      if (!auth.currentUser) {
+        console.log('익명 로그인 시작...');
+        await signInAnonymously(auth);
+        console.log('익명 로그인 완료:', auth.currentUser);
+      }
+
+      const hasLiked = localStorage.getItem(`liked_${id}`);
+      if (hasLiked) return alert('이미 추천하셨습니다.');
+
+      console.log('추천수 증가 시도...');
+      const docRef = doc(db, 'reviews', id);
+      await updateDoc(docRef, { likes: increment(1) });
+      console.log('추천수 증가 성공!');
+      setReview((prev: any) => ({ ...prev, likes: (prev.likes || 0) + 1 }));
+      localStorage.setItem(`liked_${id}`, 'true');
+      alert('이 후기를 추천했습니다!');
+    } catch (error) {
+      console.error('추천 실패:', error);
+      console.error('에러 상세:', error);
+      alert('추천에 실패했습니다. 다시 시도해주세요.');
+    }
   };
 
   const handleDeletePost = async () => {
@@ -98,14 +134,25 @@ export default function ReviewDetailClient({ id }: { id: string }) {
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.nickname || !newComment.content || !newComment.password) return alert('모든 항목을 입력하세요.');
-    await addDoc(collection(db, 'comments'), {
-      postId: id,
-      nickname: newComment.nickname,
-      password: newComment.password,
-      content: newComment.content,
-      createdAt: serverTimestamp()
-    });
-    setNewComment({ nickname: '', password: '', content: '' });
+
+    try {
+      // 익명 인증 확인
+      if (!auth.currentUser) {
+        await signInAnonymously(auth);
+      }
+
+      await addDoc(collection(db, 'comments'), {
+        postId: id,
+        nickname: newComment.nickname,
+        password: newComment.password,
+        content: newComment.content,
+        createdAt: serverTimestamp()
+      });
+      setNewComment({ nickname: '', password: '', content: '' });
+    } catch (error) {
+      console.error('댓글 등록 실패:', error);
+      alert('댓글 등록에 실패했습니다.');
+    }
   };
 
   const handleDeleteComment = async (commentId: string, correctPw: string) => {

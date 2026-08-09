@@ -1,0 +1,34 @@
+.article-prose{
+  --ink:#1f2328; --ink-strong:#16181d; --muted:#8a94a6;
+  --amber:#ff9000; --navy:#1e3a5f; --navy-tint:#f4f7fb;
+  --hairline:#e8ebef; --callout-bg:#fff8ee;
+  color:var(--ink); font-size:17px; line-height:1.78;
+  font-family:"Pretendard Variable",Pretendard,-apple-system,"Noto Sans KR",sans-serif;
+  letter-spacing:-0.02em; word-break:keep-all;
+}
+.article-prose > *:first-child{ margin-top:0; }
+.article-prose h2{ font-size:24px; font-weight:600; color:var(--ink-strong); line-height:1.4; letter-spacing:-0.02em; margin:2.4em 0 0.7em; }
+.article-prose h3{ font-size:19px; font-weight:600; color:var(--ink-strong); line-height:1.45; margin:1.9em 0 0.5em; }
+.article-prose p{ margin:0 0 1.05em; }
+.article-prose strong{ font-weight:600; color:var(--ink-strong); }
+.article-prose a{ color:var(--amber); text-decoration:none; border-bottom:1px solid rgba(255,144,0,.35); font-weight:500; }
+.article-prose a:hover{ border-bottom-color:var(--amber); }
+.article-prose ul,.article-prose ol{ margin:0.4em 0 1.2em; padding-left:1.25em; }
+.article-prose li{ margin-bottom:0.45em; line-height:1.7; padding-left:0.15em; }
+.article-prose ul li::marker{ color:var(--amber); }
+.article-prose ol li::marker{ color:var(--muted); font-weight:600; }
+.article-prose blockquote{ margin:1.4em 0; padding:16px 20px; background:var(--callout-bg); border-left:3px solid var(--amber); border-radius:10px; color:#5c4a2e; }
+.article-prose blockquote p{ margin:0; }
+.article-prose figure{ margin:1.6em 0; }
+.article-prose img{ max-width:100%; height:auto; border-radius:12px; display:block; }
+.article-prose figcaption{ font-size:13px; color:var(--muted); margin-top:8px; text-align:center; }
+.article-prose .table-wrap{ margin:1.5em 0; border:1px solid var(--hairline); border-radius:12px; overflow:hidden; }
+.article-prose table{ width:100%; border-collapse:collapse; font-size:15.5px; background:#fff; }
+.article-prose thead th{ background:var(--navy); color:#fff; font-weight:600; text-align:left; padding:13px 16px; letter-spacing:-0.01em; }
+.article-prose tbody td{ padding:12px 16px; border-top:1px solid var(--hairline); vertical-align:top; }
+.article-prose tbody tr td:first-child{ font-weight:600; color:var(--ink-strong); background:var(--navy-tint); white-space:nowrap; }
+@media (max-width:560px){
+  .article-prose{ font-size:16px; }
+  .article-prose h2{ font-size:21px; }
+  .article-prose thead th,.article-prose tbody td{ padding:11px 12px; }
+}

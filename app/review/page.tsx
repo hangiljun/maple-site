@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { db, storage } from '../../firebase';
+import { db, storage, auth } from '../../firebase';
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, limit } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { signInAnonymously } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -21,6 +22,18 @@ export default function ReviewPage() {
   const [image, setImage] = useState<File | null>(null);
 
   useEffect(() => {
+    // 익명 로그인 (일반 사용자도 write 가능하도록)
+    const initAuth = async () => {
+      try {
+        if (!auth.currentUser) {
+          await signInAnonymously(auth);
+        }
+      } catch (error) {
+        console.error('익명 로그인 실패:', error);
+      }
+    };
+    initAuth();
+
     const q = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (s) => {
       const data = s.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -50,6 +63,11 @@ export default function ReviewPage() {
     if (!form.title || !form.nickname || !form.password || !form.content) return alert('모두 입력하세요.');
     setLoading(true);
     try {
+      // 익명 인증 확인
+      if (!auth.currentUser) {
+        await signInAnonymously(auth);
+      }
+
       let url = "";
       if (image) {
         const imgRef = ref(storage, `reviews/${Date.now()}`);
@@ -61,7 +79,10 @@ export default function ReviewPage() {
       setShowForm(false);
       setForm({ title: '', nickname: '', password: '', content: '' });
       setImage(null);
-    } catch (err) { alert('오류 발생'); }
+    } catch (err) {
+      console.error('후기 등록 실패:', err);
+      alert('오류 발생');
+    }
     setLoading(false);
   };
 

@@ -7,6 +7,19 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signInWithEmailAndPassword, onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { marked } from 'marked';
 
+// 브라우저 canvas로 webp 압축/리사이즈
+async function compressToWebp(file: File, maxWidth = 1200, quality = 0.8): Promise<Blob> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, maxWidth / bitmap.width);
+  const w = Math.round(bitmap.width * scale);
+  const h = Math.round(bitmap.height * scale);
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  canvas.getContext('2d')!.drawImage(bitmap, 0, 0, w, h);
+  return await new Promise<Blob>((res, rej) =>
+    canvas.toBlob(b => b ? res(b) : rej(new Error('encode fail')), 'image/webp', quality));
+}
+
 export default function AdminDashboard() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -405,6 +418,7 @@ function PostManager() {
   const [content, setContent] = useState('');
   const [isPinned, setIsPinned] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [posts, setPosts] = useState<any[]>([]);
   const [editId, setEditId] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -473,6 +487,37 @@ function PostManager() {
       const newCursorPos = start + formattedText.length;
       textarea.setSelectionRange(newCursorPos, newCursorPos);
     }, 0);
+  };
+
+  // 커서 위치에 텍스트 삽입
+  const insertAtCursor = (text: string) => {
+    const ta = textareaRef.current;
+    if (!ta) { setContent(prev => prev + text); return; }
+    const s = ta.selectionStart, e = ta.selectionEnd;
+    const next = content.slice(0, s) + text + content.slice(e);
+    setContent(next);
+    requestAnimationFrame(() => { ta.focus(); const p = s + text.length; ta.setSelectionRange(p, p); });
+  };
+
+  // 마크다운 이미지 업로드
+  const handleMarkdownImagePick = async (ev: React.ChangeEvent<HTMLInputElement>) => {
+    const file = ev.target.files?.[0];
+    ev.target.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) return alert('이미지 파일만 올릴 수 있어요.');
+    try {
+      setUploading(true);
+      const blob = await compressToWebp(file);
+      const safe = file.name.replace(/\.[^.]+$/, '').replace(/[^\w-]/g, '_').slice(0, 40) || 'img';
+      const path = `notice-images/${Date.now()}-${safe}.webp`;
+      const r = ref(storage, path);
+      await uploadBytes(r, blob, { contentType: 'image/webp' });
+      const url = await getDownloadURL(r);
+      insertAtCursor(`\n\n![사진 설명](${url})\n\n`);
+    } catch (err: any) {
+      console.error('이미지 업로드 오류:', err);
+      alert('이미지 업로드 실패: ' + (err?.message || err));
+    } finally { setUploading(false); }
   };
 
   const fetchPosts = async () => {
@@ -704,6 +749,15 @@ function PostManager() {
             📹 동영상 <input type="file" hidden accept="video/*" onChange={handleVideoInsert} />
           </label>
           {loading && <span style={{ display: 'flex', alignItems: 'center', color: '#FF9000', fontWeight: 'bold' }}> 업로드 중...</span>}
+        </div>
+
+        {/* 마크다운 이미지 삽입 버튼 */}
+        <div style={{ marginBottom: '8px' }}>
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', border: '1px solid #e8ebef', borderRadius: '8px', padding: '8px 14px', fontSize: '14px', background: '#fff' }}>
+            {uploading ? '올리는 중…' : '📸 사진 넣기 (마크다운)'}
+            <input type="file" accept="image/*" onChange={handleMarkdownImagePick} disabled={uploading} style={{ display: 'none' }} />
+          </label>
+          <span style={{ marginLeft: '8px', fontSize: '12px', color: '#8a94a6' }}>커서 위치에 삽입돼요. 대괄호 안 '사진 설명'을 캡션으로 고쳐 주세요.</span>
         </div>
 
         {/* 작성 안내 */}

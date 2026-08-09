@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { db } from '../../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
+import Markdown from '../../components/Markdown';
 
 export default function HowtoDetailClient({ id, initialHowto }: { id: string; initialHowto: any }) {
   const [howto, setHowto] = useState<any>(initialHowto);
@@ -177,11 +178,7 @@ export default function HowtoDetailClient({ id, initialHowto }: { id: string; in
           </div>
         )}
 
-        <div
-          style={{ fontSize: '17px', lineHeight: '1.9', color: '#334155' }}
-          className="howto-content"
-          dangerouslySetInnerHTML={{ __html: convertUrlsToLinks(howto.content || '') }}
-        />
+        <Markdown source={howto.content_raw || howto.content || ''} />
 
         <button
           onClick={() => router.push('/howto')}
@@ -191,62 +188,6 @@ export default function HowtoDetailClient({ id, initialHowto }: { id: string; in
         </button>
       </div>
 
-      <style jsx global>{`
-        .howto-content img {
-          max-width: 100%;
-          height: auto;
-          display: block;
-          margin: 30px 0;
-          border-radius: 15px;
-          border: 1px solid #E2E8F0;
-        }
-        .howto-content video {
-          max-width: 100%;
-          height: auto;
-          display: block;
-          margin: 30px 0;
-          border-radius: 15px;
-          border: 1px solid #E2E8F0;
-          background: #000;
-        }
-        .howto-content table {
-          width: 100%;
-          border-collapse: collapse;
-          margin: 16px 0;
-          background: white;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-          border-radius: 8px;
-          overflow: hidden;
-        }
-        .howto-content p + table {
-          margin-top: 16px;
-        }
-        .howto-content table + p {
-          margin-top: 16px;
-        }
-        .howto-content thead {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .howto-content th {
-          padding: 14px 16px;
-          text-align: left;
-          font-weight: 700;
-          color: white;
-          font-size: 15px;
-          border: none;
-        }
-        .howto-content td {
-          padding: 12px 16px;
-          border-bottom: 1px solid #E2E8F0;
-          font-size: 15px;
-        }
-        .howto-content tbody tr:last-child td {
-          border-bottom: none;
-        }
-        .howto-content tbody tr:hover {
-          background: #F8FAFC;
-        }
-      `}</style>
     </div>
   );
 }

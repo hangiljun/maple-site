@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { db } from '../../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
+import Markdown from '../../components/Markdown';
 
 export default function NoticeDetailClient({ id, initialNotice }: { id: string; initialNotice: any }) {
   const [notice, setNotice] = useState<any>(initialNotice);
@@ -177,11 +178,7 @@ export default function NoticeDetailClient({ id, initialNotice }: { id: string; 
           </div>
         )}
 
-        <div
-          style={{ fontSize: '17px', lineHeight: '1.9', color: '#334155' }}
-          className="notice-content"
-          dangerouslySetInnerHTML={{ __html: convertUrlsToLinks(notice.content) }}
-        />
+        <Markdown source={notice.content_raw || notice.content || ''} />
 
         <button
           onClick={() => router.push('/notice')}
@@ -191,62 +188,6 @@ export default function NoticeDetailClient({ id, initialNotice }: { id: string; 
         </button>
       </div>
 
-      <style jsx global>{`
-        .notice-content img {
-          max-width: 100%;
-          height: auto;
-          display: block;
-          margin: 20px 0;
-          border-radius: 10px;
-          border: 1px solid #E2E8F0;
-        }
-        .notice-content video {
-          max-width: 100%;
-          height: auto;
-          display: block;
-          margin: 20px 0;
-          border-radius: 10px;
-          border: 1px solid #E2E8F0;
-          background: #000;
-        }
-        .notice-content table {
-          width: 100%;
-          border-collapse: collapse;
-          margin: 16px 0;
-          background: white;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-          border-radius: 8px;
-          overflow: hidden;
-        }
-        .notice-content p + table {
-          margin-top: 16px;
-        }
-        .notice-content table + p {
-          margin-top: 16px;
-        }
-        .notice-content thead {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .notice-content th {
-          padding: 14px 16px;
-          text-align: left;
-          font-weight: 700;
-          color: white;
-          font-size: 15px;
-          border: none;
-        }
-        .notice-content td {
-          padding: 12px 16px;
-          border-bottom: 1px solid #E2E8F0;
-          font-size: 15px;
-        }
-        .notice-content tbody tr:last-child td {
-          border-bottom: none;
-        }
-        .notice-content tbody tr:hover {
-          background: #F8FAFC;
-        }
-      `}</style>
     </div>
   );
 }
