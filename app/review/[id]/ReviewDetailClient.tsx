@@ -5,10 +5,11 @@ import { db, auth } from '../../../firebase';
 import { doc, getDoc, updateDoc, increment, deleteDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { signInAnonymously } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import { Review, Comment } from '@/types';
 
 export default function ReviewDetailClient({ id }: { id: string }) {
-  const [review, setReview] = useState<any>(null);
-  const [comments, setComments] = useState<any[]>([]);
+  const [review, setReview] = useState<Review | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState({ nickname: '', password: '', content: '' });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -33,35 +34,28 @@ export default function ReviewDetailClient({ id }: { id: string }) {
       try {
         // 1. 먼저 익명 로그인 완료
         if (!auth.currentUser) {
-          console.log('익명 로그인 시작...');
           await signInAnonymously(auth);
-          console.log('익명 로그인 완료:', auth.currentUser);
-        } else {
-          console.log('이미 로그인됨:', auth.currentUser);
         }
 
         // 2. 익명 로그인 완료 후 조회수 증가
-        console.log('조회수 증가 시도...');
         const docRef = doc(db, 'reviews', id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
-          setReview({ id: docSnap.id, ...data });
+          setReview({ id: docSnap.id, ...data } as Review);
           setEditForm({ title: data.title, content: data.content });
           await updateDoc(docRef, { views: increment(1) });
-          console.log('조회수 증가 성공!');
         }
       } catch (error) {
         console.error('초기화 실패:', error);
-        console.error('에러 상세:', error);
       }
     };
     init();
 
     const q = query(collection(db, 'comments'), where('postId', '==', id));
     const unsubscribe = onSnapshot(q, (s) => {
-      const fetchedData = s.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      fetchedData.sort((a: any, b: any) => {
+      const fetchedData = s.docs.map(doc => ({ id: doc.id, ...doc.data() } as Comment));
+      fetchedData.sort((a, b) => {
         const dateA = a.createdAt?.seconds || 0;
         const dateB = b.createdAt?.seconds || 0;
         return dateA - dateB;
@@ -75,31 +69,26 @@ export default function ReviewDetailClient({ id }: { id: string }) {
   const handleLike = async () => {
     try {
       // 익명 인증 확인
-      console.log('추천 버튼 클릭 - 현재 인증 상태:', auth.currentUser);
       if (!auth.currentUser) {
-        console.log('익명 로그인 시작...');
         await signInAnonymously(auth);
-        console.log('익명 로그인 완료:', auth.currentUser);
       }
 
       const hasLiked = localStorage.getItem(`liked_${id}`);
       if (hasLiked) return alert('이미 추천하셨습니다.');
 
-      console.log('추천수 증가 시도...');
       const docRef = doc(db, 'reviews', id);
       await updateDoc(docRef, { likes: increment(1) });
-      console.log('추천수 증가 성공!');
-      setReview((prev: any) => ({ ...prev, likes: (prev.likes || 0) + 1 }));
+      setReview((prev) => prev ? ({ ...prev, likes: (prev.likes || 0) + 1 }) : null);
       localStorage.setItem(`liked_${id}`, 'true');
       alert('이 후기를 추천했습니다!');
     } catch (error) {
       console.error('추천 실패:', error);
-      console.error('에러 상세:', error);
       alert('추천에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
   const handleDeletePost = async () => {
+    if (!review) return;
     const pw = prompt('게시글 삭제를 위해 비밀번호를 입력하세요.');
     if (pw === review.password) {
       if (confirm('정말로 이 후기를 삭제하시겠습니까?')) {
@@ -113,6 +102,7 @@ export default function ReviewDetailClient({ id }: { id: string }) {
   };
 
   const handleEditPost = async () => {
+    if (!review) return;
     const pw = prompt('게시글 수정을 위해 비밀번호를 입력하세요.');
     if (pw === review.password) {
       setIsEditing(true);
@@ -122,11 +112,12 @@ export default function ReviewDetailClient({ id }: { id: string }) {
   };
 
   const handleUpdatePost = async () => {
+    if (!review) return;
     await updateDoc(doc(db, 'reviews', id), {
       title: editForm.title,
       content: editForm.content
     });
-    setReview((prev: any) => ({ ...prev, title: editForm.title, content: editForm.content }));
+    setReview((prev) => prev ? ({ ...prev, title: editForm.title, content: editForm.content }) : null);
     setIsEditing(false);
     alert('수정 완료되었습니다.');
   };

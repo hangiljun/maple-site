@@ -6,6 +6,7 @@ import { collection, query, orderBy, onSnapshot, limit, doc } from 'firebase/fir
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Item, Review, Notice, Howto, Banner, SiteConfig } from '@/types';
 
 // 정적 FAQ 데이터 (SEO용 - 서버 렌더링)
 const staticFAQ = [
@@ -32,11 +33,11 @@ const staticFAQ = [
 ];
 
 export default function Home() {
-  const [items, setItems] = useState<any[]>([]);
-  const [mainBanner, setMainBanner] = useState<any>(null);
+  const [items, setItems] = useState<Item[]>([]);
+  const [mainBanner, setMainBanner] = useState<Banner | null>(null);
   const [bannerLoading, setBannerLoading] = useState(true);
 
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [today, setToday] = useState('');
 
@@ -45,8 +46,8 @@ export default function Home() {
   const [slideIndex, setSlideIndex] = useState(0);
   const tradePhotos = ['/trade1.webp','/trade2.webp','/trade3.webp','/trade4.webp','/trade5.webp','/trade6.webp','/trade7.webp'];
 
-  const [notices, setNotices] = useState<any[]>([]);
-  const [howto, setHowto] = useState<any[]>([]);
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [howto, setHowto] = useState<Howto[]>([]);
 
   const router = useRouter();
 
@@ -61,11 +62,11 @@ export default function Home() {
     setToday(`${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`);
 
     const qItems = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
-    const unsubItems = onSnapshot(qItems, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+    const unsubItems = onSnapshot(qItems, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() } as Item))));
 
     const unsubBanner = onSnapshot(doc(db, 'banners', 'home_main'), (docSnap) => {
       if (docSnap.exists()) {
-        setMainBanner(docSnap.data());
+        setMainBanner(docSnap.data() as Banner);
       } else {
         setMainBanner(null);
       }
@@ -73,17 +74,17 @@ export default function Home() {
     });
 
     const qReviews = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(10));
-    const unsubReviews = onSnapshot(qReviews, (s) => setReviews(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+    const unsubReviews = onSnapshot(qReviews, (s) => setReviews(s.docs.map(d => ({ id: d.id, ...d.data() } as Review))));
 
     const qNotices = query(collection(db, 'notices'), orderBy('createdAt', 'desc'), limit(3));
-    const unsubNotices = onSnapshot(qNotices, (s) => setNotices(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+    const unsubNotices = onSnapshot(qNotices, (s) => setNotices(s.docs.map(d => ({ id: d.id, ...d.data() } as Notice))));
 
     const qHowto = query(collection(db, 'howto'), orderBy('createdAt', 'desc'), limit(3));
-    const unsubHowto = onSnapshot(qHowto, (s) => setHowto(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+    const unsubHowto = onSnapshot(qHowto, (s) => setHowto(s.docs.map(d => ({ id: d.id, ...d.data() } as Howto))));
 
     const unsubConfig = onSnapshot(doc(db, 'site_config', 'main'), (docSnap) => {
       if (docSnap.exists()) {
-        const data = docSnap.data();
+        const data = docSnap.data() as SiteConfig;
         if (data.statusMessages) setStatusMessages(data.statusMessages);
         if (data.qna) setQnaList(data.qna);
       }
