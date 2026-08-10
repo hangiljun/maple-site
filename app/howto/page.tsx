@@ -1,122 +1,43 @@
-'use client';
-import { useEffect, useState } from 'react';
-import { db } from '../../firebase';
-import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore';
-import { useRouter } from 'next/navigation';
+import { Metadata } from 'next';
+import { getCollectionDocs } from '@/lib/firestore-rest';
+import HowtoListClient from './HowtoListClient';
 
-export default function HowtoPage() {
-  const [howtos, setHowtos] = useState<any[]>([]);
-  const [banner, setBanner] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState('전체');
-  const router = useRouter();
+export const revalidate = 300; // ISR: 5분마다 재생성
 
-  useEffect(() => {
-    const q = query(collection(db, 'howto'), orderBy('createdAt', 'desc'));
-    const unsubHowto = onSnapshot(q, (s) => setHowtos(s.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
+export const metadata: Metadata = {
+  title: '거래방법',
+  description: '메이플 아이템 거래방법, 안전하고 투명한 거래 가이드를 확인하세요. 메이플스토리 급처 거래 절차와 주의사항을 안내합니다.',
+  alternates: {
+    canonical: 'https://www.maplestoryitem.com/howto',
+  },
+  openGraph: {
+    title: '거래방법 - 메이플 아이템',
+    description: '안전하고 투명한 거래 가이드를 확인하세요.',
+    url: 'https://www.maplestoryitem.com/howto',
+  },
+};
 
-    const qBanners = query(collection(db, 'banners'), orderBy('createdAt', 'desc'), limit(50));
-    const unsubBanners = onSnapshot(qBanners, (s) => {
-      const allBanners = s.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const targetBanner = allBanners.find((b: any) => b.type === '거래방법');
-      setBanner(targetBanner || null);
-    });
+export default async function HowtoPage() {
+  const [howtosDocs, bannersDocs] = await Promise.all([
+    getCollectionDocs('howto', { orderBy: 'createdAt desc' }),
+    getCollectionDocs('banners', { orderBy: 'createdAt desc', limit: 50 }),
+  ]);
 
-    return () => { unsubHowto(); unsubBanners(); }
-  }, []);
+  const initialHowtos = howtosDocs.map(doc => ({
+    id: doc.id,
+    title: doc.title || '',
+    content: doc.content || '',
+    category: doc.category || '',
+    createdAt: doc.createdAt ? doc.createdAt.toDate().toISOString() : new Date().toISOString(),
+  }));
 
-  const extractFirstImg = (content: string) => {
-    if (!content) return null;
-    const imgReg = /<img[^>]+src=["']([^"']+)["']/;
-    const match = imgReg.exec(content);
-    return match ? match[1] : null;
-  };
+  const initialBanner = bannersDocs.find(b => b.type === '거래방법') || null;
+  const banner = initialBanner ? {
+    id: initialBanner.id,
+    imageUrl: initialBanner.imageUrl || '',
+    type: initialBanner.type || '',
+    createdAt: initialBanner.createdAt ? initialBanner.createdAt.toDate().toISOString() : new Date().toISOString(),
+  } : null;
 
-  const filteredHowtos = activeTab === '전체' ? howtos : howtos.filter(h => h.category === activeTab);
-
-  // BreadcrumbList 구조화 데이터
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "홈",
-        "item": "https://www.maplestoryitem.com"
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "거래방법",
-        "item": "https://www.maplestoryitem.com/howto"
-      }
-    ]
-  };
-
-  return (
-    <div style={{ backgroundColor: '#F8FAFC', minHeight: '100vh', fontFamily: "'Noto Sans KR', sans-serif", color: '#1E293B' }}>
-      {/* BreadcrumbList 구조화 데이터 */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-
-      <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 5%', backgroundColor: 'rgba(255, 255, 255, 0.95)', borderBottom: '1px solid #E2E8F0', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', flexShrink: 0 }} onClick={() => router.push('/')}>
-          <div style={{ backgroundColor: '#FFF', borderRadius: '10px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2E8F0' }}>
-            <img src="/favicon-new.png" alt="메이플 아이템 로고" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
-          </div>
-          <div style={{ fontSize: 'clamp(16px, 4vw, 20px)', fontWeight: '900', color: '#FF9000', whiteSpace: 'nowrap' }}>메이플 아이템</div>
-        </div>
-        <div style={{ display: 'flex', gap: 'clamp(8px, 3vw, 20px)', fontSize: 'clamp(12px, 3vw, 15px)', fontWeight: '600', color: '#64748B' }}>
-          <span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }} onClick={() => router.push('/')}>홈</span>
-          <span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }} onClick={() => router.push('/notice')}>공지사항</span>
-          <span style={{ cursor: 'pointer', color: '#FF9000', whiteSpace: 'nowrap' }}>거래방법</span>
-          <span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }} onClick={() => router.push('/review')}>이용후기</span>
-        </div>
-      </nav>
-
-      <div style={{ width: '100%', backgroundColor: '#E2E8F0', display: 'flex', justifyContent: 'center' }}>
-        <div style={{ width: '100%', maxWidth: '1200px', aspectRatio: '4/1', position: 'relative', overflow: 'hidden' }}>
-          {banner && <img src={banner.imageUrl} alt="거래방법 배너" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.65' }} />}
-          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: banner ? 'rgba(0, 0, 0, 0.35)' : 'rgba(255, 144, 0, 0.85)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'white' }}>
-            <h1 style={{ fontSize: '32px', fontWeight: 'bold', textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>거래 방법</h1>
-            <p style={{ fontSize: '16px', marginTop: '10px', color: 'rgba(255,255,255,0.9)' }}>안전한 거래 절차와 가이드를 확인하세요.</p>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ padding: '60px 5%', maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '40px', flexWrap: 'wrap' }}>
-          {['전체', '거래 방법', '거래 주의 사항'].map((tab) => (
-            <button key={tab} onClick={() => setActiveTab(tab)} style={{ padding: '10px 20px', borderRadius: '30px', border: activeTab === tab ? '1px solid #FF9000' : '1px solid #E2E8F0', backgroundColor: activeTab === tab ? '#FF9000' : '#FFFFFF', color: activeTab === tab ? '#FFF' : '#64748B', fontWeight: 'bold', cursor: 'pointer', transition: '0.3s', boxShadow: activeTab === tab ? '0 2px 8px rgba(255,144,0,0.3)' : 'none' }}>{tab}</button>
-          ))}
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '30px' }}>
-          {filteredHowtos.map((h) => {
-            const thumbnail = h.imageUrl || extractFirstImg(h.content);
-            return (
-              <div key={h.id} onClick={() => router.push(`/howto/${h.id}`)} style={{ backgroundColor: '#FFFFFF', borderRadius: '20px', overflow: 'hidden', cursor: 'pointer', border: '1px solid #E2E8F0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', transition: 'all 0.3s ease' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 10px 24px rgba(255,144,0,0.15)'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'none'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)'; }}
-              >
-                <div style={{ position: 'relative', width: '100%', height: '180px', backgroundColor: '#F1F5F9' }}>
-                  {thumbnail ? <img src={thumbnail} alt={h.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center', color:'#94A3B8', fontSize:'13px'}}>이미지 없음</div>}
-                  <div style={{ position: 'absolute', top: '15px', left: '15px', backgroundColor: '#FF9000', color: '#FFF', fontSize: '11px', fontWeight: 'bold', padding: '4px 10px', borderRadius: '5px' }}>{h.category}</div>
-                </div>
-                <div style={{ padding: '20px' }}>
-                  <h3 style={{ fontSize: '17px', fontWeight: 'bold', color: '#1E293B' }}>{h.title}</h3>
-                  <div style={{ fontSize: '12px', color: '#94A3B8', display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
-                    <span>{h.createdAt?.toDate().toLocaleDateString()}</span>
-                    <span style={{ color: '#FF9000', fontWeight: 'bold' }}>자세히 보기 →</span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
+  return <HowtoListClient initialHowtos={initialHowtos} initialBanner={banner} />;
 }
