@@ -15,6 +15,10 @@ export default async function Home() {
     getDocument('site_config', 'main'),
   ]);
 
+  // Generate server-side date string to avoid hydration mismatch
+  const now = new Date();
+  const initialToday = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
+
   // Transform to match client types (convert Timestamp to ISO string for serialization)
   const initialItems: any[] = itemsDocs.map(doc => ({
     id: doc.id,
@@ -75,6 +79,7 @@ export default async function Home() {
       initialBanner={initialBanner}
       initialStatusMessages={initialStatusMessages}
       initialQna={initialQna}
+      initialToday={initialToday}
     />
   );
 }

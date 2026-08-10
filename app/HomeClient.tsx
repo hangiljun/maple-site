@@ -16,6 +16,7 @@ interface HomeClientProps {
   initialBanner: any;
   initialStatusMessages: string[];
   initialQna: { question: string; answer: string }[];
+  initialToday: string;
 }
 
 // 정적 FAQ 데이터 (SEO용 - 서버 렌더링)
@@ -50,6 +51,7 @@ export default function HomeClient({
   initialBanner,
   initialStatusMessages,
   initialQna,
+  initialToday,
 }: HomeClientProps) {
   // Convert ISO strings back to Timestamp-like objects
   const hydrateTimestamp = (isoString: string) => ({ toDate: () => new Date(isoString) });
@@ -60,7 +62,7 @@ export default function HomeClient({
 
   const [reviews, setReviews] = useState<Review[]>(initialReviews.map(r => ({ ...r, createdAt: hydrateTimestamp(r.createdAt) })));
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
-  const [today, setToday] = useState('');
+  const [today, setToday] = useState(initialToday);
 
   const [statusMessages, setStatusMessages] = useState<string[]>(initialStatusMessages);
   const [qnaList, setQnaList] = useState<{question: string, answer: string}[]>(initialQna);
@@ -79,9 +81,6 @@ export default function HomeClient({
   };
 
   useEffect(() => {
-    const now = new Date();
-    setToday(`${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`);
-
     // Real-time listeners - update from server initial data
     const qItems = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
     const unsubItems = onSnapshot(qItems, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() } as Item))));
@@ -216,17 +215,23 @@ export default function HomeClient({
         </div>
         <div style={{ backgroundColor: '#F8FAFC', overflow: 'hidden', whiteSpace: 'nowrap', padding: '6px 0', borderTop: '1px solid #E2E8F0' }}>
           <div className="marquee" style={{ display: 'inline-block', fontSize: '12px', color: '#94A3B8' }}>
-            {statusMessages.length > 0 ? statusMessages.map((msg, i) => (
-               <span key={i} style={{ marginRight: '50px' }}>{msg}</span>
-            )) : (
-               <>
-                 <span style={{ marginRight: '50px' }}>[실시간] 루나 서버 500억 메소 매입 완료</span>
-                 <span style={{ marginRight: '50px' }}>[안내] 관리자 페이지에서 상태 메시지를 설정해주세요.</span>
-               </>
+            {statusMessages.length > 0 ? (
+              <>
+                {statusMessages.map((msg, i) => (
+                  <span key={i} style={{ marginRight: '50px' }}>{msg}</span>
+                ))}
+                {statusMessages.map((msg, i) => (
+                  <span key={`dup-${i}`} style={{ marginRight: '50px' }}>{msg}</span>
+                ))}
+              </>
+            ) : (
+              <>
+                <span style={{ marginRight: '50px' }}>[실시간] 루나 서버 500억 메소 매입 완료</span>
+                <span style={{ marginRight: '50px' }}>[안내] 관리자 페이지에서 상태 메시지를 설정해주세요.</span>
+                <span style={{ marginRight: '50px' }}>[실시간] 루나 서버 500억 메소 매입 완료</span>
+                <span style={{ marginRight: '50px' }}>[안내] 관리자 페이지에서 상태 메시지를 설정해주세요.</span>
+              </>
             )}
-            {statusMessages.length > 0 && statusMessages.map((msg, i) => (
-               <span key={`dup-${i}`} style={{ marginRight: '50px' }}>{msg}</span>
-            ))}
           </div>
         </div>
       </div>
