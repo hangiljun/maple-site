@@ -67,7 +67,7 @@ export default function HomeClient({
   const [statusMessages, setStatusMessages] = useState<string[]>(initialStatusMessages);
   const [qnaList, setQnaList] = useState<{question: string, answer: string}[]>(initialQna);
   const [slideIndex, setSlideIndex] = useState(0);
-  const tradePhotos = ['/trade1.webp','/trade2.webp','/trade3.webp','/trade4.webp','/trade5.webp','/trade6.webp','/trade7.webp'];
+  const tradePhotos = ['/trade1.webp','/trade2.webp','/trade3.webp','/trade4.webp','/trade5.webp','/trade6.webp','/trade7.webp','/trade8.png'];
 
   const [notices, setNotices] = useState<Notice[]>(initialNotices.map(n => ({ ...n, createdAt: hydrateTimestamp(n.createdAt) })));
   const [howto, setHowto] = useState<Howto[]>(initialHowto.map(h => ({ ...h, createdAt: hydrateTimestamp(h.createdAt) })));
