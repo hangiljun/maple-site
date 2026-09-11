@@ -66,8 +66,6 @@ export default function HomeClient({
 
   const [statusMessages, setStatusMessages] = useState<string[]>(initialStatusMessages);
   const [qnaList, setQnaList] = useState<{question: string, answer: string}[]>(initialQna);
-  const [slideIndex, setSlideIndex] = useState(0);
-  const tradePhotos = ['/trade1.webp','/trade2.webp','/trade3.webp','/trade4.webp','/trade5.webp','/trade6.webp','/trade7.webp','/trade8.png'];
 
   const [notices, setNotices] = useState<Notice[]>(initialNotices.map(n => ({ ...n, createdAt: hydrateTimestamp(n.createdAt) })));
   const [howto, setHowto] = useState<Howto[]>(initialHowto.map(h => ({ ...h, createdAt: hydrateTimestamp(h.createdAt) })));
@@ -123,13 +121,6 @@ export default function HomeClient({
     }, 4000);
     return () => clearInterval(interval);
   }, [reviews]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSlideIndex((prev) => (prev + 1) % tradePhotos.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
 
   const premiumItems = items.filter(item => item.isPremium === true).slice(0, 3);
   const normalItems = items.filter(item => !item.isPremium);
@@ -459,37 +450,6 @@ export default function HomeClient({
               </div>
             ) : ( <div style={{ color: '#94A3B8' }}>등록된 후기가 없습니다.</div> )}
           </div>
-      </div>
-
-      {/* 7.5. 거래 인증 사진 슬라이드 */}
-      <div style={{ padding: '60px 0', backgroundColor: '#FFFFFF', borderTop: '1px solid #E2E8F0' }}>
-        <h2 style={{ textAlign: 'center', fontSize: '22px', marginBottom: '30px', color: '#1E293B' }}>📸 실시간 거래 인증</h2>
-        <div style={{ position: 'relative', maxWidth: '500px', margin: '0 auto', padding: '0 40px' }}>
-          <div style={{ borderRadius: '20px', overflow: 'hidden', aspectRatio: '4/3', backgroundColor: '#F1F5F9' }}>
-            <img
-              src={tradePhotos[slideIndex]}
-              alt={`메이플급처 거래 인증 사진 ${slideIndex + 1}`}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'opacity 0.4s ease' }}
-            />
-          </div>
-          <button
-            onClick={() => setSlideIndex((prev) => (prev - 1 + tradePhotos.length) % tradePhotos.length)}
-            style={{ position: 'absolute', left: '0', top: '50%', transform: 'translateY(-60%)', width: '36px', height: '36px', borderRadius: '50%', border: 'none', backgroundColor: 'rgba(0,0,0,0.35)', color: '#FFF', fontSize: '20px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >‹</button>
-          <button
-            onClick={() => setSlideIndex((prev) => (prev + 1) % tradePhotos.length)}
-            style={{ position: 'absolute', right: '0', top: '50%', transform: 'translateY(-60%)', width: '36px', height: '36px', borderRadius: '50%', border: 'none', backgroundColor: 'rgba(0,0,0,0.35)', color: '#FFF', fontSize: '20px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >›</button>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '16px' }}>
-            {tradePhotos.map((_, i) => (
-              <div
-                key={i}
-                onClick={() => setSlideIndex(i)}
-                style={{ width: i === slideIndex ? '20px' : '8px', height: '8px', borderRadius: '4px', backgroundColor: i === slideIndex ? '#FF9000' : '#CBD5E1', cursor: 'pointer', transition: 'all 0.3s ease' }}
-              />
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* 8-1. 자주 묻는 질문 (정적 FAQ - SEO용) */}
