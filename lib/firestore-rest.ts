@@ -6,6 +6,8 @@ const FS_BASE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT
 
 export interface FirestoreDocument {
   id: string;
+  isPinned?: boolean;
+  createdAt?: { toDate: () => Date };
   [key: string]: any;
 }
 
@@ -21,9 +23,10 @@ export async function getCollectionDocs(
     orderBy?: string;
     limit?: number;
     revalidate?: number;
+    pinnedOnly?: boolean;
   } = {}
 ): Promise<FirestoreDocument[]> {
-  const { orderBy = 'createdAt desc', limit, revalidate = 300 } = options;
+  const { orderBy = 'createdAt desc', limit, revalidate = 300, pinnedOnly = false } = options;
 
   try {
     let url = `${FS_BASE}/${collection}`;
@@ -41,16 +44,28 @@ export async function getCollectionDocs(
       url += `?${queryString}`;
     }
 
-    const res = await fetch(url, {
-      next: { revalidate },
-    });
+    // A single-field filter avoids a composite-index requirement. Sort pinned posts after parsing.
+    const res = pinnedOnly
+      ? await fetch(`${FS_BASE}:runQuery`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ structuredQuery: {
+            from: [{ collectionId: collection }],
+            where: { fieldFilter: { field: { fieldPath: 'isPinned' }, op: 'EQUAL', value: { booleanValue: true } } },
+          } }),
+          next: { revalidate },
+        })
+      : await fetch(url, { next: { revalidate } });
 
     if (!res.ok) {
       console.error(`Failed to fetch ${collection}: ${res.status}`);
       return [];
     }
 
-    const data = await res.json();
+    const response = await res.json();
+    const data = pinnedOnly
+      ? { documents: response.flatMap((result: { document?: unknown }) => result.document ? [result.document] : []) }
+      : response;
     if (!data.documents) return [];
 
     return data.documents.map((doc: any) => {

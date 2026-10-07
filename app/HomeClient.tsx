@@ -2,17 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { db } from '../firebase';
-import { collection, query, orderBy, onSnapshot, limit, doc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, limit, doc, where } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Item, Review, Notice, Howto, Banner, SiteConfig } from '@/types';
+import { getNoticeThumbnail, selectPinnedNotices } from '@/lib/pinned-notices';
+import styles from './HomeClient.module.css';
+import { Item, Review, Notice, Banner, SiteConfig } from '@/types';
 
 interface HomeClientProps {
   initialItems: any[];
   initialReviews: any[];
   initialNotices: any[];
-  initialHowto: any[];
   initialBanner: any;
   initialStatusMessages: string[];
   initialQna: { question: string; answer: string }[];
@@ -47,7 +48,6 @@ export default function HomeClient({
   initialItems,
   initialReviews,
   initialNotices,
-  initialHowto,
   initialBanner,
   initialStatusMessages,
   initialQna,
@@ -68,15 +68,8 @@ export default function HomeClient({
   const [qnaList, setQnaList] = useState<{question: string, answer: string}[]>(initialQna);
 
   const [notices, setNotices] = useState<Notice[]>(initialNotices.map(n => ({ ...n, createdAt: hydrateTimestamp(n.createdAt) })));
-  const [howto, setHowto] = useState<Howto[]>(initialHowto.map(h => ({ ...h, createdAt: hydrateTimestamp(h.createdAt) })));
 
   const router = useRouter();
-
-  const extractFirstImage = (content: string) => {
-    if (!content) return null;
-    const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
-    return imgMatch ? imgMatch[1] : null;
-  };
 
   useEffect(() => {
     // Real-time listeners - update from server initial data
@@ -95,11 +88,8 @@ export default function HomeClient({
     const qReviews = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(10));
     const unsubReviews = onSnapshot(qReviews, (s) => setReviews(s.docs.map(d => ({ id: d.id, ...d.data() } as Review))));
 
-    const qNotices = query(collection(db, 'notices'), orderBy('createdAt', 'desc'), limit(3));
-    const unsubNotices = onSnapshot(qNotices, (s) => setNotices(s.docs.map(d => ({ id: d.id, ...d.data() } as Notice))));
-
-    const qHowto = query(collection(db, 'howto'), orderBy('createdAt', 'desc'), limit(3));
-    const unsubHowto = onSnapshot(qHowto, (s) => setHowto(s.docs.map(d => ({ id: d.id, ...d.data() } as Howto))));
+    const qNotices = query(collection(db, 'notices'), where('isPinned', '==', true));
+    const unsubNotices = onSnapshot(qNotices, (s) => setNotices(selectPinnedNotices(s.docs.map(d => ({ id: d.id, ...d.data() } as Notice)))));
 
     const unsubConfig = onSnapshot(doc(db, 'site_config', 'main'), (docSnap) => {
       if (docSnap.exists()) {
@@ -110,7 +100,7 @@ export default function HomeClient({
     });
 
     return () => {
-      unsubItems(); unsubBanner(); unsubReviews(); unsubNotices(); unsubHowto(); unsubConfig();
+      unsubItems(); unsubBanner(); unsubReviews(); unsubNotices(); unsubConfig();
     };
   }, []);
 
@@ -372,70 +362,6 @@ export default function HomeClient({
         </div>
       </div>
 
-      {/* 6.5. 공지사항 & 거래방법 프리뷰 */}
-      <div style={{ padding: '60px 0', backgroundColor: '#FFFFFF' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 20px' }}>
-          {/* 공지사항 */}
-          <div style={{ marginBottom: '50px' }}>
-            <h2 style={{ fontSize: '22px', fontWeight: 'bold', color: '#1E293B', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '24px' }}>📢</span> 공지사항
-              <Link href="/notice" style={{ marginLeft: 'auto', fontSize: '14px', color: '#94A3B8', textDecoration: 'none' }}>더보기 →</Link>
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              {notices.map((notice) => {
-                const thumbnail = extractFirstImage(notice.content) || '/favicon-new.png';
-                return (
-                  <Link key={notice.id} href={`/notice/${notice.id}`} style={{ textDecoration: 'none' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '15px', backgroundColor: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0', transition: 'all 0.3s ease', cursor: 'pointer' }}
-                         onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FFF'; e.currentTarget.style.borderColor = '#FF9000'; }}
-                         onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; e.currentTarget.style.borderColor = '#E2E8F0'; }}>
-                      <img src={thumbnail} alt={notice.title} style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />
-                      <div style={{ flex: 1, overflow: 'hidden' }}>
-                        <div style={{ fontSize: '16px', fontWeight: '600', color: '#1E293B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {notice.isPinned && <span style={{ color: '#FF9000', marginRight: '5px' }}>📌</span>}
-                          <span style={{ color: '#FF9000', fontSize: '14px', marginRight: '8px' }}>[{notice.category}]</span>
-                          {notice.title}
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-              {notices.length === 0 && <div style={{ textAlign: 'center', color: '#94A3B8', padding: '30px' }}>등록된 공지사항이 없습니다.</div>}
-            </div>
-          </div>
-
-          {/* 거래방법 */}
-          <div>
-            <h2 style={{ fontSize: '22px', fontWeight: 'bold', color: '#1E293B', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '24px' }}>📘</span> 거래방법
-              <Link href="/howto" style={{ marginLeft: 'auto', fontSize: '14px', color: '#94A3B8', textDecoration: 'none' }}>더보기 →</Link>
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              {howto.map((post) => {
-                const thumbnail = extractFirstImage(post.content) || '/favicon-new.png';
-                return (
-                  <Link key={post.id} href={`/howto/${post.id}`} style={{ textDecoration: 'none' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '15px', backgroundColor: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0', transition: 'all 0.3s ease', cursor: 'pointer' }}
-                         onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FFF'; e.currentTarget.style.borderColor = '#0066FF'; }}
-                         onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; e.currentTarget.style.borderColor = '#E2E8F0'; }}>
-                      <img src={thumbnail} alt={post.title} style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />
-                      <div style={{ flex: 1, overflow: 'hidden' }}>
-                        <div style={{ fontSize: '16px', fontWeight: '600', color: '#1E293B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          <span style={{ color: '#0066FF', fontSize: '14px', marginRight: '8px' }}>[{post.category}]</span>
-                          {post.title}
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-              {howto.length === 0 && <div style={{ textAlign: 'center', color: '#94A3B8', padding: '30px' }}>등록된 거래방법이 없습니다.</div>}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* 7. 실시간 후기 */}
       <div style={{ padding: '60px 0', borderTop: '1px solid #E2E8F0', backgroundColor: '#FFFFFF' }}>
           <h2 style={{ textAlign: 'center', fontSize: '22px', marginBottom: '30px', color: '#1E293B' }}>📢 실시간 거래 후기</h2>
@@ -531,6 +457,35 @@ export default function HomeClient({
           </div>
         </div>
       </div>
+
+      {notices.length > 0 && (
+        <section className={styles.pinnedNotices} aria-labelledby="pinned-notices-title">
+          <div className={styles.pinnedContainer}>
+            <div className={styles.pinnedHeader}>
+              <h2 id="pinned-notices-title">거래 안내</h2>
+              <Link href="/notice">공지사항 전체 보기 →</Link>
+            </div>
+            <div className={styles.pinnedGrid}>
+              {notices.map(notice => {
+                const thumbnail = getNoticeThumbnail(notice);
+                return (
+                  <Link key={notice.id} href={`/notice/${notice.id}`} className={styles.pinnedCard}>
+                    {thumbnail ? (
+                      <img src={thumbnail} alt={notice.title} className={styles.pinnedThumbnail} loading="lazy" width={1200} height={675} />
+                    ) : (
+                      <div className={styles.pinnedFallback}>{notice.title}</div>
+                    )}
+                    <div className={styles.pinnedCardFooter}>
+                      <h3>{notice.title}</h3>
+                      <span aria-hidden="true">→</span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       <footer style={{ backgroundColor: '#F1F5F9', padding: '40px 20px', textAlign: 'center', color: '#94A3B8', fontSize: '12px', borderTop: '1px solid #E2E8F0' }}>
         <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
