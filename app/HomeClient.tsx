@@ -350,6 +350,35 @@ export default function HomeClient({
         </div>
       </div>
 
+      {notices.length > 0 && (
+        <section className={styles.pinnedNotices} aria-labelledby="pinned-notices-title">
+          <div className={styles.pinnedContainer}>
+            <div className={styles.pinnedHeader}>
+              <h2 id="pinned-notices-title">거래 안내</h2>
+              <Link href="/notice">공지사항 전체 보기 →</Link>
+            </div>
+            <div className={styles.pinnedGrid}>
+              {notices.map(notice => {
+                const thumbnail = getNoticeThumbnail(notice);
+                return (
+                  <Link key={notice.id} href={`/notice/${notice.id}`} className={styles.pinnedCard}>
+                    {thumbnail ? (
+                      <img src={thumbnail} alt={notice.title} className={styles.pinnedThumbnail} loading="lazy" width={1200} height={675} />
+                    ) : (
+                      <div className={styles.pinnedFallback}>{notice.title}</div>
+                    )}
+                    <div className={styles.pinnedCardFooter}>
+                      <h3>{notice.title}</h3>
+                      <span aria-hidden="true">→</span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* 6. 업체 비교 */}
       <div style={{ padding: '80px 0', backgroundColor: '#F1F5F9', borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0' }}>
         <h2 style={{ textAlign: 'center', fontSize: '24px', marginBottom: '50px', color: '#1E293B' }}>
@@ -457,35 +486,6 @@ export default function HomeClient({
           </div>
         </div>
       </div>
-
-      {notices.length > 0 && (
-        <section className={styles.pinnedNotices} aria-labelledby="pinned-notices-title">
-          <div className={styles.pinnedContainer}>
-            <div className={styles.pinnedHeader}>
-              <h2 id="pinned-notices-title">거래 안내</h2>
-              <Link href="/notice">공지사항 전체 보기 →</Link>
-            </div>
-            <div className={styles.pinnedGrid}>
-              {notices.map(notice => {
-                const thumbnail = getNoticeThumbnail(notice);
-                return (
-                  <Link key={notice.id} href={`/notice/${notice.id}`} className={styles.pinnedCard}>
-                    {thumbnail ? (
-                      <img src={thumbnail} alt={notice.title} className={styles.pinnedThumbnail} loading="lazy" width={1200} height={675} />
-                    ) : (
-                      <div className={styles.pinnedFallback}>{notice.title}</div>
-                    )}
-                    <div className={styles.pinnedCardFooter}>
-                      <h3>{notice.title}</h3>
-                      <span aria-hidden="true">→</span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      )}
 
       <footer style={{ backgroundColor: '#F1F5F9', padding: '40px 20px', textAlign: 'center', color: '#94A3B8', fontSize: '12px', borderTop: '1px solid #E2E8F0' }}>
         <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
