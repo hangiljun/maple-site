@@ -22,7 +22,7 @@ export default function PrivacyPage() {
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>처리하는 정보</h2>
             <p style={{ color: '#4B5563' }}>
-              후기·댓글 운영을 위해 닉네임, 작성 내용, 작성 시각, 수정·삭제용 비밀번호와 후기 첨부 이미지를 저장하며, Firebase 익명 인증 식별자를 사용합니다. 카카오톡으로 거래를 요청하실 때 전달하신 전화번호는 거래 진행에 필요한 경우에만 사용합니다.
+              후기·댓글 운영을 위해 닉네임, 작성 내용, 작성 시각, 수정·삭제용 비밀번호와 후기 첨부 이미지를 저장하며, Firebase 익명 인증 식별자를 사용합니다.
             </p>
           </section>
 
@@ -32,14 +32,7 @@ export default function PrivacyPage() {
               후기와 댓글 정보는 게시물이 유지되는 동안 보관합니다. 게시물을 삭제하거나 운영자가 삭제 요청을 처리할 때 해당 정보를 게시판 데이터베이스에서 삭제합니다.
             </p>
             <p style={{ color: '#4B5563', marginTop: '12px' }}>
-              거래 문의로 받은 개인정보는 이용 목적이 달성되면 운영자가 관리하는 기록에서 삭제합니다. 법령상 보존 의무가 있는 기록은 해당 기간 동안 보관합니다.
-            </p>
-          </section>
-
-          <section style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>외부 서비스</h2>
-            <p style={{ color: '#4B5563' }}>
-              후기·댓글 저장과 게시판 인증에는 Google Firebase를 사용합니다.
+              거래 문의로 받은 개인정보는 이용 목적이 달성되면 운영자가 관리하는 기록에서 삭제합니다.
             </p>
           </section>
 
