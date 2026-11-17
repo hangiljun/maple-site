@@ -12,24 +12,24 @@ export default function PrivacyPage() {
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>사이트 이용과 댓글 삭제</h2>
             <p style={{ color: '#4B5563' }}>
-              사이트를 열람하거나 후기·댓글을 작성할 때 전화번호나 이메일을 입력할 필요가 없습니다. 후기와 댓글의 작성 내용과 닉네임은 공개될 수 있으니 개인정보는 글이나 첨부 이미지에 적지 말아 주세요.
+              사이트를 열람하거나 댓글을 작성할 때 전화번호나 이메일을 입력할 필요가 없습니다. 댓글 내용과 닉네임은 공개될 수 있으니 개인정보는 댓글에 적지 말아 주세요.
             </p>
             <p style={{ color: '#4B5563', marginTop: '12px' }}>
-              작성한 글이나 댓글의 삭제를 원하시면 카카오톡 ID han8246으로 게시글 주소와 해당 글 또는 댓글을 찾을 수 있는 정보를 보내주세요.
+              작성한 댓글의 삭제를 원하시면 카카오톡 ID han8246으로 게시글 주소와 해당 댓글을 찾을 수 있는 정보를 보내주세요.
             </p>
           </section>
 
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>처리하는 정보</h2>
             <p style={{ color: '#4B5563' }}>
-              후기·댓글 운영을 위해 닉네임, 작성 내용, 작성 시각, 수정·삭제용 비밀번호와 후기 첨부 이미지를 저장하며, Firebase 익명 인증 식별자를 사용합니다.
+              댓글 운영을 위해 닉네임, 댓글 내용, 작성 시각, 삭제용 비밀번호를 저장하며, Firebase 익명 인증 식별자를 사용합니다.
             </p>
           </section>
 
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>보유 및 삭제</h2>
             <p style={{ color: '#4B5563' }}>
-              후기와 댓글 정보는 게시물이 유지되는 동안 보관합니다. 게시물을 삭제하거나 운영자가 삭제 요청을 처리할 때 해당 정보를 게시판 데이터베이스에서 삭제합니다.
+              댓글 정보는 댓글이 게시되어 있는 동안 보관합니다. 댓글을 삭제하면 해당 정보를 게시판 데이터베이스에서 삭제합니다.
             </p>
             <p style={{ color: '#4B5563', marginTop: '12px' }}>
               거래 문의로 받은 개인정보는 이용 목적이 달성되면 운영자가 관리하는 기록에서 삭제합니다.
