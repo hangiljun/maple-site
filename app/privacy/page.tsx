@@ -12,10 +12,10 @@ export default function PrivacyPage() {
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>사이트 이용과 댓글 삭제</h2>
             <p style={{ color: '#4B5563' }}>
-              사이트를 열람하거나 댓글을 작성할 때 전화번호나 이메일을 입력할 필요가 없습니다. 댓글 내용과 닉네임은 공개될 수 있으니 개인정보는 댓글에 적지 말아 주세요.
+              댓글 내용과 닉네임은 공개될 수 있으니 개인정보는 댓글에 적지 말아 주세요.
             </p>
             <p style={{ color: '#4B5563', marginTop: '12px' }}>
-              작성한 댓글의 삭제를 원하시면 카카오톡 ID han8246으로 게시글 주소와 해당 댓글을 찾을 수 있는 정보를 보내주세요.
+              작성한 댓글의 삭제를 원하시면 카카오톡 ID han8246으로 게시글 주소와 댓글을 찾을 수 있는 정보를 보내주세요.
             </p>
           </section>
 
